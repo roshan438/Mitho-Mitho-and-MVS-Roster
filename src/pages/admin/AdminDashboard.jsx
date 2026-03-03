@@ -344,7 +344,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [today, showToast]);
+  }, [today]);
 
   useEffect(() => {
     loadToday();
