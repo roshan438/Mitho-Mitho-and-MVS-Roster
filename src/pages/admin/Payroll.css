@@ -1,0 +1,260 @@
+/* .top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  
+  .filters {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    background: rgba(255,255,255,0.02);
+  }
+  
+  .seg {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  
+  .segBtn {
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    padding: 8px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #eaeef6;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  
+  .segActive {
+    border-color: rgba(246,166,0,0.30);
+    background: rgba(246,166,0,0.10);
+    color: #ffd27a;
+  }
+  
+  .filterGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  @media (max-width: 980px) {
+    .filterGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  
+  .totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  @media (max-width: 900px) {
+    .totals { grid-template-columns: 1fr; }
+  }
+  
+  .totCard {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    background: rgba(255,255,255,0.02);
+  }
+  
+  .totLabel {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  
+  .totValue {
+    font-weight: 900;
+    font-size: 22px;
+    margin-top: 6px;
+  }
+  
+  
+  .split {
+    display: grid;
+    grid-template-columns: 0.9fr 1.6fr;
+    gap: 14px;
+  }
+  
+  @media (max-width: 980px) {
+    .split {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .panel {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px;
+    background: rgba(0,0,0,0.10);
+  }
+  
+  .panelTitle {
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+  
+  
+  .list {
+    display: grid;
+    gap: 10px;
+  }
+  
+  .rowItem {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(255,255,255,0.02);
+  }
+  
+  .name {
+    font-weight: 900;
+  }
+  
+  .sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  
+  .amt {
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  
+  .empty {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  
+  
+  .table {
+    display: grid;
+    gap: 8px;
+  }
+  
+  .thead, .trow {
+    display: grid;
+    grid-template-columns: 120px 1.2fr 1.2fr 90px 90px 120px;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  @media (max-width: 980px) {
+    .thead, .trow {
+      grid-template-columns: 120px 1fr 1fr;
+    }
+    .thead div:nth-child(n+4),
+    .trow div:nth-child(n+4) {
+      display: none;
+    }
+  }
+  
+  .thead {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  
+  .trow {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(255,255,255,0.02);
+  }
+  
+  .strong {
+    font-weight: 900;
+  }
+  
+  .hint {
+    color: var(--muted);
+    font-size: 12px;
+  } */
+
+
+
+
+
+
+
+
+
+
+  /* Payroll Specific Styling */
+.payroll-filters-container {
+    padding: 15px;
+    background: #1c2230;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .payroll-card {
+    background: #1c2230;
+    margin: 10px 15px;
+    border-radius: 16px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  
+  .staff-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+  }
+  
+  .staff-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+  }
+  
+  .shift-tag {
+    font-size: 0.75rem;
+    color: #7d859a;
+    margin-top: 2px;
+  }
+  
+  .payroll-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 10px;
+  }
+  
+  .pay-col label {
+    display: block;
+    font-size: 0.65rem;
+    color: #7d859a;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  
+  .pay-col span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  
+  .pay-col.total span.brand {
+    color: #00ff88; /* Brand Green */
+    font-weight: 800;
+  }
+  
+  .stat-item .value.brand {
+    color: #00ff88;
+  }
