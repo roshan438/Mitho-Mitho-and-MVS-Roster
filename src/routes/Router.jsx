@@ -311,7 +311,7 @@ export default function Router() {
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />}/>
+        <Route path="/forgot" element={<ForgotPassword />}/>
         
         <Route path="/pending" element={
           <AuthGate>

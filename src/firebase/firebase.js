@@ -7,14 +7,15 @@ import { getFirestore } from "firebase/firestore";
  * 2) Add a Web app
  * 3) Paste config below
  */
-const firebaseConfig = {
-  apiKey: "AIzaSyCQi6w1sBcWnASrEDp_cfJj98Nypz2N7XQ",
-  authDomain: "ras-roster-app.firebaseapp.com",
-  projectId: "ras-roster-app",
-  storageBucket: "ras-roster-app.firebasestorage.app",
-  messagingSenderId: "431100698096",
-  appId: "1:431100698096:web:6ae7cd7321b2c089b99135"
-};
+  const firebaseConfig = {
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID
+  };
+
 
 const app = initializeApp(firebaseConfig);
 

@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import { googleProvider } from "../../firebase/authProviders";
 import { useToast } from "../../context/ToastContext";
+import Forgot from "./Forgot";
 import "./Login.css";
 
 export default function Login() {
