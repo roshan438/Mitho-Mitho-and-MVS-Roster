@@ -1,0 +1,475 @@
+/* 
+.subtle { color: var(--muted); }
+.tiny { font-size: 12px; }
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.auditTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.auditFilters {
+  margin-top: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+}
+
+.auditStats {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+}
+
+.statLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.statValue {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 950;
+}
+
+.statValue.warn { color: #f6a600; }
+
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.03);
+  white-space: nowrap;
+}
+
+.chip.ok {
+  border-color: rgba(80, 200, 120, 0.25);
+  background: rgba(80, 200, 120, 0.10);
+  color: rgba(200, 255, 220, 0.95);
+}
+
+.chip.warn {
+  border-color: rgba(246,166,0,0.25);
+  background: rgba(246,166,0,0.10);
+  color: #ffd27a;
+}
+
+
+.auditDesktop { display: block; margin-top: 14px; }
+.auditMobile { display: none; }
+
+.thead {
+  display: grid;
+  grid-template-columns: 120px 1.2fr 1.4fr 1fr 1fr 1fr 120px 90px;
+  gap: 12px;
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trow {
+  display: grid;
+  grid-template-columns: 120px 1.2fr 1.4fr 1fr 1fr 1fr 120px 90px;
+  gap: 12px;
+  align-items: center;
+
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.02);
+}
+
+.strong { font-weight: 950; }
+
+.storeCell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell .big {
+  font-weight: 950;
+  font-size: 16px;
+}
+
+.cell .small {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.actions { display: flex; justify-content: flex-end; }
+
+
+.editorRow {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+}
+
+.editor {
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.editorGrid {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.editorGrid .span2 { grid-column: 1 / -1; }
+
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.editorActions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grow { flex: 1; }
+
+
+@media (max-width: 820px) {
+  .auditDesktop { display: none; }
+  .auditMobile { display: grid; gap: 12px; margin-top: 14px; }
+
+  .auditTop { flex-direction: column; align-items: stretch; }
+
+  .auditStats { grid-template-columns: 1fr; }
+
+  .mcard {
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.02);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .mcardTop {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    cursor: pointer;
+  }
+  .mcardTop::-webkit-details-marker { display: none; }
+
+  .mLeft .mTitle {
+    font-size: 16px;
+    font-weight: 950;
+    line-height: 1.1;
+  }
+
+  .mLeft .mSub {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .mRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 60%;
+  }
+
+  .mBody {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 14px 14px;
+  }
+
+  .miniGrid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .miniBox {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 10px;
+    background: rgba(255,255,255,0.01);
+  }
+
+  .miniBox .k {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .miniBox .v {
+    margin-top: 6px;
+    font-size: 18px;
+    font-weight: 950;
+  }
+
+  .miniBox .s {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .mEditor {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .editorActions {
+    margin-top: 6px;
+  }
+} */
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Audit Page Specific Styles */
+.audit-filters-container {
+    padding: 15px;
+    background: #1c2230;
+    margin-bottom: 2px;
+  }
+  
+  .preset-tabs {
+    display: flex;
+    background: #0f1420;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 15px;
+  }
+  
+  .tab-item {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: #7d859a;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  
+  .tab-item.active {
+    background: #2b3548;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .filters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .filter-field label {
+    display: block;
+    font-size: 0.7rem;
+    color: #7d859a;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  
+  .filter-field select, 
+  .filter-field input {
+    width: 100%;
+    background: #0f1420;
+    border: 1px solid #2b3548;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  
+  /* Audit Cards */
+  .audit-card {
+    background: #1c2230;
+    border-radius: 16px;
+    margin: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.2s;
+  }
+  
+  .audit-card-header {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .staff-name {
+    display: block;
+    font-weight: 700;
+    color: #fff;
+    font-size: 1rem;
+  }
+  
+  .shift-date {
+    font-size: 0.75rem;
+    color: #7d859a;
+  }
+  
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 15px;
+    gap: 10px;
+    background: rgba(0,0,0,0.1);
+  }
+  
+  .comp-box label {
+    display: block;
+    font-size: 0.65rem;
+    color: #7d859a;
+    margin-bottom: 4px;
+  }
+  
+  .comp-box .actual {
+    display: block;
+    font-weight: 700;
+    color: #00ff88;
+    font-size: 0.9rem;
+  }
+  
+  .comp-box .input-val {
+    font-size: 0.65rem;
+    color: #5d667a;
+  }
+  
+  /* Editor Inside Card */
+  .admin-editor {
+    padding: 15px;
+    border-top: 1px solid #2b3548;
+    background: #141a26;
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  .edit-field { margin-bottom: 15px; }
+  .edit-field label { display: block; font-size: 0.75rem; color: #7d859a; margin-bottom: 5px; }
+  
+  .edit-field select, 
+  .edit-field textarea,
+  .field-box input {
+    width: 100%;
+    background: #0f1420;
+    border: 1px solid #2b3548;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+  }
+  
+  .override-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .editor-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-primary {
+    flex: 2;
+    background: #00ff88;
+    color: #000;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  
+  .btn-sec {
+    flex: 1;
+    background: #2b3548;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+
+  .custom-date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .animate-slide-down {
+    animation: slideDown 0.25s ease-out;
+  }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Ensure date inputs match the style */
+  .app-input {
+    width: 100%;
+    background: #0f1420;
+    border: 1px solid #2b3548;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }

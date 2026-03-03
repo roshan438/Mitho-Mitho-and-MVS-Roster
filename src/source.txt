@@ -1,0 +1,17 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCQi6w1sBcWnASrEDp_cfJj98Nypz2N7XQ",
+  authDomain: "ras-roster-app.firebaseapp.com",
+  projectId: "ras-roster-app",
+  storageBucket: "ras-roster-app.firebasestorage.app",
+  messagingSenderId: "431100698096",
+  appId: "1:431100698096:web:6ae7cd7321b2c089b99135"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
