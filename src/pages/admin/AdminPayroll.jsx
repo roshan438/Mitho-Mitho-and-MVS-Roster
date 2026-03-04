@@ -1182,6 +1182,9 @@
 
 
 
+
+
+
 // src/pages/admin/AdminPayroll.jsx
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
@@ -1208,9 +1211,12 @@ const round2 = (n) => Math.round((Number(n || 0) + Number.EPSILON) * 100) / 100;
 const money = (n) =>
   Number(n || 0).toLocaleString("en-AU", { style: "currency", currency: "AUD" });
 
+const isYMD = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+
 const hmToMinutes = (hm) => {
   if (!hm) return null;
-  const [h, m] = hm.split(":").map(Number);
+  const [h, m] = String(hm).split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
   return h * 60 + m;
 };
 
@@ -1234,12 +1240,13 @@ const calcWorkedMinutes = (ts) => {
   return Math.max(0, worked);
 };
 
-const minutesToHours = (min) => Math.round((min / 60) * 100) / 100;
+const minutesToHours = (min) => Math.round((Number(min || 0) / 60) * 100) / 100;
 
 // Week Mon–Sun, Payday = next Thursday after that week.
 // If weekStart is Monday: payday = weekStart + 10 days.
 function getPaydayForWeekStart(weekStartYMD) {
   const d = new Date(weekStartYMD + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return "";
   const payday = addDays(d, 10);
   return toYMD(payday);
 }
@@ -1253,14 +1260,34 @@ function chunk(arr, size) {
 export default function AdminPayroll() {
   const { showToast } = useToast();
 
-  const [weekStart, setWeekStart] = useState(toYMD(getWeekStartMonday(new Date())));
-  const weekStartObj = useMemo(() => new Date(weekStart + "T00:00:00"), [weekStart]);
-  const weekEndExclusive = useMemo(() => toYMD(addDays(weekStartObj, 7)), [weekStartObj]);
-  const weekEndInclusive = useMemo(() => toYMD(addDays(weekStartObj, 6)), [weekStartObj]);
+  // ✅ IMPORTANT: keep this ALWAYS YYYY-MM-DD for <input type="date" />
+  const [weekStart, setWeekStart] = useState(() =>
+    toYMD(getWeekStartMonday(new Date()))
+  );
 
-  const paydayYMD = useMemo(() => getPaydayForWeekStart(weekStart), [weekStart]);
+  const weekStartObj = useMemo(() => {
+    if (!isYMD(weekStart)) return null;
+    const d = new Date(weekStart + "T00:00:00");
+    return Number.isNaN(d.getTime()) ? null : d;
+  }, [weekStart]);
+
+  const weekEndExclusive = useMemo(() => {
+    if (!weekStartObj) return "";
+    return toYMD(addDays(weekStartObj, 7));
+  }, [weekStartObj]);
+
+  const weekEndInclusive = useMemo(() => {
+    if (!weekStartObj) return "";
+    return toYMD(addDays(weekStartObj, 6));
+  }, [weekStartObj]);
+
+  const paydayYMD = useMemo(() => {
+    if (!isYMD(weekStart)) return "";
+    return getPaydayForWeekStart(weekStart);
+  }, [weekStart]);
+
   const todayYMD = useMemo(() => toYMD(new Date()), []);
-  const isPaydayToday = todayYMD === paydayYMD;
+  const isPaydayToday = Boolean(paydayYMD) && todayYMD === paydayYMD;
 
   const [loading, setLoading] = useState(true);
 
@@ -1278,38 +1305,51 @@ export default function AdminPayroll() {
 
   // -------- Load staff list (approved staff + hourlyRate) --------
   const loadStaff = useCallback(async () => {
-    const qs = query(
-      collection(db, "users"),
-      where("role", "==", "staff"),
-      where("status", "==", "approved")
-    );
-    const snap = await getDocs(qs);
+    try {
+      const qs = query(
+        collection(db, "users"),
+        where("role", "==", "staff"),
+        where("status", "==", "approved")
+      );
+      const snap = await getDocs(qs);
 
-    const list = snap.docs
-      .map((d) => ({
-        uid: d.id,
-        name:
-          `${d.data().firstName || ""} ${d.data().lastName || ""}`.trim() ||
-          d.data().email ||
-          d.id,
-        hourlyRate: Number(d.data().hourlyRate || 0),
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      const list = snap.docs
+        .map((d) => ({
+          uid: d.id,
+          name:
+            `${d.data().firstName || ""} ${d.data().lastName || ""}`.trim() ||
+            d.data().email ||
+            d.id,
+          hourlyRate: Number(d.data().hourlyRate || 0),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
-    setStaffList(list);
-  }, []);
+      setStaffList(list);
+    } catch (e) {
+      console.error(e);
+      showToast("Failed to load staff", "error");
+    }
+  }, [showToast]);
 
   // -------- Load payroll summary from payrollWeeks/{weekStart}/staff --------
   const loadWeekRows = useCallback(async () => {
+    if (!isYMD(weekStart)) {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
+      // ✅ Correct Firestore path: payrollWeeks/{weekStart}/staff
       const snap = await getDocs(collection(db, "payrollWeeks", weekStart, "staff"));
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
+      // init pay input boxes once per uid
       setPayInputs((prev) => {
         const next = { ...prev };
         list.forEach((r) => {
-          if (next[r.uid] == null) next[r.uid] = "";
+          if (r?.uid && next[r.uid] == null) next[r.uid] = "";
         });
         return next;
       });
@@ -1324,6 +1364,7 @@ export default function AdminPayroll() {
     } catch (e) {
       console.error(e);
       showToast("Failed to load payroll week", "error");
+      setRows([]);
     } finally {
       setLoading(false);
     }
@@ -1338,7 +1379,10 @@ export default function AdminPayroll() {
       const batches = chunk(uids, 10); // documentId IN max 10
 
       for (const part of batches) {
-        const qTotals = query(collection(db, "payrollTotals"), where(documentId(), "in", part));
+        const qTotals = query(
+          collection(db, "payrollTotals"),
+          where(documentId(), "in", part)
+        );
         const snap = await getDocs(qTotals);
 
         snap.docs.forEach((d) => {
@@ -1351,7 +1395,7 @@ export default function AdminPayroll() {
           };
         });
 
-        // if doc doesn't exist yet, default it (so UI doesn't show ALL: —)
+        // default if doc doesn't exist yet
         part.forEach((uid) => {
           if (!out[uid]) out[uid] = { totalAmount: 0, paidTotal: 0, remaining: 0, totalHours: 0 };
         });
@@ -1363,18 +1407,27 @@ export default function AdminPayroll() {
     }
   }, []);
 
+  // -------- Effects (kept stable to avoid max update depth) --------
   useEffect(() => {
     loadStaff();
   }, [loadStaff]);
 
+  // ✅ Only reload week rows when weekStart changes
   useEffect(() => {
     loadWeekRows();
   }, [loadWeekRows]);
 
+  // ✅ Only reload lifetime totals when the set of UIDs changes
+  const uidsKey = useMemo(() => {
+    const uids = rows.map((r) => r.uid).filter(Boolean).sort();
+    return uids.join("|");
+  }, [rows]);
+
   useEffect(() => {
-    const uids = rows.map((r) => r.uid).filter(Boolean);
+    if (!uidsKey) return;
+    const uids = uidsKey.split("|").filter(Boolean);
     loadLifetimeTotals(uids);
-  }, [rows, loadLifetimeTotals]);
+  }, [uidsKey, loadLifetimeTotals]);
 
   // -------- PayrollTotals maintenance (idempotent per week) --------
   async function upsertTotalsForWeek({ uid, staffName, weekStartYMD, weekTotalHours, weekTotalAmount }) {
@@ -1525,13 +1578,18 @@ export default function AdminPayroll() {
 
   // -------- Sync from timesheets (Mon–Sun) into payrollDays + payrollWeeks + payrollTotals --------
   async function syncFromTimesheets() {
+    if (!isYMD(weekStart) || !weekStartObj || !isYMD(weekEndExclusive)) {
+      showToast("Invalid week start date", "error");
+      return;
+    }
+
     setLoading(true);
     try {
       if (!staffList.length) {
         await loadStaff();
       }
 
-      // Create parent week doc so it exists in console (optional but helps)
+      // Create parent week doc
       await setDoc(
         doc(db, "payrollWeeks", weekStart),
         { weekStart, weekEnd: weekEndInclusive, payday: paydayYMD, updatedAt: serverTimestamp() },
@@ -1565,6 +1623,7 @@ export default function AdminPayroll() {
         const rate = Number(rateByUid[uid] || ts.hourlyRate || 0);
         const amount = round2(workedHours * rate);
 
+        // payrollDays/{date}/entries/{uid}
         const dayRef = doc(db, "payrollDays", ts.date, "entries", uid);
         await setDoc(
           dayRef,
@@ -1590,6 +1649,7 @@ export default function AdminPayroll() {
       }
 
       for (const uid of Object.keys(agg)) {
+        // payrollWeeks/{weekStart}/staff/{uid}
         const ref = doc(db, "payrollWeeks", weekStart, "staff", uid);
         const curSnap = await getDoc(ref);
         const cur = curSnap.exists() ? curSnap.data() : null;
@@ -1630,7 +1690,7 @@ export default function AdminPayroll() {
           { merge: true }
         );
 
-        // ✅ update lifetime totals (idempotent via payrollTotals/{uid}/weeks/{weekStart})
+        // update lifetime totals (idempotent)
         await upsertTotalsForWeek({
           uid,
           staffName,
@@ -1697,7 +1757,15 @@ export default function AdminPayroll() {
         updatedAt: serverTimestamp(),
       });
 
-      const logRef = doc(db, "payrollWeeks", weekStart, "staff", uid, "payments", `${Date.now()}`);
+      const logRef = doc(
+        db,
+        "payrollWeeks",
+        weekStart,
+        "staff",
+        uid,
+        "payments",
+        `${Date.now()}`
+      );
       await setDoc(logRef, {
         type: "payment",
         uid,
@@ -1707,7 +1775,7 @@ export default function AdminPayroll() {
         note: mode === "full" ? "Mark Paid" : "Pay Part",
       });
 
-      // ✅ update lifetime totals
+      // update lifetime totals
       await applyPaymentToTotals({
         uid,
         staffName,
@@ -1725,7 +1793,6 @@ export default function AdminPayroll() {
     }
   }
 
-  // ✅ Reset: set paidTotal back to 0 (unpaid again)
   async function resetPaid(uid) {
     try {
       const ref = doc(db, "payrollWeeks", weekStart, "staff", uid);
@@ -1748,7 +1815,15 @@ export default function AdminPayroll() {
         updatedAt: serverTimestamp(),
       });
 
-      const logRef = doc(db, "payrollWeeks", weekStart, "staff", uid, "payments", `${Date.now()}`);
+      const logRef = doc(
+        db,
+        "payrollWeeks",
+        weekStart,
+        "staff",
+        uid,
+        "payments",
+        `${Date.now()}`
+      );
       await setDoc(logRef, {
         type: "reset",
         uid,
@@ -1758,7 +1833,7 @@ export default function AdminPayroll() {
         note: "Reset paid to 0 (unpaid again)",
       });
 
-      // ✅ update lifetime totals (subtract old paid from lifetime)
+      // update lifetime totals (subtract old paid from lifetime)
       await resetWeekPaidInTotals({
         uid,
         staffName,
@@ -1829,20 +1904,24 @@ export default function AdminPayroll() {
               <label>Week Start (Mon)</label>
               <input
                 type="date"
-                value={weekStart}
-                onChange={(e) => setWeekStart(e.target.value)}
+                value={isYMD(weekStart) ? weekStart : ""}
+                onChange={(e) => {
+                  const v = e.target.value; // ✅ already YYYY-MM-DD
+                  if (!v) return;
+                  setWeekStart(v);
+                }}
                 disabled={loading}
               />
             </div>
 
             <div className="filter-field">
               <label>Week End</label>
-              <input type="date" value={weekEndInclusive} disabled />
+              <input type="date" value={weekEndInclusive || ""} disabled />
             </div>
 
             <div className="filter-field">
               <label>Payday</label>
-              <input type="date" value={paydayYMD} disabled />
+              <input type="date" value={paydayYMD || ""} disabled />
             </div>
 
             <div className="filter-field">
@@ -1854,7 +1933,7 @@ export default function AdminPayroll() {
           </div>
         </section>
 
-        <section className="stats-bar mid ">
+        <section className="stats-bar mid">
           <div className="stat-item mid">
             <label>Total</label>
             <div className="value">{money(totals.totalAmount)}</div>
@@ -1902,7 +1981,6 @@ export default function AdminPayroll() {
                         {r.staffName || r.uid}
                       </span>
 
-                      {/* ✅ RIGHT SIDE: lifetime remaining */}
                       <span className="shift-tag" title="All-time remaining">
                         {allRemaining == null ? "ALL: —" : `ALL: ${money(allRemaining)}`}
                       </span>

@@ -304,6 +304,7 @@ import Payroll from "../pages/admin/Payroll.jsx";
 import Audit from "../pages/admin/Audit.jsx";
 import StoreSettings from "../pages/admin/StoreSettings.jsx";
 import ForgotPassword from "../pages/public/Forgot.jsx"
+import AdminEditTimesheets from "../pages/admin/AdminEditTimesheets.jsx";
 
 export default function Router() {
   return (
@@ -350,6 +351,7 @@ export default function Router() {
           <Route path="roster" element={<RosterManager />} />
           <Route path="payroll" element={<Payroll />} />
           <Route path="audit" element={<Audit />} />
+          <Route path="edit-timesheets" element={<AdminEditTimesheets />} />
           <Route path="admin-payroll" element={<AdminPayroll />} />
           <Route path="payroll/:weekStart/:uid" element={<PayrollHistory />} />
           <Route index element={<Navigate to="dashboard" replace />} />
