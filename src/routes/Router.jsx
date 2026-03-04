@@ -346,9 +346,7 @@ export default function Router() {
         }>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="store-settings" element={<StoreSettings />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="approvals" element={<Approvals />} />
-          <Route path="store-settings" element={<StoreSettings />} />
           <Route path="roster" element={<RosterManager />} />
           <Route path="payroll" element={<Payroll />} />
           <Route path="audit" element={<Audit />} />
