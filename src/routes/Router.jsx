@@ -287,6 +287,9 @@ import RoleGate from "../auth/RoleGate.jsx";
 import ApprovalGate from "../auth/ApprovalGate.jsx";
 import HomeRedirect from "./HomeRedirect.jsx"; // Move logic to own file if preferred
 
+import AdminPayroll from "../pages/admin/AdminPayroll.jsx";
+import PayrollHistory from "../pages/admin/PayrollHistory.jsx"
+
 import Navbar from "../components/Navbar.jsx";
 import Login from "../pages/public/Login.jsx";
 import Signup from "../pages/public/Signup.jsx";
@@ -342,7 +345,6 @@ export default function Router() {
           </AuthGate>
         }>
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="approvals" element={<Approvals />} />
           <Route path="store-settings" element={<StoreSettings />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="approvals" element={<Approvals />} />
@@ -350,6 +352,8 @@ export default function Router() {
           <Route path="roster" element={<RosterManager />} />
           <Route path="payroll" element={<Payroll />} />
           <Route path="audit" element={<Audit />} />
+          <Route path="admin-payroll" element={<AdminPayroll />} />
+          <Route path="payroll/:weekStart/:uid" element={<PayrollHistory />} />
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
 
