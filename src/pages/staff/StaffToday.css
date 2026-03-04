@@ -1,4 +1,4 @@
-/* App-like LIGHT UI (matches your screenshots) */
+/* 
 
 .sdPage {
     min-height: 100vh;
@@ -17,7 +17,7 @@
     max-width: 980px;
   }
   
-  /* Header */
+
   .sdHeader {
     display: flex;
     align-items: center;
@@ -79,7 +79,7 @@
     font-size: 18px;
   }
   
-  /* Tabs */
+
   .sdTabs {
     margin-top: 16px;
     background: #f4f8ff;
@@ -109,14 +109,14 @@
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   }
   
-  /* Body */
+ 
   .sdBody {
     margin-top: 18px;
     display: grid;
     gap: 16px;
   }
   
-  /* Today mini card */
+  
   .sdMini {
     border: 2px solid #dbe7ff;
     background: #ffffff;
@@ -202,7 +202,7 @@
     text-align: right;
   }
   
-  /* Main panels */
+  
   .sdPanel {
     border: 2px solid #dbe7ff;
     background: #ffffff;
@@ -243,7 +243,7 @@
     color: #ef4444;
   }
   
-  /* Verified row */
+  
   .sdVerifiedRow {
     display: flex;
     align-items: center;
@@ -264,7 +264,7 @@
     white-space: nowrap;
   }
   
-  /* Scan button big */
+  
   .sdScanBtn {
     width: 100%;
     height: 90px;
@@ -288,7 +288,7 @@
     cursor: not-allowed;
   }
   
-  /* verification hints (small + clean) */
+  
   .sdVerifyHints {
     margin-top: 14px;
     display: grid;
@@ -325,7 +325,7 @@
     gap: 12px;
   }
   
-  /* pills */
+  
   .sdPill {
     height: 34px;
     padding: 0 14px;
@@ -352,7 +352,7 @@
     color: #c02626;
   }
   
-  /* Inputs */
+  
   .sdField {
     margin-top: 16px;
   }
@@ -395,14 +395,14 @@
     opacity: 0.85;
   }
   
-  /* Buttons */
+  
   .sdPrimary {
     margin-top: 18px;
     width: 100%;
     height: 72px;
     border-radius: 20px;
     border: 0;
-    background: #8fb3ff; /* like screenshot */
+    background: #8fb3ff; 
     color: #ffffff;
     font-weight: 950;
     font-size: 26px;
@@ -465,7 +465,8 @@
     background: #f3f7ff;
   }
   
-  /* Working buttons */
+  
+  
   .sdBtnRow {
     margin-top: 18px;
     display: grid;
@@ -534,7 +535,8 @@
     font-size: 22px;
   }
   
-  /* Summary */
+ 
+  
   .sdSummary {
     margin-top: 16px;
     border-radius: 18px;
@@ -555,7 +557,8 @@
     border-top: 0;
   }
   
-  /* Responsive */
+ 
+  
   @media (max-width: 520px) {
     .sdHeaderTitle {
       font-size: 26px;
@@ -599,7 +602,8 @@
 
 
 
-  /* Container Card */
+ 
+  
 .clock-card {
     background: #ffffff;
     border-radius: 20px;
@@ -626,7 +630,8 @@
     margin-bottom: 24px;
   }
   
-  /* Status Section */
+ 
+  
   .status-container {
     display: flex;
     flex-direction: column;
@@ -657,7 +662,8 @@
     color: #333;
   }
   
-  /* Badges & Pills */
+ 
+  
   .status-badge {
     display: inline-block;
     align-self: center;
@@ -679,8 +685,8 @@
   }
   
 
-  /* Starts from here hai gemeni */
-  /* Buttons */
+
+  
   .action-button {
     width: 100%;
     padding: 14px;
@@ -716,7 +722,8 @@
     transform: scale(0.98);
   }
   
-  /* Utilities */
+ 
+  
   .divider {
     height: 1px;
     background: #eee;
@@ -792,7 +799,8 @@
     letter-spacing: 0.05em;
   }
   
-  /* Modernized Time Input */
+ 
+  
   .time-picker {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
@@ -803,7 +811,8 @@
     font-family: inherit;
     outline: none;
     transition: border-color 0.2s;
-    /* Ensures the clock icon is visible in dark mode */
+
+    
     color-scheme: dark; 
   }
   
@@ -811,10 +820,11 @@
     border-color: var(--brand);
   }
   
-  /* Brand Button */
+  
+  
   .brand-filled {
     background: var(--brand);
-    color: #000; /* High contrast for the gold/orange */
+    color: #000; 
     border: none;
     padding: 16px;
     border-radius: 12px;
@@ -839,8 +849,8 @@
 
 
   .break-card {
-    background: rgba(18, 24, 38, 0.5); /* Slightly more transparent than the main card */
-    border: 1px dashed var(--border); /* Dashed border signals "Optional" visually */
+    background: rgba(18, 24, 38, 0.5); 
+    border: 1px dashed var(--border); 
     border-radius: 20px;
     padding: 20px;
     max-width: 400px;
@@ -877,14 +887,14 @@
     margin-bottom: 18px;
   }
   
-  /* Vertical stack for better thumb reach */
+  
   .input-stack {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
   
-  /* Outline Button Style */
+  
   .action-button.outline {
     background: transparent;
     border: 1.5px solid var(--brand);
@@ -911,7 +921,7 @@
 
   .break-active-card {
     background: var(--card);
-    border: 1px solid var(--brand); /* Highlighted border because this is an active state */
+    border: 1px solid var(--brand); 
     border-radius: 20px;
     padding: 24px;
     max-width: 400px;
@@ -920,7 +930,7 @@
     overflow: hidden;
   }
   
-  /* Suble "Live" pulsing text */
+  
   .pulse-text {
     color: var(--brand) !important;
   }
@@ -944,7 +954,7 @@
     border-color: rgba(246, 166, 0, 0.3) !important;
   }
   
-  /* Warning/Notice box at the bottom */
+  
   .status-notice {
     margin-top: 20px;
     display: flex;
@@ -967,7 +977,7 @@
     font-size: 1rem;
   }
   
-  /* Reuse the brand-filled button style from Clock In for consistency */
+  
   .break-active-card .brand-filled {
     background: var(--brand);
     color: #000;
@@ -990,7 +1000,7 @@
     transition: all 0.3s ease;
   }
   
-  /* Visual state when button is disabled due to break */
+ 
   .clock-off-card.is-locked {
     opacity: 0.6;
     filter: grayscale(0.5);
@@ -1011,12 +1021,12 @@
     margin-bottom: 24px;
   }
   
-  /* High-priority completion button */
+  
   .clock-off-btn {
     background: var(--brand);
     color: #000;
     border: none;
-    padding: 18px; /* Slightly larger for the final action */
+    padding: 18px; 
     border-radius: 14px;
     font-size: 1.1rem;
     font-weight: 800;
@@ -1029,7 +1039,7 @@
     box-shadow: 0 4px 10px rgba(246, 166, 0, 0.1);
   }
   
-  /* Warning for active break */
+ 
   .lock-notice {
     margin-top: 20px;
     display: flex;
@@ -1052,7 +1062,7 @@
     font-size: 1.2rem;
   }
   
-  /* Time picker specifically for this card */
+  
   .clock-off-card .time-picker:disabled {
     background: rgba(0, 0, 0, 0.2);
     color: var(--muted);
@@ -1062,8 +1072,7 @@
 
   .summary-card {
     background: var(--card);
-    border: 1px solid rgba(40, 167, 69, 0.3); /* Subtle green border for success */
-    border-radius: 24px;
+    border: 1px solid rgba(40, 167, 69, 0.3); 
     padding: 32px 24px;
     max-width: 400px;
     margin: 16px auto;
@@ -1101,7 +1110,8 @@
     margin-top: 4px;
   }
   
-  /* Receipt Styling */
+
+  
   .receipt-container {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 16px;
@@ -1126,7 +1136,8 @@
   
   .receipt-value {
     color: var(--text);
-    font-family: 'Courier New', monospace; /* Professional log feel */
+    font-family: 'Courier New', monospace; 
+    
     font-weight: 600;
     font-size: 0.95rem;
   }
@@ -1144,8 +1155,7 @@
     font-size: 0.75rem;
     letter-spacing: 0.1em;
   }
-  
-  /* Refresh Button */
+ 
   .summary-card .secondary {
     background: #f2f2f710;
     color: var(--text);
@@ -1161,7 +1171,7 @@
     background: #f2f2f720;
   }
 
-  /* Dashboard Header */
+
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -1206,7 +1216,7 @@
     transform: rotate(45deg);
   }
   
-  /* Shift Info Card */
+ 
   .shift-info-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -1241,7 +1251,7 @@
   }
   
   .primary-link {
-    color: var(--brand); /* Highlight store name with brand color */
+    color: var(--brand);  
   }
   
   .info-divider-vertical {
@@ -1255,4 +1265,212 @@
     color: var(--muted);
     font-weight: 400;
     padding: 0 2px;
+  } */
+
+
+
+  /* Container & Global Layout */
+.container {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+    color: #fff;
+  }
+  
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Dashboard Header */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .dashboard-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+  }
+  
+  .dashboard-date {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
+  }
+  
+  .date-highlight {
+    color: var(--brand-color, #f6a600);
+    font-weight: 600;
+  }
+  
+  .icon-button-refresh {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .icon-button-refresh:active {
+    transform: rotate(180deg);
+  }
+  
+  /* Shift Info Segmented Card */
+  .shift-info-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .info-segment {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 4px;
+  }
+  
+  .info-value {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  
+  .info-divider-vertical {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Verification Cards (Clock In/Out) */
+  .clock-card, .time-entry-card, .break-card, .break-active-card, .clock-off-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .clock-header, .time-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .clock-description, .time-description {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  
+  /* Status Badges */
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  
+  .status-badge.is-ok {
+    background: rgba(82, 196, 26, 0.2);
+    color: #52c41a;
+  }
+  
+  .status-badge.is-warn {
+    background: rgba(255, 77, 79, 0.2);
+    color: #ff4d4f;
+  }
+  
+  /* Inputs & Buttons */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .time-picker {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .action-button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .action-button.primary {
+    background: var(--brand-color, #f6a600);
+    color: #000;
+  }
+  
+  .action-button.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  
+  .action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Break Pulse Animation */
+  .pulse-text {
+    color: #f6a600;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  
+  /* Logic for Locked State */
+  .is-locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+    pointer-events: none;
+  }
+  
+  .status-notice {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    color: #ff4d4f;
   }

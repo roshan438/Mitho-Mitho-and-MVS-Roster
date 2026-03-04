@@ -48,7 +48,7 @@ export default function HomeRedirect() {
 
   // 2. If no user, go to login
   if (!fbUser) {
-    console.log("No active session, redirecting to login");
+    // console.log("No active session, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
@@ -59,16 +59,16 @@ export default function HomeRedirect() {
 
   // 4. Role-based Routing
   if (role === "admin") {
-    console.log("Admin verified, entering dashboard");
+    // console.log("Admin verified, entering dashboard");
     return <Navigate to="/admin/dashboard" replace />;
   }
 
   if (role === "staff" && status === "approved") {
-    console.log("Staff approved, entering workspace");
+    // console.log("Staff approved, entering workspace");
     return <Navigate to="/staff/today" replace />;
   }
 
   // 5. Default for Pending or Rejected
-  console.log("Status check: ", status || "pending");
+//   console.log("Status check: ", status || "pending");
   return <Navigate to="/pending" replace />;
 }
