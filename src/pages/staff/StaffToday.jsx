@@ -2016,7 +2016,7 @@ export default function StaffToday() {
             </div>
 
             {/* STEP 1: Verification (Only show if not clocked in) */}
-            {!timesheet?.startActual && (
+            {!timesheet?.startActual && !canPerformActions && (
               <div className="clock-card">
                 <h2 className="clock-header">Verification</h2>
                 <div className="status-container">
@@ -2046,12 +2046,22 @@ export default function StaffToday() {
             )}
 
             {/* STEP 2: Clock In (Only show if verified but not started) */}
-            {!timesheet?.startActual && verifiedOnce && (
+            {/* STEP 2: Clock In (Show once verified) */}
+            {!timesheet?.startActual && canPerformActions && (
               <div className="time-entry-card animation-fade-in">
                 <h2 className="time-header">Ready to Start</h2>
                 <div className="input-group">
-                  <input className="time-picker" type="time" value={startInput} onChange={e => setStartInput(e.target.value)} />
-                  <button className="action-button brand-filled" onClick={doClockOn} disabled={!startInput}>
+                  <input
+                    className="time-picker"
+                    type="time"
+                    value={startInput}
+                    onChange={(e) => setStartInput(e.target.value)}
+                  />
+                  <button
+                    className="action-button brand-filled"
+                    onClick={doClockOn}
+                    disabled={!startInput}
+                  >
                     Clock On Now
                   </button>
                 </div>

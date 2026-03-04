@@ -399,7 +399,7 @@ export default function MyTimesheets() {
     } finally {
       setLoading(false);
     }
-  }, [uid, weekStart, weekStartDateObj, showToast]);
+  }, [uid, weekStart, weekStartDateObj]);
 
   useEffect(() => {
     loadWeek();
