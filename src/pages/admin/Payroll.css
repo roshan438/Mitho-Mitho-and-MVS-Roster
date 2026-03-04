@@ -258,3 +258,28 @@
   .stat-item .value.brand {
     color: #00ff88;
   }
+
+  .pay-col input{
+    width: 100%;
+    background: #0f1420;
+    border: 1px solid #2b3548;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.stat-item.mid .value {
+    font-size: 1.2rem;
+}
+.stats-bar.mid{
+    margin: 8px calc(var(--safe-area) + 12px) 16px;
+}
+
+.remain-balance{
+    color: #F32013 !important;
+}
+
+.paid-balance{
+    color: #00ff88 !important;
+}

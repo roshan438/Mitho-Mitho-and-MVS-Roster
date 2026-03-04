@@ -4,7 +4,12 @@
     --text: #e6edf3;
     --muted: #9aa4b2;
     --border: rgba(255, 255, 255, 0.12);
-    --brand: #f6a600;
+    --danger: #ef4444;
+    --brand: #f6a600 !important;
+  }
+
+  .gap-btn{
+    width: 8px;
   }
   
   * { box-sizing: border-box; }
