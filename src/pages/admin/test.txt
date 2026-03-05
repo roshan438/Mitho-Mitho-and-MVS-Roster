@@ -1,0 +1,221 @@
+Got you. If you want **daily saved earnings** (not just “calculate on the fly”), plus **click employee → see daily history**, plus **admin can edit/add days**, then you want a **Payroll Ledger** design.
+
+Here’s the cleanest structure that won’t break later.
+
+---
+
+## Firestore data model (daily ledger + weekly summary)
+
+### A) Daily ledger (source of truth)
+
+**Collection:** `payrollDays/{dayId}/entries/{uid}`
+Where `dayId = YYYY-MM-DD` (example: `2026-03-04`)
+
+**Doc:** `payrollDays/2026-03-04/entries/{uid}`
+
+```js
+{
+  uid: "USER_UID",
+  staffName: "Deepa",
+  date: "2026-03-04",
+  storeId: "strathfield",
+
+  hours: 6.5,
+  rate: 28.5,
+  amount: 185.25,
+
+  // where it came from
+  source: "timesheet" | "manual",
+  timesheetId: "uid_2026-03-04",   // if source=timesheet
+
+  note: "",
+
+  // audit
+  editedBy: null,                 // admin uid if edited
+  editedAt: null,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
+}
+```
+
+✅ This gives you exactly what you want:
+
+* “Every day save the amount earned” ✅
+* “Click name → list of days, hours, store, amount” ✅
+* “Admin can edit/add day entry” ✅
+
+---
+
+### B) Weekly summary (fast UI)
+
+**Collection:** `payrollWeeks/{weekId}/staff/{uid}`
+Where `weekId = Monday date` e.g. `2026-03-03` (Mon)
+
+```js
+{
+  uid,
+  staffName,
+
+  weekStart: "2026-03-03",
+  weekEnd: "2026-03-09",
+  payday: "2026-03-06", // Thu
+
+  totalHours: 0,
+  totalAmount: 0,
+
+  paidTotal: 0,
+  remaining: 0,
+  status: "unpaid" | "partial" | "paid",
+
+  updatedAt: serverTimestamp()
+}
+```
+
+This summary is computed from the daily ledger for the week.
+
+---
+
+### C) Payments history
+
+`payrollWeeks/{weekId}/staff/{uid}/payments/{paymentId}`
+
+```js
+{
+  amount: 200,
+  method: "cash" | "bank" | "other",
+  note: "partial",
+  paidAt: serverTimestamp(),
+  paidBy: "ADMIN_UID"
+}
+```
+
+---
+
+## How daily records get created (2 options)
+
+### Option 1 (best): Auto-sync from timesheets
+
+Whenever a timesheet is created/updated (clock on/off), you create/update that day’s ledger entry.
+
+**You can do this:**
+
+* Later with Cloud Functions (best)
+* OR right now from Admin “Sync Payroll” button (simpler)
+
+**Logic:**
+
+* For each timesheet for that day:
+
+  * compute hours (end-start minus break)
+  * rate from `/users/{uid}.hourlyRate`
+  * upsert `payrollDays/{date}/entries/{uid}` with `source="timesheet"`
+
+### Option 2: Manual entries only
+
+Admin creates entries by hand. Works, but more work.
+
+**What you asked** is both: auto + admin edits. So we do:
+
+* Auto creates as `source="timesheet"`
+* Admin edits sets `source="manual"` and stores audit info.
+
+---
+
+## The “click employee → history list” query
+
+When admin clicks a staff member on the weekly page:
+
+* You fetch all days in that week:
+
+  * `payrollDays/{dayId}/entries/{uid}` for each dayId
+  * or store all entries also under staff for easier query (optional)
+
+**Simpler & fast approach: also keep staff subcollection**
+If you want **one query** for history, add:
+
+`users/{uid}/payrollEntries/{entryId}`
+
+```js
+{
+  date, weekId, storeId, hours, rate, amount, source, note, updatedAt
+}
+```
+
+Then history page is one query:
+
+* `query(users/{uid}/payrollEntries, where("weekId","==",weekId), orderBy("date","asc"))`
+
+✅ This is easiest for UI.
+
+If you don’t want duplicate data, stick with `payrollDays` only, but you’ll fetch 7 docs (still totally fine).
+
+---
+
+## Admin edit rules (what is allowed)
+
+You want admin to:
+
+* edit hours/amount/rate/store/day
+* add missing day entry
+* delete wrong entry (optional)
+
+**Recommended approach**
+
+* Admin edits `hours` and `rate`
+* App auto-calculates `amount = hours * rate` so it stays consistent.
+* Store a `note` and `editedBy/editedAt` always.
+
+---
+
+## UI flow (what you’ll build)
+
+### 1) Weekly Payroll page
+
+* week selector
+* list staff cards:
+
+  * total, paid, remaining
+  * “Add payment”
+  * “Open history”
+* Thursday highlight: if today is Thu show banner “Payday today”
+
+### 2) Staff Payroll History page (when click staff)
+
+* table:
+
+  * Date | Store | Hours | Rate | Amount | Source | Edit
+* “Add manual day” button
+* “Re-sync from timesheets” button (optional)
+
+---
+
+## Firestore rules concept (high level)
+
+* Only **admin** can write:
+
+  * `payrollDays/**`
+  * `payrollWeeks/**`
+* Staff can read their own summary/history (optional)
+
+---
+
+## Next: I can generate the full code
+
+To generate the full working thing, I just need 3 details from your current app:
+
+1. In `/users/{uid}` what fields exist?
+
+   * confirm: `role`, `status`, `hourlyRate`, `firstName`, `lastName`?
+2. Timesheet fields:
+
+   * do you store `breakStartActual/breakEndActual` always? (or sometimes missing)
+3. Pay week start:
+
+   * you want week = **Mon–Sun** and payday = **Thursday**, right?
+
+If you reply those 3, I’ll give you:
+
+* `AdminPayroll.jsx` (weekly view)
+* `PayrollHistory.jsx` (daily view + edit/add)
+* `payrollCalc.js` (hours calc)
+* updated **Firestore rules** for these new collections (full file)
