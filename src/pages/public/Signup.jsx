@@ -467,7 +467,7 @@ export default function Signup() {
 
   return (
     <div className="auth-page-wrapper signup-wrapper">
-      <div className="auth-container signup-container">/
+      <div className="auth-container signup-container">
         <header className="auth-header">
           <h1 className="auth-title">Staff Onboarding</h1>
           <p className="auth-subtitle">Complete your profile to join the team</p>
