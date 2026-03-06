@@ -226,7 +226,8 @@ body {
 .user-email {
   font-size: 0.85rem;
   color: #64748b;
-  display: none; /* Hide on small screens */
+   /* Hide on small screens */
+   /* display: none; */
 }
 
 @media (min-width: 768px) { .user-email { display: block; } }
@@ -235,17 +236,46 @@ body {
 .admin-toolbar {
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
+  /* Remove overflow-x: auto if you want a fixed split, 
+     or keep it for mobile scrolling */
 }
-
-.admin-toolbar::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
 .admin-scroll-container {
   display: flex;
+  justify-content: space-between; /* This pushes the Staff link to the right */
+  align-items: center;
   padding: 0 0.5rem;
+  max-width: 1400px; /* Optional: prevents links from getting too far apart on ultra-wide screens */
+  margin: 0 auto;
 }
+
+.admin-nav-group {
+  display: flex;
+  overflow-x: auto; /* Allows the left side to scroll if there are too many links */
+  scrollbar-width: none;
+}
+
+.admin-nav-group::-webkit-scrollbar { display: none; }
+
+.staff-right {
+  margin-left: auto; /* Ensures it stays right even if space-between isn't enough */
+  border-left: 1px solid #e2e8f0; /* Optional: adds a small divider */
+  font-weight: 700; /* Optional: makes it stand out */
+  color: #0ea5e9; /* Optional: different color to distinguish from other tools */
+}
+
+.admin-link {
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.admin-toolbar::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
 .admin-link {
   padding: 0.75rem 1rem;

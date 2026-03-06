@@ -180,11 +180,18 @@ export default function Approvals() {
     setLoading(true);
     setErr("");
     try {
-      const q = query(
-        collection(db, "users"),
-        where("status", "==", "pending"),
-        orderBy("createdAt", "desc")
-      );
+      // const q = query(
+      //   collection(db, "users"),
+      //   where("status", "==", "pending"),
+      //   orderBy("createdAt", "desc")
+      // );
+
+        const q = query(
+          collection(db, "users"),
+          where("status", "==", "pending"),
+          where("profileComplete", "==", true),
+          orderBy("createdAt", "desc")
+        );
 
       const snap = await getDocs(q);
       const list = snap.docs.map((d) => ({

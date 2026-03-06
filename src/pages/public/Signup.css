@@ -210,7 +210,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  color: var(--brand-color); /* Updated to match your brand */
+  color: var(--brand); /* Updated to match your brand */
   font-weight: 500;
 }
 

@@ -263,7 +263,7 @@
   
   
   /* Timeline Cards */
-  .timeline { padding: 0 var(--safe-area); }
+  /* .timeline { padding: 0 var(--safe-area); } */
   
   .timeline-card {
     display: flex;

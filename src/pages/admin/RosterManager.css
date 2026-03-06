@@ -168,9 +168,7 @@
 
 
 
-
   .admin-wrapper { padding: 20px; max-width: 1400px; margin: 0 auto; }
-
 .status-pill {
   font-size: 0.7rem; padding: 4px 10px; border-radius: 12px; font-weight: 800;
   background: rgba(255,255,255,0.05); color: var(--muted);
@@ -387,6 +385,7 @@
     .btn-sec, .btn-primary {
       flex: 1; /* Make buttons equal width on mobile */
     }
+    
   }
 
 

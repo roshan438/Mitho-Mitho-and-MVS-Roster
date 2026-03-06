@@ -211,17 +211,19 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { collectionGroup, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { STORES } from "../../utils/constants";
+// import { STORES } from "../../utils/constants";
+import { useStores } from "../../hooks/useStore";
 import { subDays, addDays, getWeekStartMonday, prettyDate, toYMD, weekDates } from "../../utils/dates";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext"; // Import Toast Hook
 import "./MyRoster.css";
 
-const storeLabel = (storeId) => STORES.find((s) => s.id === storeId)?.label || storeId || "-";
+// const storeLabel = (storeId) => STORES.find((s) => s.id === storeId)?.label || storeId || "-";
 
 export default function MyRoster() {
   const { fbUser } = useAuth();
   const { showToast } = useToast(); // Initialize Toast
+  const { getStoreLabel } = useStores();
   const uid = fbUser?.uid;
 
   const [weekStart, setWeekStart] = useState(toYMD(getWeekStartMonday(new Date())));
@@ -338,7 +340,7 @@ export default function MyRoster() {
                         <div key={s.id} className="shift-entry">
                           <div className="shift-accent" />
                           <div className="shift-details">
-                            <div className="store-tag">{storeLabel(s.storeId)}</div>
+                            <div className="store-tag">{getStoreLabel(s.storeId)}</div>
                             <div className="shift-time">
                               {s.startPlanned} — {s.endPlanned}
                             </div>

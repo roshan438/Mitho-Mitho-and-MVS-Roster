@@ -1204,6 +1204,7 @@ import { db } from "../../firebase/firebase";
 import { addDays, getWeekStartMonday, toYMD } from "../../utils/dates";
 import { useToast } from "../../context/ToastContext";
 import "./Payroll.css";
+import "./AdminPayroll.css";
 
 // ---------------- Helpers ----------------
 const round2 = (n) => Math.round((Number(n || 0) + Number.EPSILON) * 100) / 100;
@@ -1867,7 +1868,7 @@ export default function AdminPayroll() {
         <div className="header-text">
           <h1 className="main-title">Admin Payroll</h1>
           <span className="subtitle">
-            Week {weekStart} → {weekEndInclusive} • Payday: {paydayYMD}
+            Week {weekStart} → {weekEndInclusive} <br></br>Payday: <span style={{color: '#f6a600'}}>{paydayYMD}</span>
           </span>
         </div>
 

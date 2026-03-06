@@ -511,7 +511,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { STORES } from "../../utils/constants";
+// import { STORES } from "../../utils/constants";
+import { useStores } from "../../hooks/useStore";
 import {
   subDays,
   addDays,
@@ -524,9 +525,9 @@ import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
 import "./MyTimesheets.css";
 
-// Utility Helpers
-const storeLabel = (storeId) =>
-  STORES.find((s) => s.id === storeId)?.label || storeId || "-";
+// // Utility Helpers
+// const storeLabel = (storeId) =>
+//   STORES.find((s) => s.id === storeId)?.label || storeId || "-";
 
 const minutesToHours = (min) => Math.round((min / 60) * 100) / 100;
 
@@ -559,6 +560,8 @@ const calcWorkedMinutes = (ts) => {
 export default function MyTimesheets() {
   const { fbUser } = useAuth();
   const { showToast } = useToast();
+  
+  const { getStoreLabel } = useStores();
   const uid = fbUser?.uid;
 
   const [weekStart, setWeekStart] = useState(toYMD(getWeekStartMonday(new Date())));
@@ -731,7 +734,7 @@ export default function MyTimesheets() {
                       <>
                         <div className="card-row">
                           <span className="store-tag">
-                            {storeLabel(ts.storeId)}
+                            {getStoreLabel(ts.storeId)}
                           </span>
                           <span className="hours-total">
                             {minutesToHours(worked)}h

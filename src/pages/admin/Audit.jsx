@@ -734,16 +734,18 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { STORES } from "../../utils/constants";
+// import { STORES } from "../../utils/constants";
+import { useStores } from "../../hooks/useStore";
 import { addDays, getWeekStartMonday, toYMD } from "../../utils/dates";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
 import "./Audit.css";
+import { useNavigate } from "react-router-dom";
 
 // --- Helpers ---
-function storeLabel(storeId) {
-  return STORES.find((s) => s.id === storeId)?.label || storeId || "-";
-}
+// function storeLabel(storeId) {
+//   return STORES.find((s) => s.id === storeId)?.label || storeId || "-";
+// }
 
 function chunk(arr, size) {
   const out = [];
@@ -794,6 +796,7 @@ function localInputToTimestamp(v) {
 export default function Audit() {
   const { fbUser } = useAuth();
   const { showToast } = useToast();
+  const { stores, getStoreLabel } = useStores();
 
   // Filters
   const [preset, setPreset] = useState("week");
@@ -960,7 +963,7 @@ export default function Audit() {
               <label>Store</label>
               <select className="app-input" value={storeId} onChange={(e) => setStoreId(e.target.value)}>
                 <option value="all">All Stores</option>
-                {STORES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                {stores.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </div>
             <div className="filter-field">
@@ -1009,7 +1012,7 @@ export default function Audit() {
                 }}>
                   <div className="staff-info">
                     <span className="staff-name">{t.staffName}</span>
-                    <span className="shift-date">{t.date} • {storeLabel(t.storeId)}</span>
+                    <span className="shift-date">{t.date} • {getStoreLabel(t.storeId)}</span>
                   </div>
                   <div className="status-area">
                      <span className={`chip ${t.auditStatus === 'approved' ? 'ok' : t.auditStatus === 'reviewed' ? 'warn' : ''}`}>

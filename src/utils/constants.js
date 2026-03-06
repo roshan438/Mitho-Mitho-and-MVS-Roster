@@ -13,5 +13,13 @@ export const STORES = [
       lng: 151.079898, // <-- put exact
       radiusM: 20,
     },
+    {
+      id: "kitchen_homebush",
+      label: "Kitchen – Homebush",
+      lat: -33.864428, // <-- put exact
+      lng: 151.091064, // <-- put exact
+      radiusM: 20,
+    },
+     
   ];
   
