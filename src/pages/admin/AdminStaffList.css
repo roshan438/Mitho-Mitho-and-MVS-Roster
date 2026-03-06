@@ -1,0 +1,415 @@
+.admin-staff-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    color: #fff;
+  }
+  
+  .staff-header {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 15px;
+  }
+  
+  .staff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+  }
+  
+  .staff-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+  }
+  
+  .staff-card:hover {
+    background: #2d3748;
+    transform: translateY(-2px);
+  }
+  
+  .staff-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .staff-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  
+  .staff-email {
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+  
+
+  .working-badge {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+  }
+  
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(74, 222, 128, 0.4);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+  }
+  
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  .profile-modal {
+    background: #1e293b;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 16px;
+    border: 1px solid #334155;
+    overflow: hidden;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-header {
+    padding: 20px;
+    background: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+  }
+  
+  .modal-content {
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .modal-content section {
+    margin-bottom: 25px;
+  }
+  
+  .modal-content h3 {
+    font-size: 0.9rem;
+    color: #38bdf8;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  
+  .detail-row {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .detail-row span {
+    color: #94a3b8;
+    font-weight: 500;
+  }
+  
+  .status-pill {
+    background: #064e3b;
+    color: #6ee7b7;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 2rem;
+    cursor: pointer;
+  }
+
+
+
+  .contact-actions-container {
+    margin-top: 20px;
+  }
+  
+  .contact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .contact-info label {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  
+  .contact-info p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f1f5f9;
+  }
+  
+  .sub-text {
+    font-size: 12px !important;
+    color: #64748b !important;
+    margin-top: 2px !important;
+  }
+  
+  .contact-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .mini-btn {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: transform 0.1s, filter 0.2s;
+  }
+  
+  .mini-btn:active {
+    transform: scale(0.95);
+  }
+  
+  .call-bg { background: #0ea5e9; color: white; }
+  .sms-bg { background: #8b5cf6; color: white; }
+  .email-bg { background: #64748b; color: white; }
+  .emergency-bg { background: #ef4444; color: white; }
+  
+  .mini-btn:hover {
+    filter: brightness(1.2);
+  }
+
+
+
+
+
+
+
+
+
+  /* Staff Card Enhancements */
+.working-border {
+    border-left: 4px solid #4ade80 !important;
+    background: linear-gradient(90deg, rgba(74, 222, 128, 0.05) 0%, #1e293b 100%) !important;
+  }
+  
+  .staff-role-tag {
+    font-size: 10px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    width: fit-content;
+    margin-top: 4px;
+  }
+  
+  /* Action Ribbon (Call/SMS/Email) */
+  .action-ribbon {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  
+  .action-pill {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    transition: opacity 0.2s;
+  }
+  
+  .action-pill.call { background: #0ea5e9; color: white; }
+  .action-pill.sms { background: #8b5cf6; color: white; }
+  .action-pill.email { background: #64748b; color: white; }
+  .action-pill:active { opacity: 0.7; }
+  
+  /* Admin Controls Box */
+  .admin-controls-box {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #334155;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .edit-toggle-btn {
+    background: none;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .edit-form-grid {
+    display: grid;
+    gap: 12px;
+  }
+  
+  .input-group label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+  
+  .input-group input, .input-group select {
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+  }
+  
+  .save-btn {
+    background: #4ade80;
+    color: #064e3b;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 800;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  
+  .readonly-stats {
+    display: flex;
+    gap: 40px;
+  }
+  
+  .stat label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+  }
+  
+  .stat span {
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+  
+  .capitalize { text-transform: capitalize; }
+
+  .address-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 20px;
+  }
+  
+  .address-card .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .address-card h3 {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  
+  /* Map Button Styling */
+  .map-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #38bdf8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .map-link-btn:hover {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+  }
+  
+  /* Text Styling */
+  .address-content {
+    border-left: 2px solid #334155;
+    padding-left: 15px;
+    margin-left: 5px;
+  }
+  
+  .address-main .street {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0;
+  }
+  
+  .address-main .suburb-post {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 4px 0 0 0;
+  }

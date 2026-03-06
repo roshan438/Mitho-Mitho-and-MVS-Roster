@@ -1,0 +1,87 @@
+.payroll-card {
+    background: #1c2230;
+    border-radius: 16px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin: 0 16px 16px 16px;
+
+  }
+  
+  .staff-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+  }
+  
+  .staff-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+  }
+  
+  .shift-tag {
+    font-size: 0.75rem;
+    color: #7d859a;
+    margin-top: 2px;
+  }
+  
+  .payroll-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 10px;
+  }
+  
+  .pay-col label {
+    display: block;
+    font-size: 0.65rem;
+    color: #7d859a;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  
+  .pay-col span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  
+  .pay-col.total span.brand {
+    color: #00ff88; 
+    font-weight: 800;
+  }
+  
+  .stat-item .value.brand {
+    color: #00ff88;
+  }
+
+  .pay-col input{
+    width: 100%;
+    background: #0f1420;
+    border: 1px solid #2b3548;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.stat-item.mid .value {
+    font-size: 1.2rem;
+}
+.stats-bar.mid{
+    margin: 8px calc(var(--safe-area) + 0px) 8px;
+}
+
+.remain-balance{
+    color: #F32013 !important;
+}
+
+.paid-balance{
+    color: #00ff88 !important;
+}
+
+.header-left.header-staff-list{
+    display: block;
+}

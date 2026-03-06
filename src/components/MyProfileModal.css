@@ -1,0 +1,111 @@
+/* Navbar additions */
+.clickable-user {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    font-weight: 600;
+    color: var(--brand);
+  }
+  
+  .clickable-user:hover {
+    background: #f1f5f9;
+    text-decoration: underline;
+  }
+  
+  /* Modal Specifics */
+  .profile-section {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .info-item label {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+  
+  .info-item p {
+    font-weight: 500;
+    color: #1e293b;
+  }
+  
+  .info-item input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+  }
+  
+  .save-profile-btn {
+    width: 100%;
+    background: var(--brand);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .text-btn {
+    background: none;
+    border: none;
+    color: #38bdf8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .password-form input {
+    padding: 10px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    border-radius: 6px;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .confirm-btn {
+    flex: 1;
+    background: #38bdf8;
+    color: #0f172a;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .hint-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-style: italic;
+  }

@@ -5,7 +5,9 @@ import { addDays, toYMD } from "../../utils/payrollCalc";
 
 import { subDays, getWeekStartMonday } from "../../utils/dates";
 import "./PayrollHistory.css";
-import { STORES } from "../../utils/constants";
+// import { STORES } from "../../utils/constants";
+
+import { useStores } from "../../hooks/useStore";
 
 function parseUrlParams() {
   const parts = window.location.pathname.split("/").filter(Boolean);
