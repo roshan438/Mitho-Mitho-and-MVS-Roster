@@ -249,7 +249,7 @@
   
   .btn-save { background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
   
-  .btn-delete { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+  /* .btn-delete { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 12px; border-radius: 6px; cursor: pointer; } */
   
   /* --- MOBILE MAGIC --- */
   @media (max-width: 950px) {
