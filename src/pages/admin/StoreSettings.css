@@ -176,7 +176,7 @@
 }
 
 
-.btn-delete {
+/* .btn-delete {
   background: rgba(255, 68, 68, 0.1);
   border: 1px solid rgba(255, 68, 68, 0.3);
   color: #ff4444;
@@ -188,7 +188,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-}
+} */
 
 .btn-delete:hover {
   background: #ff4444;
