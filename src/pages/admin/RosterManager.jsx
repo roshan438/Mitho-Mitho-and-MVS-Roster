@@ -500,13 +500,17 @@ import {
   query, setDoc, updateDoc, where, serverTimestamp, writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { STORES } from "../../utils/constants";
+// import { STORES } from "../../utils/constants";
+
 import { addDays, getWeekStartMonday, prettyDate, toYMD, weekDates } from "../../utils/dates";
 import { useToast } from "../../context/ToastContext"; // Import Toast Hook
 import "./RosterManager.css";
+import { useStores } from "../../hooks/useStore";
 
 export default function RosterManager() {
   const { showToast } = useToast(); // Initialize Toast
+
+  const { stores, getStoreLabel } = useStores();
   const [weekStart, setWeekStart] = useState(toYMD(getWeekStartMonday(addDays(new Date(), 7))));
   const [weekStatus, setWeekStatus] = useState("draft");
   const [loading, setLoading] = useState(true);
@@ -570,7 +574,7 @@ export default function RosterManager() {
     try {
       const shiftsCol = collection(db, "rosterWeeks", weekStart, "shifts");
       await addDoc(shiftsCol, {
-        uid: "", staffName: "", storeId: STORES[0].id, date: ymd,
+        uid: "", staffName: "", storeId: stores[0].id, date: ymd,
         startPlanned: "13:00", endPlanned: "22:00", updatedAt: serverTimestamp()
       });
       loadWeek();
@@ -721,7 +725,7 @@ export default function RosterManager() {
                       value={s.storeId} 
                       onChange={(e) => updateShift(s.id, { storeId: e.target.value })}
                     >
-                      {STORES.map(st => <option key={st.id} value={st.id}>{st.label}</option>)}
+                      {stores.map(st => <option key={st.id} value={st.id}>{st.label}</option>)}
                     </select>
 
                     <div className="time-row">

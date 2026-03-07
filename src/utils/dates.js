@@ -38,3 +38,30 @@ function pad(n) {
     return date.toLocaleDateString(undefined, { weekday: "short"});
         // , day: "2-digit", month: "short" });
   }
+
+
+  export function prettyTime(time) {
+    if (!time) return "";
+  
+    let date;
+  
+    // 1. Check if it's a Firebase Timestamp (has a .toDate() method)
+    if (typeof time.toDate === 'function') {
+      date = time.toDate();
+    } 
+    // 2. Fallback for strings like "19:00"
+    else {
+      const [hours, minutes] = String(time).split(':');
+      date = new Date();
+      date.setHours(parseInt(hours), parseInt(minutes));
+    }
+  
+    return date.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).toLowerCase();
+  }
+  
+  
+  

@@ -306,9 +306,10 @@
   
   .stat-item { flex: 1; text-align: center; }
   .stat-item label { display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 6px; }
-  .stat-item .value {text-align: center; font-size: 1.5rem; font-weight: 800; color: var(--brand); }
+  .stat-item .value { font-size: 1.5rem; font-weight: 800; color: var(--brand); }
   .stat-item .value small { font-size: 0.9rem; margin-left: 2px; color: var(--text); opacity: 0.5; }
   .stat-divider { width: 1px; height: 40px; background: var(--border); }
+  
   
   .date-nav { margin: 0 var(--safe-area) 24px; }
   .date-display input {

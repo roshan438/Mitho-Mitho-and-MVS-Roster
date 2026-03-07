@@ -524,6 +524,7 @@ import {
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
 import "./MyTimesheets.css";
+import { prettyTime } from "../../utils/dates";
 
 // // Utility Helpers
 // const storeLabel = (storeId) =>
@@ -744,15 +745,15 @@ export default function MyTimesheets() {
                         <div className="time-grid">
                           <div className="time-box">
                             <label>IN</label>
-                            <span>{ts.startInput || "--:--"}</span>
+                            <span>{prettyTime(ts.startInput) || "--:--"}</span>
                           </div>
                           <div className="time-box">
                             <label>BREAK</label>
-                            <span>{ts.breakStartInput ? "Done" : "None"}</span>
+                            <span>{prettyTime(ts.breakStartInput) ? "Done" : "None"}</span>
                           </div>
                           <div className="time-box">
                             <label>OUT</label>
-                            <span>{ts.endInput || "--:--"}</span>
+                            <span>{prettyTime(ts.endInput) || "--:--"}</span>
                           </div>
                         </div>
                       </>

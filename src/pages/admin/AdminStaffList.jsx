@@ -664,7 +664,6 @@ export default function AdminStaffList() {
                 )}
               </section>
 
-              {/* Address section remains the same... */}
             
                <section className="address-card">
                  <div className="section-header">
