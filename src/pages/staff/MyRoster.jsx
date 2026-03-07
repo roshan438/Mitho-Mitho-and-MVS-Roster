@@ -217,6 +217,7 @@ import { subDays, addDays, getWeekStartMonday, prettyDate, toYMD, weekDates } fr
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext"; // Import Toast Hook
 import "./MyRoster.css";
+import { prettyTime } from "../../utils/dates";
 
 // const storeLabel = (storeId) => STORES.find((s) => s.id === storeId)?.label || storeId || "-";
 
@@ -342,7 +343,7 @@ export default function MyRoster() {
                           <div className="shift-details">
                             <div className="store-tag">{getStoreLabel(s.storeId)}</div>
                             <div className="shift-time">
-                              {s.startPlanned} — {s.endPlanned}
+                              {prettyTime(s.startPlanned)} — {prettyTime(s.endPlanned)}
                             </div>
                           </div>
                         </div>
