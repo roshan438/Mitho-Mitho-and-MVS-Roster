@@ -87,7 +87,10 @@
   
 
   @media (max-width: 768px) {
-    .admin-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .admin-header { 
+      /* flex-direction: column;  */
+      align-items: flex-start; 
+      gap: 15px; }
     /* .header-actions { width: 100%; } */
     .btn-add { flex: 1; }
     

@@ -168,6 +168,39 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.shift-field label {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.shift-field select,
+.shift-field input {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
   .admin-wrapper { padding: 20px; max-width: 1400px; margin: 0 auto; }
 .status-pill {
   font-size: 0.7rem; padding: 4px 10px; border-radius: 12px; font-weight: 800;
@@ -196,7 +229,7 @@
   color: #ff4d4d; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem;
 }
 
-/* Horizontal Grid for Desktop, Stacked for Mobile */
+
 .roster-grid {
   display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px;
   scrollbar-width: thin; scrollbar-color: var(--border) transparent;
@@ -221,7 +254,7 @@
   background: rgba(255,255,255,0.02); padding: 10px;
   border: 1px solid var(--border); border-top: none;
   border-radius: 0 0 15px 15px; 
-  /* min-height: 400px; */
+
 }
 
 .shift-editor-card {
@@ -236,6 +269,10 @@
 }
 
 .time-row { display: flex; gap: 8px; }
+.time-row .shift-field {
+  width: 50%;
+
+}
 
 .del-btn {
   width: 100%; background: transparent; border: 1px solid rgba(255,77,77,0.3);
@@ -245,11 +282,11 @@
 .empty-day { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 16px 0; }
 
 
-/* Roster Controls Container */
+
 .roster-controls {
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Better vertical alignment */
+    align-items: center; 
     background: linear-gradient(145deg, #161c2d 0%, #0b0f14 100%);
     padding: 24px;
     border-radius: 20px;
@@ -259,19 +296,19 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   }
   
-  /* Date Input Group */
+
   .control-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
     flex: 1;
-    max-width: 200px; /* Keeps the date picker neat */
+    max-width: 200px;
   }
   
   .control-group label {
     font-size: 0.7rem;
     font-weight: 700;
-    color: var(--brand); /* Highlight label with your brand color */
+    color: var(--brand); 
     text-transform: uppercase;
     letter-spacing: 1px;
   }
@@ -285,7 +322,7 @@
     font-size: 0.95rem;
     font-family: inherit;
     transition: all 0.2s ease;
-    color-scheme: dark; /* Makes the calendar popup dark mode */
+    color-scheme: dark; 
   }
   
   .control-group input[type="date"]:focus {
@@ -294,15 +331,17 @@
     background: rgba(255, 255, 255, 0.07);
   }
   
-  /* Button Row Layout */
+
   .button-row {
     display: flex;
-    gap: 12px;
-    align-items: flex-end; /* Align buttons with the bottom of the input */
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end; 
   }
   
-  /* Secondary Button (Copy Prev) */
+
   .btn-sec {
+    width: 100%;
     background: transparent;
     color: var(--text);
     border: 1px solid var(--border);
@@ -324,7 +363,7 @@
     cursor: not-allowed;
   }
   
-  /* Primary Action Button (Publish/Unlock) */
+
   .btn-primary {
     padding: 12px 24px;
     border-radius: 12px;
@@ -340,9 +379,9 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
   
-  /* Lock State (Publish Roster) */
+
   .btn-primary.lock {
-    background: var(--brand); /* Your gold/yellow color */
+    background: var(--brand); 
     color: #000;
   }
   
@@ -352,7 +391,7 @@
     box-shadow: 0 6px 20px rgba(246, 166, 0, 0.3);
   }
   
-  /* Unlock State (Unlock Roster) */
+
   .btn-primary.unlock {
     background: rgba(255, 77, 77, 0.1);
     color: #ff4d4d;
@@ -365,7 +404,7 @@
     box-shadow: 0 6px 20px rgba(255, 77, 77, 0.3);
   }
   
-  /* Responsive Tweak for Mobile */
+
   @media (max-width: 600px) {
     .roster-controls {
       flex-direction: column;
@@ -383,14 +422,494 @@
     }
     
     .btn-sec, .btn-primary {
-      flex: 1; /* Make buttons equal width on mobile */
+      flex: 1; 
     }
     
   }
 
 
-/* Responsive */
+
 @media (max-width: 1024px) {
   .roster-grid { flex-direction: column; }
   .day-column { min-width: 100%; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.collapsible-day {
+  overflow: hidden;
+}
+
+.collapsible-trigger {
+  width: 100%;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.day-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.day-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.day-chevron {
+  font-size: 1rem;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.day-chevron.open {
+  transform: rotate(180deg);
+}
+
+.small-add {
+  min-width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .day-header.clean {
+    padding: 14px 12px;
+  }
+
+  .day-header-right {
+    gap: 8px;
+  }
+
+  .day-count {
+    font-size: 0.68rem;
+  }
+}
+
+
+
+.roster-controls select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.roster-controls select:focus {
+  outline: none;
+  border-color: var(--brand);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.roster-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.summary-card-mini {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.summary-label-mini {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.summary-card-mini strong {
+  color: #fff;
+  font-size: 0.98rem;
+}
+
+.btn-primary:disabled,
+.btn-sec:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== Better mobile layout for roster controls ===== */
+@media (max-width: 768px) {
+  .admin-wrapper.roster-page {
+    padding: 12px;
+  }
+
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .title-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .main-title {
+    margin: 0;
+    font-size: 1.95rem;
+    line-height: 1.05;
+  }
+
+  .roster-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .status-pill {
+    font-size: 0.66rem;
+    padding: 6px 10px;
+    border-radius: 999px;
+  }
+
+  .header-actions .refresh-circle {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+  }
+
+  .roster-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    margin-bottom: 14px;
+    align-items: end;
+  }
+
+  .control-group {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .control-group label {
+    font-size: 0.62rem;
+    margin-bottom: 4px;
+    letter-spacing: 0.08em;
+  }
+
+  .control-group input,
+  .control-group input[type="date"],
+  .roster-controls select {
+    width: 100%;
+    min-height: 44px;
+    height: 44px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  /* Row 1: week + store */
+  .roster-controls .control-group:nth-child(1),
+  .roster-controls .control-group:nth-child(2) {
+    grid-column: span 1;
+  }
+
+  /* Row 2: view + day */
+  .roster-controls .control-group:nth-child(3),
+  .roster-controls .control-group:nth-child(4) {
+    grid-column: span 1;
+  }
+
+  /* Row 3: buttons full width */
+  .roster-controls .button-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 10px;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .btn-sec,
+  .btn-primary {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    height: 44px;
+    padding: 10px 12px;
+    font-size: 0.92rem;
+    border-radius: 12px;
+  }
+
+  .roster-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .summary-card-mini {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .summary-label-mini {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .summary-card-mini strong {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .roster-grid.cleaner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .day-column.clean {
+    border-radius: 14px;
+  }
+
+  .day-header.clean {
+    padding: 12px;
+    min-height: 54px;
+  }
+
+  .day-name {
+    font-size: 0.95rem;
+  }
+
+  .day-date {
+    font-size: 0.72rem;
+  }
+
+  .day-header-right {
+    gap: 8px;
+  }
+
+  .day-count {
+    font-size: 0.66rem;
+  }
+
+  .small-add {
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.95rem;
+  }
+
+  .shift-list.clean {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .shift-editor-card.clean {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .shift-number {
+    /* font-size: 0.68rem; */
+    display: none;
+  }
+
+  .shift-field {
+    margin-bottom: 10px;
+  }
+
+  .shift-field label {
+    /* font-size: 10px; */
+    /* margin-bottom: 5px; */
+    display: none;
+  }
+  .staff-lable-name{
+    display: block !important;
+  }
+
+  .shift-field select,
+  .shift-field input {
+    min-height: 42px;
+    padding: 9px 10px;
+    font-size: 0.92rem;
+    border-radius: 10px;
+    margin-bottom: 0;
+  }
+
+  .time-row.clean {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .del-btn.compact {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    border-radius: 10px;
+  }
+
+  .validation-box {
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    margin-bottom: 14px;
+  }
+
+  .empty-day {
+    padding: 14px 10px;
+    font-size: 0.78rem;
+  }
+}
+
+/* ===== Extra small phones / iPhones ===== */
+@media (max-width: 480px) {
+  .admin-wrapper.roster-page {
+    padding: 10px;
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .main-title {
+    font-size: 1.75rem;
+  }
+
+  .header-actions .refresh-circle {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+  }
+
+  .roster-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .control-group label {
+    font-size: 0.6rem;
+  }
+
+  .control-group input,
+  .control-group input[type="date"],
+  .roster-controls select {
+    font-size: 16px;
+    min-height: 42px;
+    height: 42px;
+    padding: 8px 10px;
+  }
+
+  .roster-controls .button-row {
+    /* grid-template-columns: 1fr; */
+    gap: 8px;
+  }
+
+  .btn-sec,
+  .btn-primary {
+    font-size: 0.9rem;
+    min-height: 42px;
+    height: 42px;
+  }
+
+  .roster-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .summary-card-mini {
+    padding: 10px;
+  }
+
+  .summary-card-mini strong {
+    font-size: 0.84rem;
+  }
+
+  .day-header.clean {
+    padding: 10px 12px;
+  }
+
+  .day-count {
+    display: none;
+  }
+
+  .shift-list.clean {
+    padding: 8px;
+  }
+
+  .shift-editor-card.clean {
+    padding: 9px;
+  }
+
+  .time-row.clean {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .shift-field select,
+  .shift-field input {
+    font-size: 16px;
+    min-height: 42px;
+  }
 }
