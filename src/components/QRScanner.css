@@ -123,7 +123,7 @@
     background: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Mobile Bottom Sheet look */
+    align-items: center; /* Mobile Bottom Sheet look */
     z-index: 2000;
     backdrop-filter: blur(8px);
   }

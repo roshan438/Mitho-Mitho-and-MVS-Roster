@@ -127,6 +127,11 @@
     grid-column: span 2;
     margin-top: 5px;
   }
+
+  .store-add-button{
+    margin: 0 !important;
+    width: 80%;
+  }
   
   .btn-brand, .btn-sec {
     display: flex;
