@@ -77,3 +77,98 @@
     font-size: 12px;
     color: var(--muted);
   }
+
+
+
+
+
+
+
+
+
+  /* =======================================================
+   GLOBAL FORM RESET (Mobile Safe + Consistent Styling)
+======================================================= */
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+/* Base control behavior */
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  border-radius: 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  background-clip: padding-box;
+}
+
+/* Prevent iOS auto zoom on focus */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* critical for iOS */
+  }
+}
+
+/* Normalize height across devices */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+select,
+textarea {
+  min-height: 42px;
+  line-height: 1.2;
+}
+
+/* Fix Safari date/time alignment */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+/* Make calendar icon clickable and clean */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+/* Remove ugly inner shadows on iOS */
+input,
+textarea {
+  box-shadow: none;
+}
+
+/* Clean focus behavior */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Optional: smooth tap feel */
+@media (hover: none) {
+  input,
+  select,
+  textarea,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

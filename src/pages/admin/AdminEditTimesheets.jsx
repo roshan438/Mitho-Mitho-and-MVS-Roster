@@ -1820,7 +1820,7 @@ export default function AdminEditTimesheets() {
 
         <div className="header-actions">
           <button className="btn-add" onClick={() => setAddOpen(true)}>
-            + New Entry
+            New Entry
           </button>
           <button
             className={`btn-refresh ${loading ? "spinning" : ""}`}
