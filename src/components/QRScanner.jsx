@@ -146,7 +146,6 @@ export default function QRScanner({
                 {detected && (
                   <div className="qrDetected">
                     <div className="qrDetectedTitle">Detected ✅</div>
-                    <div className="qrDetectedSub">{detectedText}</div>
                   </div>
                 )}
               </div>
