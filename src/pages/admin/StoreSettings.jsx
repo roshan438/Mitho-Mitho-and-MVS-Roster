@@ -870,7 +870,7 @@ export default function StoreSettings() {
                <input className="app-input" placeholder="Lng" onChange={e => setNewStore({...newStore, lng: e.target.value})} />
             </div>
             <div className="modal-actions" style={{display:'flex', gap:'10px', marginTop:'15px'}}>
-              <button className="btn-brand" onClick={handleAddStore} disabled={saving}>Add Store</button>
+              <button className="btn-brand store-add-button" onClick={handleAddStore} disabled={saving}>Add Store</button>
               <button className="btn-sec" onClick={() => setShowAddModal(false)}>Cancel</button>
             </div>
           </div>
