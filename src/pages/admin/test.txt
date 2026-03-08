@@ -219,3 +219,7 @@ If you reply those 3, I’ll give you:
 * `PayrollHistory.jsx` (daily view + edit/add)
 * `payrollCalc.js` (hours calc)
 * updated **Firestore rules** for these new collections (full file)
+
+
+
+
