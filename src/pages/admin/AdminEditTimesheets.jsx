@@ -1524,9 +1524,11 @@ export default function AdminEditTimesheets() {
     date: toYMD(new Date()),
     storeId: "",
     startInput: "",
+    startActual: "",
     breakStartInput: "",
     breakEndInput: "",
     endInput: "",
+    ensActual: "",
     adminNote: "",
   });
   useEffect(() => {
@@ -1693,6 +1695,8 @@ export default function AdminEditTimesheets() {
         breakStartInput: edit.breakStartInput || "",
         breakEndInput: edit.breakEndInput || "",
         endInput: edit.endInput || "",
+        startActual: edit.startInput,
+        endActual: edit.endInput,
       };
 
       const patch = {
@@ -1788,7 +1792,6 @@ export default function AdminEditTimesheets() {
         storeId: addForm.storeId,
         date: addForm.date,
         startInput: addForm.startInput,
-        startActual:addForm.startInput,
         breakStartInput: addForm.breakStartInput,
         breakEndInput: addForm.breakEndInput,
         endInput: addForm.endInput,
