@@ -1861,20 +1861,29 @@ export default function StaffToday() {
           </div>
 
           <div className="header-actions add-item-dash">
-            {!isKitchen && timesheet?.startActual && !timesheet?.endActual && (
+            {!isKitchen && timesheet?.startActual 
+            // && !timesheet?.endActual 
+            && (
               <div style={{ display: "flex", gap: "8px" }}>
                 <button className="view-log-btn" onClick={() => setShowDispatchModal(true)}>
                   🚚 Log
                 </button>
 
-                {isClosingShift && (
+                {/* {isClosingShift && (
                   <button
                     className={`stock-btn ${stockTakeDone ? "is-done" : ""}`}
                     onClick={handleOpenStockModal}
                   >
                     {stockTakeDone ? "📝 Edit Stock" : "📦 Stock"}
                   </button>
-                )}
+                )} */}
+
+                  <button
+                    className={`stock-btn ${stockTakeDone ? "is-done" : ""}`}
+                    onClick={handleOpenStockModal}
+                  >
+                    {stockTakeDone ? "📝 Edit Stock" : "📦 Stock"}
+                  </button>
               </div>
             )}
 
