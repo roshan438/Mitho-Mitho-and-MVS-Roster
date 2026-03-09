@@ -273,6 +273,8 @@ export default function Navbar() {
                 <Link to="/admin/approvals" className={`admin-link ${isActive("/admin/approvals")}`}>Approvals</Link>
                 <Link to="/admin/roster" className={`admin-link ${isActive("/admin/roster")}`}>Roster</Link>
                 <Link to="/admin/payroll" className={`admin-link ${isActive("/admin/payroll")}`}>Payroll</Link>
+                <Link to="/admin/payroll-history" className={`admin-link ${isActive("/admin/payroll-history")}`}>Payroll Hidtory</Link>
+                <Link to="/admin/admin-payroll" className={`admin-link ${isActive("/admin/admin-payroll")}`}>Pay Staff</Link>
                 <Link to="/admin/edit-timesheets" className={`admin-link ${isActive("/admin/edit-timesheets")}`}>Timesheets</Link>
                 <Link to="/admin/audit" className={`admin-link ${isActive("/admin/audit")}`}>Audit</Link>
                 <Link to="/admin/store-settings" className={`admin-link ${isActive("/admin/store-settings")}`}>Settings</Link>
