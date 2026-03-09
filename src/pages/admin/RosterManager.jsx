@@ -2511,7 +2511,15 @@ export default function RosterManager() {
 
 
 
-  function toggleDayOpen(ymd) {
+
+
+
+
+
+
+
+
+  function toggleAddOpen(ymd) {
     setOpenDays((prev) => {
       const isCurrentlyOpen = !!prev[ymd];
   
@@ -2534,11 +2542,8 @@ export default function RosterManager() {
           });
         }, 150);
       }
-  
-      return next;
     });
   }
-
 
 
   
@@ -2683,15 +2688,20 @@ export default function RosterManager() {
                   </span>
 
                   {!isLocked && (
-                    <span
-                      className="add-shift-btn small-add"
+                    <button
+                      // className="add-shift-btn small-add"
+                      className={`btn-primary ${isLocked ? "unlock" : "lock"}`}
+                      
+                      disabled={selectedStoreId === "all"}
                       onClick={(e) => {
                         e.stopPropagation();
+                        // toggleAddOpen(ymd);
                         addShift(ymd);
+
                       }}
                     >
                       +
-                    </span>
+                    </button>
                   )}
 
                   <span className={`day-chevron ${openDays[ymd] ? "open" : ""}`}>⌄</span>
