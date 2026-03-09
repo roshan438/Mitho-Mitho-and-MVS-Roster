@@ -1445,6 +1445,80 @@ function parseQrPayload(text) {
   return null;
 }
 
+// function parseStockBulkText(text) {
+//   if (!text?.trim()) return [];
+
+//   return text
+//     .split("\n")
+//     .map((line) => line.trim())
+//     .filter(Boolean)
+//     .map((line) => {
+//       const match = line.match(/^(.*?)(?:\s+(\d+(?:\.\d+)?))?$/);
+//       const name = match?.[1]?.trim() || "";
+//       const qty = match?.[2] ? Number(match[2]) : 1;
+
+//       return {
+//         name,
+//         qtyRequested: qty,
+//         status: "pending",
+//         qtySent: 0,
+//       };
+//     })
+//     .filter((item) => item.name);
+// }
+
+
+function parseStockBulkText(text) {
+  if (!text?.trim()) return [];
+
+  const lines = text.split("\n");
+  const parsed = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const parts = line.split(/\s+/);
+
+    let qty = 1;
+    let nameParts = [...parts];
+
+    const lastPart = parts[parts.length - 1];
+
+    // If last part is number → treat as qty
+    if (!isNaN(lastPart)) {
+      qty = Number(lastPart);
+      nameParts.pop();
+    }
+
+    const name = nameParts.join(" ");
+
+    if (!name) {
+      throw new Error(`Missing item name on line ${i + 1}`);
+    }
+
+    // 🚨 Reject if name contains any number
+    if (/\d/.test(name)) {
+      throw new Error(
+        `Item name cannot contain numbers (line ${i + 1})`
+      );
+    }
+
+    if (qty <= 0) {
+      throw new Error(`Invalid quantity on line ${i + 1}`);
+    }
+
+    parsed.push({
+      name: name.trim(),
+      qtyRequested: qty,
+      status: "pending",
+      qtySent: 0,
+    });
+  }
+
+  return parsed;
+}
+
 export default function StaffToday() {
   const { fbUser, profile } = useAuth();
   const { showToast } = useToast();
@@ -1489,6 +1563,8 @@ export default function StaffToday() {
   const [breakStartInput, setBreakStartInput] = useState("");
   const [breakEndInput, setBreakEndInput] = useState("");
   const [endInput, setEndInput] = useState("");
+
+  const [stockBulkText, setStockBulkText] = useState("");
 
   const isKitchen = profile?.department === "kitchen" || todayShift?.storeId === "kitchen";
 
@@ -1760,23 +1836,66 @@ export default function StaffToday() {
     loadToday();
   }
 
+  // const handleOpenStockModal = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const tomorrowSnap = await getDoc(
+  //       doc(db, "dailyStockTake", `${todayShift.storeId}_${tomorrow}`)
+  //     );
+
+  //     if (tomorrowSnap.exists()) {
+  //       const existingData = tomorrowSnap.data();
+  //       const mappedItems = (existingData.items || []).map((item) => ({
+  //         ...item,
+  //         id: Math.random(),
+  //       }));
+  //       setStockDraft(mappedItems);
+  //     } else {
+  //       setStockDraft([{ id: Math.random(), name: "", qtyRequested: "" }]);
+  //     }
+  //     setShowStockModal(true);
+  //   } catch (e) {
+  //     showToast("Error loading existing request", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // Stock Modal Helpers
+  
+  
+  
   const handleOpenStockModal = async () => {
     setLoading(true);
     try {
       const tomorrowSnap = await getDoc(
         doc(db, "dailyStockTake", `${todayShift.storeId}_${tomorrow}`)
       );
-
+  
       if (tomorrowSnap.exists()) {
         const existingData = tomorrowSnap.data();
-        const mappedItems = (existingData.items || []).map((item) => ({
-          ...item,
-          id: Math.random(),
-        }));
-        setStockDraft(mappedItems);
+        const existingItems = existingData.items || [];
+  
+        setStockDraft(
+          existingItems.map((item) => ({
+            ...item,
+            id: Math.random(),
+          }))
+        );
+  
+        const bulkText = existingItems
+          .map((item) => {
+            const qty = Number(item.qtyRequested || 1);
+            return qty === 1 ? `${item.name}` : `${item.name} ${qty}`;
+          })
+          .join("\n");
+  
+        setStockBulkText(bulkText);
       } else {
         setStockDraft([{ id: Math.random(), name: "", qtyRequested: "" }]);
+        setStockBulkText("");
       }
+  
       setShowStockModal(true);
     } catch (e) {
       showToast("Error loading existing request", "error");
@@ -1784,8 +1903,8 @@ export default function StaffToday() {
       setLoading(false);
     }
   };
-
-  // Stock Modal Helpers
+  
+  
   const addStockRow = () =>
     setStockDraft([...stockDraft, { id: Math.random(), name: "", qtyRequested: "" }]);
 
@@ -1795,37 +1914,129 @@ export default function StaffToday() {
   const removeStockRow = (id) =>
     setStockDraft((prev) => prev.filter((it) => it.id !== id));
 
-  async function handleStockSubmit() {
-    const finalItems = stockDraft
-      .filter((it) => it.name.trim() && it.qtyRequested)
-      .map(({ id, ...rest }) => ({
-        ...rest,
-        status: "pending",
-        qtySent: 0,
-      }));
+  // async function handleStockSubmit() {
+  //   const finalItems = stockDraft
+  //     .filter((it) => it.name.trim() && it.qtyRequested)
+  //     .map(({ id, ...rest }) => ({
+  //       ...rest,
+  //       status: "pending",
+  //       qtySent: 0,
+  //     }));
 
-    setSubmittingStock(true);
+  //   setSubmittingStock(true);
 
-    await setDoc(
-      doc(db, "dailyStockTake", `${todayShift.storeId}_${tomorrow}`),
-      {
-        storeId: todayShift.storeId,
-        storeLabel: storeLabel(todayShift.storeId),
-        date: tomorrow,
-        lastUpdatedByName: profile?.firstName,
-        items: finalItems,
-        adminProcessed: false,
-      },
-      { merge: true }
-    );
+  //   await setDoc(
+  //     doc(db, "dailyStockTake", `${todayShift.storeId}_${tomorrow}`),
+  //     {
+  //       storeId: todayShift.storeId,
+  //       storeLabel: storeLabel(todayShift.storeId),
+  //       date: tomorrow,
+  //       lastUpdatedByName: profile?.firstName,
+  //       items: finalItems,
+  //       adminProcessed: false,
+  //     },
+  //     { merge: true }
+  //   );
 
-    setStockTakeDone(true);
-    setShowStockModal(false);
-    setSubmittingStock(false);
-    showToast("Request Sent", "success");
-  }
+  //   setStockTakeDone(true);
+  //   setShowStockModal(false);
+  //   setSubmittingStock(false);
+  //   showToast("Request Sent", "success");
+  // }
 
   // Kitchen Dispatch Helpers
+  
+  
+  
+  
+  // async function handleStockSubmit() {
+  //   const finalItems = parseStockBulkText(stockBulkText);
+  
+  //   if (finalItems.length === 0) {
+  //     showToast("Please enter at least one item", "error");
+  //     return;
+  //   }
+  
+  //   setSubmittingStock(true);
+  
+  //   try {
+  //     await setDoc(
+  //       doc(db, "dailyStockTake", `${todayShift.storeId}_${tomorrow}`),
+  //       {
+  //         storeId: todayShift.storeId,
+  //         storeLabel: storeLabel(todayShift.storeId),
+  //         date: tomorrow,
+  //         lastUpdatedByName: profile?.firstName,
+  //         items: finalItems,
+  //         adminProcessed: false,
+  //       },
+  //       { merge: true }
+  //     );
+  
+  //     setStockDraft(
+  //       finalItems.map((item) => ({
+  //         ...item,
+  //         id: Math.random(),
+  //       }))
+  //     );
+  //     setStockTakeDone(true);
+  //     setShowStockModal(false);
+  //     showToast("Request Sent", "success");
+  //   } catch (e) {
+  //     showToast("Failed to save stock request", "error");
+  //   } finally {
+  //     setSubmittingStock(false);
+  //   }
+  // }
+
+  
+
+  async function handleStockSubmit() {
+    try {
+      const finalItems = parseStockBulkText(stockBulkText);
+  
+      if (finalItems.length === 0) {
+        showToast("Please enter at least one item", "error");
+        return;
+      }
+  
+      setSubmittingStock(true);
+  
+      await setDoc(
+        doc(db, "dailyStockTake", `${todayShift.storeId}_${tomorrow}`),
+        {
+          storeId: todayShift.storeId,
+          storeLabel: storeLabel(todayShift.storeId),
+          date: tomorrow,
+          lastUpdatedByName: profile?.firstName,
+          items: finalItems,
+          adminProcessed: false,
+        },
+        { merge: true }
+      );
+  
+      setStockDraft(
+        finalItems.map((item) => ({
+          ...item,
+          id: Math.random(),
+        }))
+      );
+  
+      setStockTakeDone(true);
+      setShowStockModal(false);
+      showToast("Request Sent", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to save stock", "error");
+    } finally {
+      setSubmittingStock(false);
+    }
+  }
+  
+  
+  
+  
+  
+  
   const handleKitchenQtyChange = (docId, idx, val) => {
     setAllStoreRequests((prev) =>
       prev.map((req) => {
@@ -2159,7 +2370,7 @@ export default function StaffToday() {
       )}
 
       {/* STOCK MODAL */}
-      {showStockModal && (
+      {/* {showStockModal && (
         <div className="modal-overlay">
           <div className="stock-modal">
             <div className="modal-header add-item-dash">
@@ -2215,7 +2426,56 @@ export default function StaffToday() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+
+
+
+
+      {/* STOCK MODAL */}
+{showStockModal && (
+  <div className="modal-overlay">
+    <div className="stock-modal">
+      <div className="modal-header add-item-dash">
+        <h3>Stock for {tomorrow}</h3>
+        {stockTakeDone && <p className="small-note-sub">Editing existing request</p>}
+      </div>
+
+      <div className="stock-list-container">
+        <textarea
+          className="stock-bulk-textarea"
+          placeholder={`Enter one item per line
+
+Examples:
+Milk 2
+Cheese 5
+Onion
+Tomato 10`}
+          value={stockBulkText}
+          onChange={(e) => setStockBulkText(e.target.value)}
+          rows={10}
+        />
+      </div>
+
+      <div className="modal-actions">
+        <button
+          onClick={handleStockSubmit}
+          disabled={submittingStock}
+          className="action-button brand-filled"
+        >
+          {stockTakeDone ? "Update Request" : "Send Request"}
+        </button>
+        <button
+          onClick={() => setShowStockModal(false)}
+          className="action-button secondary"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
       <QRScanner
         open={scanOpen}

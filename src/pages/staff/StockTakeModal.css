@@ -1,0 +1,70 @@
+.stock-textarea {
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border, #334155);
+    background: var(--bg, #0f172a);
+    color: #fff;
+    font: inherit;
+    line-height: 1.45;
+    box-sizing: border-box;
+  }
+  
+  .stock-text-help {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  
+  .stock-preview-box {
+    margin-top: 14px;
+    border: 1px solid var(--border, #334155);
+    border-radius: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .stock-preview-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  
+  .stock-preview-empty {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  
+  .stock-preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .stock-preview-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .stock-preview-name {
+    color: #fff;
+    word-break: break-word;
+  }
+  
+  .stock-preview-qty {
+    color: #f6a600;
+    font-weight: 700;
+    white-space: nowrap;
+  }
