@@ -2196,7 +2196,7 @@ export default function StaffToday() {
             ) : !timesheet?.endActual ? (
               <div className="flow">
                 {/* Kitchen Specific UI */}
-                {isKitchen && (
+                {/* {isKitchen && (
                   <div className="kitchen-dispatch-area">
                     <h3 className="section-label">Pending Store Orders</h3>
                     {allStoreRequests.length === 0 ? (
@@ -2249,7 +2249,91 @@ export default function StaffToday() {
                       ))
                     )}
                   </div>
-                )}
+                )} */}
+
+{isKitchen && (
+  <div className="kitchen-dispatch-area">
+    <h3 className="section-label">Today's Orders</h3>
+
+    {allStoreRequests.length === 0 ? (
+      <p className="small-note">No orders today.</p>
+    ) : (
+      allStoreRequests.map((req) => {
+        const isOpen = collapsedGroups[req.id];
+
+        const totalItems = req.items.length;
+        const fulfilled = req.items.filter(
+          it => Number(it.qtySent) >= Number(it.qtyRequested)
+        ).length;
+
+        const percent = Math.round((fulfilled / totalItems) * 100);
+
+        return (
+          <div key={req.id} className="dispatch-card enhanced">
+            
+            <div
+              className="dispatch-header clickable enhanced-header"
+              onClick={() =>
+                setCollapsedGroups(prev => ({
+                  [req.id]: !prev[req.id]
+                }))
+              }
+            >
+              <div className="store-block">
+                <h4>{storeLabel(req.storeId)}</h4>
+                <span className={`status-pill ${req.adminProcessed ? "done" : "pending"}`}>
+                  {req.adminProcessed ? "Completed" : "Pending"}
+                </span>
+              </div>
+
+              <div className="progress-mini">
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <span>{percent}%</span>
+              </div>
+            </div>
+
+            {isOpen && (
+              <div className="dispatch-content enhanced-content">
+                {req.items.map((it, idx) => (
+                  <div key={idx} className="dispatch-row enhanced-row">
+                    <div className="item-left">
+                      <div className="item-name">{it.name}</div>
+                      <div className="req-text">Req: {it.qtyRequested}</div>
+                    </div>
+
+                    <input
+                      type="number"
+                      className="qty-send-input large"
+                      value={it.qtySent || ""}
+                      onChange={(e) =>
+                        handleKitchenQtyChange(req.id, idx, e.target.value)
+                      }
+                    />
+                  </div>
+                ))}
+
+                <button
+                  className="dispatch-submit-btn sticky"
+                  onClick={() => {
+                    handleKitchenSubmit(req);
+                    setCollapsedGroups({});
+                  }}
+                >
+                  Save Dispatch
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })
+    )}
+  </div>
+)}
 
                 {/* Break Management */}
                 {!timesheet.breakStartActual ? (
