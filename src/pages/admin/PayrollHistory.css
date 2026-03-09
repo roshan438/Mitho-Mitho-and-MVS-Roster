@@ -179,242 +179,318 @@
 
 
 
-  /* Container & Base Styles */
+
+
+/* Container & Base Styles */
 .payroll-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #0f172a;
+  color: #f8fafc;
+  min-height: 100vh;
+}
+
+.payroll-container h2 {
+  margin: 0 0 16px;
+  color: #38bdf8;
+}
+
+.close-btn {
+  background: var(--danger);
+  border: 1px solid #334155;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #f8fafc;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.user-info-bar {
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  margin-bottom: 20px;
+  color: #38bdf8;
+}
+
+/* New wrapper list */
+.payroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each day card */
+.row-wrapper {
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #1e293b;
+  overflow: hidden;
+}
+
+/* Collapsed Header */
+.collapse-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  padding: 14px 16px;
+  border-bottom: 1px solid #334155;
+  background: #1e293b;
+}
+
+.collapse-header span:first-child,
+.collapse-header .col-date {
+  font-family: monospace;
+  font-size: 18px;
+  color: #38bdf8;
+}
+
+.collapse-header span:last-child,
+.collapse-header .col-amount {
+  font-weight: 700;
+  font-size: 18px;
+  color: #10b981;
+}
+
+/* Expanded content */
+.row-body {
+  display: grid;
+  grid-template-columns: 140px 100px 100px 1fr;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+  background: #1e293b;
+}
+
+/* Inputs */
+.row-body input,
+.row-body select {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #475569;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Note field full width */
+.row-body input[placeholder="Note"] {
+  grid-column: span 2;
+}
+
+/* Actions */
+.row-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-save {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-delete {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 1;
+}
+
+/* Weekly footer */
+.weekly-total {
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #1e293b;
+  padding: 16px;
+  color: #f8fafc;
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.weekly-total strong {
+  color: #38bdf8;
+}
+
+/* Keep old classes harmless if used elsewhere */
+.payroll-grid {
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #1e293b;
+  overflow: hidden;
+}
+
+.grid-header,
+.grid-row,
+.grid-footer {
+  display: grid;
+  grid-template-columns: 120px 140px 80px 80px 100px 120px 1fr 140px;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+}
+
+.grid-header {
+  background: #0f172a;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.grid-row {
+  border-top: 1px solid #334155;
+}
+
+.col-date {
+  font-family: monospace;
+  color: #38bdf8;
+  font-size: 14px;
+}
+
+.col-amount,
+.total-amount {
+  color: #10b981;
+  font-weight: 700;
+}
+
+/* --- MOBILE MAGIC --- */
+@media (max-width: 950px) {
+  .row-body {
+    grid-template-columns: 1fr;
     padding: 16px;
-    max-width: 1200px;
-    margin: 0 auto;
-    background-color: #0f172a; /* Deep Navy */
-    color: #f8fafc;
-    min-height: 100vh;
   }
-  
-  .close-btn {
-    background: var(--danger);
-    border: 1px solid #334155;
-    padding: 8px 16px;
-    border-radius: 8px;
-    color: #f8fafc;
-    cursor: pointer;
-    margin-bottom: 15px;
+
+  .row-body input,
+  .row-body select {
+    width: 100%;
+    font-size: 16px;
   }
-  
-  .user-info-bar {
-    background: #1e293b;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    margin-bottom: 20px;
-    color: #38bdf8;
+
+  .row-body input[placeholder="Note"] {
+    grid-column: auto;
   }
-  
-  /* Grid Wrapper */
-  .payroll-grid {
-    border: 1px solid #334155;
-    border-radius: 12px;
-    background: #1e293b;
-    overflow: hidden;
+
+  .row-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
   }
-  
-  /* Desktop Layout (8 Columns) */
-  .grid-header, .grid-row, .grid-footer {
-    display: grid;
-    grid-template-columns: 120px 140px 80px 80px 100px 120px 1fr 140px;
-    gap: 12px;
+
+  .btn-save,
+  .btn-delete {
+    width: 100%;
     padding: 12px;
-    align-items: center;
+    font-size: 16px;
   }
-  
+
+  .weekly-total {
+    padding: 20px;
+  }
+
+  /* old grid fallback */
   .grid-header {
-    background: #0f172a;
-    font-size: 11px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
-  
-  .grid-row { border-top: 1px solid #334155; }
-  .col-date { font-family: monospace; color: #38bdf8; font-size: 14px; }
-  .col-amount, .total-amount { color: #10b981; font-weight: 700; }
-  
-  /* Dark Form Elements */
-  .payroll-grid input, .payroll-grid select {
-    width: 100%;
-    background: #0f172a;
-    border: 1px solid #475569;
-    color: white;
-    padding: 8px;
-    border-radius: 6px;
-  }
-  
-  .btn-save { background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-  
-  /* .btn-delete { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 12px; border-radius: 6px; cursor: pointer; } */
-  
-  /* --- MOBILE MAGIC --- */
-  @media (max-width: 950px) {
-    .grid-header { display: none; }
-  
-    /* Change grid to card stack */
-    .grid-row {
-      display: block; 
-      padding: 16px;
-      border-bottom: 8px solid #0f172a;
-    }
-  
-    /* Hide Note, Source, and Rate on Mobile */
-    .hide-mobile {
-      display: none !important;
-    }
-  
-    .grid-row > div {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-  
-    /* Label styling for mobile cards */
-    .grid-row > div::before {
-      content: attr(data-label);
-      color: #94a3b8;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-  
-    /* The Date acts as a card header */
-    .grid-row .col-date {
-      display: block;
-      font-size: 18px;
-      border-bottom: 1px solid #334155;
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-    }
-    .grid-row .col-date::before { display: none; }
-
-    .payroll-grid input, .payroll-grid select {
-        width: 80%;
-      }
-  
-    /* Save/Delete buttons side-by-side */
-    .col-actions {
-        display: flex !important; /* Force side-by-side */
-        gap: 10px;
-        border: none !important;
-        margin-top: 15px;
-        width: 100%;
-      }
-
-      .btn-save {
-        flex: 2; /* Make Save button wider */
-        padding: 12px; /* Bigger touch target for mobile */
-        font-size: 16px;
-      }
-    
-      .btn-delete {
-        flex: 1; /* Make Delete button smaller but still aligned */
-        padding: 12px;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-  
-    /* Footer Adjustment */
-    .grid-footer {
-      display: block;
-      background: #0f172a;
-      padding: 20px;
-    }
-
-    
-    .footer-label { font-size: 18px; color: #38bdf8; margin-bottom: 5px; }
-    .footer-separator, .footer-spacer { display: none; }
+    display: none;
   }
 
-  /* Accordion header (collapsed) */
-.day-collapse-header {
-    width: 100%;
+  .grid-row {
+    display: block;
+    padding: 16px;
+    border-bottom: 8px solid #0f172a;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .grid-row > div {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-  
-    /* Keep your grid-row look */
-    gap: 12px;
+    margin-bottom: 12px;
   }
-  
-  /* Make header date + amount look clean */
-  .day-collapse-header .col-date {
-    font-family: monospace;
-    color: #38bdf8;
-    font-size: 18px;
-  }
-  
-  .day-collapse-header .col-amount {
-    color: #10b981;
-    font-weight: 800;
-    font-size: 18px;
-  }
-  
-  /* Expanded body spacing */
-  .day-collapse-body {
-    margin-top: 14px;
-    display: grid;
-    gap: 12px;
-  }
-  
-  /* On desktop, keep expanded body aligned nicely */
-  @media (min-width: 950px) {
-    .day-collapse-body {
-      grid-template-columns: 140px 140px 140px 140px 1fr;
-      align-items: center;
-    }
-  
-    /* .col-actions {
-      grid-column: 1 / -1;
-    } */
-    .collapse-header{
-        grid-column: 1 / -1;
-    }
-    .colap-close{
-        /* display: none; */
-    }
-    .btn-delete{
-        margin-left: 4px;
-    }
-    .grid-row {
-         /* background-color: lightblue; */
-    }
 
-    .exception-grid{
-        /* background-color:#334155 !important; */
-    }
+  .grid-row > div::before {
+    content: attr(data-label);
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .grid-row .col-date {
+    display: block;
+    font-size: 18px;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+  }
+
+  .grid-row .col-date::before {
+    display: none;
+  }
+
+  .grid-footer {
+    display: block;
+    background: #0f172a;
+    padding: 20px;
+  }
+
+  .footer-label {
+    font-size: 18px;
+    color: #38bdf8;
+    margin-bottom: 5px;
+  }
+
+  .footer-separator,
+  .footer-spacer {
+    display: none;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .payroll-container {
+    padding: 12px;
+  }
+
+  .user-info-bar,
+  .weekly-total,
+  .row-wrapper {
+    border-radius: 10px;
   }
 
   .collapse-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    width: 100%;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #334155;
-  }
-  
-  .collapse-header .col-date {
-    font-family: monospace;
-    font-size: 18px;
-    color: #38bdf8;
-  }
-  
-  .collapse-header .col-amount {
-    font-weight: 700;
-    font-size: 18px;
+    padding: 12px 14px;
   }
 
+  .collapse-header span:first-child,
+  .collapse-header .col-date {
+    font-size: 16px;
+  }
+
+  .collapse-header span:last-child,
+  .collapse-header .col-amount {
+    font-size: 16px;
+  }
+
+  .row-body {
+    padding: 12px;
+    gap: 10px;
+  }
+}
