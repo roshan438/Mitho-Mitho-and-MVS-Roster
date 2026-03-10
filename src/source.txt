@@ -1,17 +1,1196 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebase";
+
+const AuthCtx = createContext(null);
+
+function splitDisplayName(displayName = "") {
+  const parts = displayName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "", lastName: "" };
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  };
+}
+
+export function AuthProvider({ children }) {
+  const [fbUser, setFbUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      setLoading(true);
+      setFbUser(u);
+      setProfile(null);
+
+      if (!u) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const ref = doc(db, "users", u.uid);
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          const name = splitDisplayName(u.displayName || "");
+
+          await setDoc(
+            ref,
+            {
+              uid: u.uid,
+              email: u.email || "",
+              firstName: name.firstName,
+              lastName: name.lastName,
+              dob: "",
+              phone: "",
+              addressLine1: "",
+              suburb: "",
+              state: "NSW",
+              postcode: "",
+              emergencyName: "",
+              emergencyPhone: "",
+              emergencyRelationship: "",
+              taxInProgress: true,
+              role: "staff",
+              status: "pending",
+              profileComplete: false,
+              hourlyRate: null,
+              provider: u.providerData?.[0]?.providerId || "unknown",
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+
+          const newSnap = await getDoc(ref);
+          setProfile(newSnap.data());
+        } else {
+          setProfile(snap.data());
+        }
+      } catch (err) {
+        console.error("AuthProvider profile load error:", err);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
+  const value = useMemo(() => ({ fbUser, profile, loading }), [fbUser, profile, loading]);
+
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+}
+
+export function useAuth() {
+  return useContext(AuthCtx);
+}
+
+
+
+
+
+
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthUser } from "./useAuthUser";
+
+export default function AuthGate({ children }) {
+  const { fbUser, loading } = useAuthUser();
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="card">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!fbUser) return <Navigate to="/login" replace />;
+
+  return children || <Outlet />;
+}
+
+
+
+
+
+
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthUser } from "./useAuthUser";
+
+export default function ApprovalGate({ children }) {
+  const { status, loading, role } = useAuthUser();
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="card">Verifying approval status...</div>
+      </div>
+    );
+  }
+
+  if (role === "admin") return children || <Outlet />;
+
+  if (status !== "approved") return <Navigate to="/pending" replace />;
+
+  return children || <Outlet />;
+}
+
+
+
+
+import { Navigate } from "react-router-dom";
+import { useAuthUser } from "./useAuthUser";
+
+export default function RoleGate({ allow = [], children }) {
+  const { role, loading } = useAuthUser();
+  if (loading) return <div className="container"><div className="card">Loading...</div></div>;
+
+  if (!role) return <Navigate to="/login" replace />;
+  if (!allow.includes(role)) return <Navigate to="/" replace />;
+
+  return children;
+}
+
+
+
+
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthUser } from "./useAuthUser";
+
+export default function ProfileGate({ children }) {
+  const { fbUser, role, loading, profileComplete } = useAuthUser();
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="card">Checking profile...</div>
+      </div>
+    );
+  }
+
+  if (!fbUser) return <Navigate to="/login" replace />;
+
+  if (role === "admin") return children || <Outlet />;
+
+  if (!profileComplete) return <Navigate to="/complete-profile" replace />;
+
+  return children || <Outlet />;
+}
+
+
+
+
+
+import { useAuth } from "./AuthProvider";
+
+export function useAuthUser() {
+  const { fbUser, profile, loading } = useAuth();
+
+  const role = profile?.role || null;
+  const status = profile?.status || null;
+
+  const profileComplete =
+    !!profile?.firstName?.trim() &&
+    !!profile?.lastName?.trim() &&
+    !!profile?.dob &&
+    !!profile?.phone?.trim() &&
+    !!profile?.addressLine1?.trim() &&
+    !!profile?.suburb?.trim() &&
+    !!profile?.postcode?.trim() &&
+    !!profile?.emergencyName?.trim() &&
+    !!profile?.emergencyPhone?.trim() &&
+    !!profile?.emergencyRelationship?.trim();
+
+  return {
+    fbUser,
+    profile,
+    role,
+    status,
+    loading,
+    profileComplete,
+  };
+}
+
+
+
+
+
+
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase/firebase";
+import { googleProvider } from "../../firebase/authProviders";
+import { useToast } from "../../context/ToastContext";
+import getFirebaseErrorMessage from "../../utils/getFirebaseErrorMessage";
+import "./Login.css";
+
+export default function Login() {
+  const nav = useNavigate();
+  const { showToast } = useToast();
+
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function routeUser(uid) {
+    const snap = await getDoc(doc(db, "users", uid));
+    const profile = snap.exists() ? snap.data() : null;
+
+    if (!profile?.profileComplete) {
+      showToast("Please complete your profile to continue.", "info", {
+        title: "Profile incomplete",
+      });
+      nav("/complete-profile");
+      return;
+    }
+
+    if (profile?.role === "admin") {
+      showToast("Welcome back, admin.", "success", {
+        title: "Signed in",
+      });
+      nav("/admin/dashboard");
+      return;
+    }
+
+    if (profile?.status === "approved") {
+      showToast("Welcome back.", "success", {
+        title: "Signed in",
+      });
+      nav("/staff/today");
+      return;
+    }
+
+    if (profile?.status === "rejected") {
+      showToast("Your account is not approved right now.", "warning", {
+        title: "Access limited",
+      });
+      nav("/pending");
+      return;
+    }
+
+    showToast("Your account is waiting for approval.", "info", {
+      title: "Pending approval",
+    });
+    nav("/pending");
+  }
+
+  async function onEmailLogin(e) {
+    e.preventDefault();
+
+    if (!email.trim() || !pass.trim()) {
+      return showToast("Please enter both email and password.", "warning", {
+        title: "Missing details",
+      });
+    }
+
+    setLoading(true);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
+      await routeUser(cred.user.uid);
+    } catch (err) {
+      showToast(getFirebaseErrorMessage(err), "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onGoogle() {
+    setLoading(true);
+    try {
+      const cred = await signInWithPopup(auth, googleProvider);
+      showToast("Google sign-in successful.", "success", {
+        title: "Signed in",
+      });
+      await routeUser(cred.user.uid);
+    } catch (err) {
+      showToast(getFirebaseErrorMessage(err), "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="auth-page-wrapper">
+      <div className="auth-container">
+        <header className="auth-header">
+          <div className="brand-logo"></div>
+          <h1 className="auth-title">Welcome back</h1>
+          <p className="auth-subtitle">Sign in to continue to your dashboard.</p>
+        </header>
+
+        <main className="auth-card">
+          <button
+            className="btn-google"
+            onClick={onGoogle}
+            disabled={loading}
+            type="button"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <div className="auth-divider">
+            <span>or sign in with email</span>
+          </div>
+
+          <form className="auth-form" onSubmit={onEmailLogin}>
+            <div className="input-group login">
+              <label>Email Address</label>
+              <input
+                type="email"
+                className="auth-input"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                autoComplete="email"
+              />
+            </div>
+
+            <div className="input-group login">
+              <div
+                className="label-row"
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              >
+                <label>Password</label>
+                <button
+                  type="button"
+                  className="text-link small"
+                  onClick={() => setShowPass(!showPass)}
+                  style={{ background: "none", border: "none", cursor: "pointer" }}
+                >
+                  {showPass ? "Hide" : "Show"}
+                </button>
+              </div>
+
+              <input
+                type={showPass ? "text" : "password"}
+                className="auth-input"
+                placeholder="••••••••"
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                disabled={loading}
+                autoComplete="current-password"
+              />
+            </div>
+
+            <button className="btn-brand auth-submit" type="submit" disabled={loading}>
+              {loading ? <div className="spinner-small"></div> : "Sign In"}
+            </button>
+
+            <Link to="/forgot" className="text-link small">
+              Forgot password?
+            </Link>
+          </form>
+        </main>
+
+        <footer className="auth-footer">
+          <p>
+            New staff member? <Link to="/signup" className="text-link">Create an account</Link>
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+import { useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
+import {
+  doc,
+  serverTimestamp,
+  setDoc,
+  getDoc,
+} from "firebase/firestore";
+import { auth, db } from "../../firebase/firebase";
+import { googleProvider } from "../../firebase/authProviders";
+import { useToast } from "../../context/ToastContext";
+import "./Signup.css";
+
+export default function Signup() {
+  const nav = useNavigate();
+  const { showToast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  // Auth States
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
+
+  // Profile States
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dob, setDob] = useState("");
+  const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [suburb, setSuburb] = useState("");
+  const [state, setState] = useState("NSW");
+  const [postcode, setPostcode] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [emergencyRelationship, setEmergencyRelationship] = useState("");
+  const [taxInProgress, setTaxInProgress] = useState(true);
+
+  const strength = useMemo(() => {
+    if (!pass) return { score: 0, label: "", color: "#eee" };
+
+    let score = 0;
+    if (pass.length > 6) score++;
+    if (pass.length > 10) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+    const results = [
+      { label: "Weak", color: "#ff4d4d" },
+      { label: "Fair", color: "#ffa500" },
+      { label: "Good", color: "#2db7f5" },
+      { label: "Strong", color: "#52c41a" },
+    ];
+
+    return { score, ...(results[score - 1] || results[0]) };
+  }, [pass]);
+
+  function validateProfileFields() {
+    if (!firstName.trim()) return "First name is required";
+    if (!lastName.trim()) return "Last name is required";
+    if (!dob) return "Date of birth is required";
+    if (!phone.trim()) return "Phone is required";
+    if (!addressLine1.trim()) return "Address is required";
+    if (!suburb.trim()) return "Suburb is required";
+    if (!postcode.trim()) return "Postcode is required";
+    if (!emergencyName.trim()) return "Emergency contact name is required";
+    if (!emergencyPhone.trim()) return "Emergency contact phone is required";
+    if (!emergencyRelationship.trim()) return "Emergency relationship is required";
+    return null;
+  }
+
+  async function upsertProfile(uid, authEmail) {
+    const ref = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+
+    const payload = {
+      uid,
+      email: authEmail || email || "",
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      dob,
+      phone: phone.trim(),
+      addressLine1: addressLine1.trim(),
+      suburb: suburb.trim(),
+      state,
+      postcode: postcode.trim(),
+      emergencyName: emergencyName.trim(),
+      emergencyPhone: emergencyPhone.trim(),
+      emergencyRelationship: emergencyRelationship.trim(),
+      taxInProgress,
+      role: "staff",
+      status: "pending",
+      profileComplete: true,
+      hourlyRate: null,
+      updatedAt: serverTimestamp(),
+    };
+
+    if (!snap.exists()) {
+      payload.createdAt = serverTimestamp();
+    }
+
+    await setDoc(ref, payload, { merge: true });
+  }
+
+  async function onEmailSignup(e) {
+    e.preventDefault();
+
+    const validationError = validateProfileFields();
+    if (validationError) return showToast(validationError, "error");
+
+    if (pass !== confirmPass) {
+      return showToast("Passwords do not match", "error");
+    }
+
+    if (pass.length < 6) {
+      return showToast("Password should be at least 6 characters", "error");
+    }
+
+    setLoading(true);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      await updateProfile(cred.user, {
+        displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+      });
+
+      await upsertProfile(cred.user.uid, cred.user.email);
+
+      showToast("Account created. Waiting for admin approval.", "success");
+      nav("/pending");
+    } catch (err) {
+      showToast(err?.message || "Signup failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onGoogleSignup() {
+    setLoading(true);
+    try {
+      const cred = await signInWithPopup(auth, googleProvider);
+
+      const ref = doc(db, "users", cred.user.uid);
+      const snap = await getDoc(ref);
+      const profile = snap.exists() ? snap.data() : null;
+
+      showToast("Google sign-in successful", "success");
+
+      if (!profile?.profileComplete) {
+        nav("/complete-profile");
+        return;
+      }
+
+      if (profile?.role === "admin" || profile?.status === "approved") {
+        nav("/");
+        return;
+      }
+
+      nav("/pending");
+    } catch (err) {
+      showToast(err?.message || "Google signup failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="auth-page-wrapper signup-wrapper">
+      <div className="auth-container signup-container">
+        <header className="auth-header">
+          <h1 className="auth-title">Staff Onboarding</h1>
+          <p className="auth-subtitle">Create your account to join the team</p>
+        </header>
+
+        <main className="auth-card">
+          <button
+            type="button"
+            className="btn-google"
+            onClick={onGoogleSignup}
+            disabled={loading}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            Continue with Google
+          </button>
+
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#6b7280",
+              textAlign: "center",
+              marginTop: "10px",
+              marginBottom: "6px",
+            }}
+          >
+            Google signup will take you to complete your profile next
+          </div>
+
+          <div className="auth-divider">
+            <span>or sign up with email</span>
+          </div>
+
+          <form onSubmit={onEmailSignup} className="auth-form">
+            <h3 className="form-section-title">Personal Information</h3>
+            <div className="form-grid">
+              <Field label="First Name">
+                <input
+                  className="auth-input"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field label="Last Name">
+                <input
+                  className="auth-input"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field label="D.O.B">
+                <input
+                  className="auth-input"
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field label="Phone">
+                <input
+                  className="auth-input"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </Field>
+            </div>
+
+            <h3 className="form-section-title">Residential Address</h3>
+            <Field label="Address Line 1">
+              <input
+                className="auth-input"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                required
+              />
+            </Field>
+
+            <div className="form-grid">
+              <Field label="Suburb">
+                <input
+                  className="auth-input"
+                  value={suburb}
+                  onChange={(e) => setSuburb(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field label="State">
+                <select
+                  className="auth-input"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                >
+                  <option value="NSW">NSW</option>
+                  <option value="VIC">VIC</option>
+                  <option value="QLD">QLD</option>
+                  <option value="WA">WA</option>
+                  <option value="SA">SA</option>
+                  <option value="TAS">TAS</option>
+                </select>
+              </Field>
+
+              <Field label="Postcode">
+                <input
+                  className="auth-input"
+                  value={postcode}
+                  onChange={(e) => setPostcode(e.target.value)}
+                  required
+                />
+              </Field>
+            </div>
+
+            <h3 className="form-section-title">Emergency Contact</h3>
+            <Field label="Full Name">
+              <input
+                className="auth-input"
+                value={emergencyName}
+                onChange={(e) => setEmergencyName(e.target.value)}
+                required
+              />
+            </Field>
+
+            <div className="form-grid">
+              <Field label="Phone">
+                <input
+                  className="auth-input"
+                  value={emergencyPhone}
+                  onChange={(e) => setEmergencyPhone(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <Field label="Relationship">
+                <input
+                  className="auth-input"
+                  value={emergencyRelationship}
+                  onChange={(e) => setEmergencyRelationship(e.target.value)}
+                  required
+                />
+              </Field>
+            </div>
+
+            <div className="tax-toggle">
+              <input
+                type="checkbox"
+                id="tax"
+                checked={taxInProgress}
+                onChange={(e) => setTaxInProgress(e.target.checked)}
+              />
+              <label htmlFor="tax">TFN / Tax paperwork in progress</label>
+            </div>
+
+            <h3 className="form-section-title">Account Credentials</h3>
+            <div className="form-grid">
+              <Field label="Email">
+                <input
+                  className="auth-input"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Field>
+
+              <div className="input-group">
+                <div
+                  className="label-row"
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <label>Password</label>
+                  <button
+                    type="button"
+                    className="text-link small"
+                    onClick={() => setShowPass(!showPass)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {showPass ? "Hide" : "Show"}
+                  </button>
+                </div>
+
+                <input
+                  className="auth-input"
+                  type={showPass ? "text" : "password"}
+                  value={pass}
+                  onChange={(e) => setPass(e.target.value)}
+                  required
+                />
+
+                {pass && (
+                  <div className="strength-meter" style={{ marginTop: "8px" }}>
+                    <div
+                      style={{
+                        height: "4px",
+                        width: "100%",
+                        backgroundColor: "#eee",
+                        borderRadius: "2px",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${(strength.score / 4) * 100}%`,
+                          backgroundColor: strength.color,
+                          transition: "width 0.3s ease",
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: "11px", color: strength.color }}>
+                      {strength.label}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <Field label="Confirm Password">
+                <input
+                  className="auth-input"
+                  type={showPass ? "text" : "password"}
+                  value={confirmPass}
+                  onChange={(e) => setConfirmPass(e.target.value)}
+                  required
+                />
+                {confirmPass && pass !== confirmPass && (
+                  <span style={{ fontSize: "11px", color: "#ff4d4d" }}>
+                    Passwords do not match
+                  </span>
+                )}
+              </Field>
+            </div>
+
+            <button
+              className="btn-brand signup-submit"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? <div className="spinner-small"></div> : "Create Account"}
+            </button>
+          </form>
+        </main>
+
+        <footer className="auth-footer">
+          <p>
+            Already joined?{" "}
+            <Link to="/login" className="text-link">
+              Sign In
+            </Link>
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div className="input-group">
+      <label>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+
+
+
+}
+
+
+
+import { Navigate } from "react-router-dom";
+import { useAuthUser } from "../auth/useAuthUser";
+
+export default function HomeRedirect() {
+  const { fbUser, role, status, loading, profileComplete } = useAuthUser();
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="loading-screen">
+          <div className="spinner"></div>
+          <p>Syncing profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!fbUser) return <Navigate to="/login" replace />;
+
+  if (!role) {
+    return <div className="container">Finalizing session...</div>;
+  }
+
+  if (role === "admin") {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  if (!profileComplete) {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
+  if (status === "approved") {
+    return <Navigate to="/staff/today" replace />;
+  }
+
+  return <Navigate to="/pending" replace />;
+}
+
+
+
+
+
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import AuthGate from "../auth/AuthGate.jsx";
+import RoleGate from "../auth/RoleGate.jsx";
+import ApprovalGate from "../auth/ApprovalGate.jsx";
+import ProfileGate from "../auth/ProfileGate.jsx";
+import HomeRedirect from "./HomeRedirect.jsx";
+
+import Navbar from "../components/Navbar.jsx";
+
+import Login from "../pages/public/Login.jsx";
+import Signup from "../pages/public/Signup.jsx";
+import Pending from "../pages/public/Pending.jsx";
+import ForgotPassword from "../pages/public/Forgot.jsx";
+import CompleteProfile from "../pages/public/CompleteProfile.jsx";
+
+import StaffToday from "../pages/staff/StaffToday.jsx";
+import MyRoster from "../pages/staff/MyRoster.jsx";
+import MyTimesheets from "../pages/staff/MyTimesheets.jsx";
+
+import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
+import Approvals from "../pages/admin/Approvals.jsx";
+import RosterManager from "../pages/admin/RosterManager.jsx";
+import Payroll from "../pages/admin/Payroll.jsx";
+import Audit from "../pages/admin/Audit.jsx";
+import StoreSettings from "../pages/admin/StoreSettings.jsx";
+import AdminEditTimesheets from "../pages/admin/AdminEditTimesheets.jsx";
+import AdminPayroll from "../pages/admin/AdminPayroll.jsx";
+import PayrollHistory from "../pages/admin/PayrollHistory.jsx";
+// NEW IMPORT
+import AdminStaffList from "../pages/admin/AdminStaffList.jsx"; 
+import StockManager from "../pages/admin/StockManager.jsx";
+
+export default function Router() {
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomeRedirect />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+
+        <Route
+          path="/pending"
+          element={
+            <AuthGate>
+              <Pending />
+            </AuthGate>
+          }
+        />
+
+        <Route
+          path="/complete-profile"
+          element={
+            <AuthGate>
+              <CompleteProfile />
+            </AuthGate>
+          }
+        />
+
+        <Route
+          path="/staff"
+          element={
+            <AuthGate>
+              <RoleGate allow={["staff"]}>
+                <ProfileGate>
+                  <ApprovalGate />
+                </ProfileGate>
+              </RoleGate>
+            </AuthGate>
+          }
+        >
+          <Route path="today" element={<StaffToday />} />
+          <Route path="my-roster" element={<MyRoster />} />
+          <Route path="my-timesheets" element={<MyTimesheets />} />
+          <Route index element={<Navigate to="today" replace />} />
+        </Route>
+
+        <Route
+          path="/admin"
+          element={
+            <AuthGate>
+              <RoleGate allow={["admin"]}>
+                <Outlet />
+              </RoleGate>
+            </AuthGate>
+          }
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="store-settings" element={<StoreSettings />} />
+          <Route path="approvals" element={<Approvals />} />
+          <Route path="staff" element={<AdminStaffList />} /> {/* NEW ROUTE */}
+          <Route path="roster" element={<RosterManager />} />
+          <Route path="payroll" element={<Payroll />} />
+          <Route path="audit" element={<Audit />} />
+          <Route path="edit-timesheets" element={<AdminEditTimesheets />} />
+          <Route path="admin-payroll" element={<AdminPayroll />} />
+          <Route path="payroll/:weekStart/:uid" element={<PayrollHistory />} />
+          <Route path="stock-manager" element={<StockManager />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+          
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+
+
+
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+/**
+ * 1) Create Firebase project
+ * 2) Add a Web app
+ * 3) Paste config below
+ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCQi6w1sBcWnASrEDp_cfJj98Nypz2N7XQ",
-  authDomain: "ras-roster-app.firebaseapp.com",
-  projectId: "ras-roster-app",
-  storageBucket: "ras-roster-app.firebasestorage.app",
-  messagingSenderId: "431100698096",
-  appId: "1:431100698096:web:6ae7cd7321b2c089b99135"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+
+
+
+import { GoogleAuthProvider, OAuthProvider } from "firebase/auth";
+
+export const googleProvider = new GoogleAuthProvider();
+export const appleProvider = new OAuthProvider("apple.com");
+
+
+
+
+
+
+import React, { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/firebase";
+import { useAuthUser } from "../auth/useAuthUser";
+import MyProfileModal from "./MyProfileModal.jsx";
+import "./Navbar.css";
+
+export default function Navbar() {
+  const { fbUser, profile, role, status } = useAuthUser();
+  const [showProfile, setShowProfile] = useState(false);
+  const nav = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path ? "active" : "";
+
+  return (
+    <>
+      <nav className="top-nav">
+        <div className="brand" onClick={() => nav("/")}>
+          <span className="dot" />
+          <span>MITHO MITHO || MVS</span>
+          {role === "admin" && <span className="admin-tag">ADMIN</span>}
+        </div>
+
+        {fbUser && (
+          <div className="top-nav-actions">
+             {/* Use userData if exists, fallback to fbUser display name */}
+             <span 
+               className="user-email clickable-user" 
+               onClick={() => setShowProfile(true)}
+             >
+               {profile?.firstName || fbUser.displayName || "My Profile"}
+             </span>
+             
+             <button className="logout-icon-btn" onClick={() => signOut(auth)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* Admin Toolbar with Staff on Right */}
+      {fbUser && role === "admin" && (
+        <nav className="admin-toolbar">
+          <div className="admin-scroll-container">
+            <div className="admin-nav-group">
+                <Link to="/admin/dashboard" className={`admin-link ${isActive("/admin/dashboard")}`}>Dashboard</Link>
+                <Link to="/admin/approvals" className={`admin-link ${isActive("/admin/approvals")}`}>Approvals</Link>
+                <Link to="/admin/roster" className={`admin-link ${isActive("/admin/roster")}`}>Roster</Link>
+                <Link to="/admin/payroll" className={`admin-link ${isActive("/admin/payroll")}`}>Payroll</Link>
+                <Link to="/admin/admin-payroll" className={`admin-link ${isActive("/admin/admin-payroll")}`}>Pay Staff</Link>
+                <Link to="/admin/edit-timesheets" className={`admin-link ${isActive("/admin/edit-timesheets")}`}>Timesheets</Link>
+                <Link to="/admin/audit" className={`admin-link ${isActive("/admin/audit")}`}>Audit</Link>
+                <Link to="/admin/store-settings" className={`admin-link ${isActive("/admin/store-settings")}`}>Settings</Link>
+            </div>
+            <Link to="/admin/staff" className={`admin-link staff-right ${isActive("/admin/staff")}`}>Staff List</Link>
+          </div>
+        </nav>
+      )}
+
+    
+       {fbUser && role === "staff" && (
+        <nav className="bottom-tab-bar">
+          <Link to="/staff/today" className={`tab-item ${isActive("/staff/today")}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Home</span>
+          </Link>
+          <Link to="/staff/my-roster" className={`tab-item ${isActive("/staff/my-roster")}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Roster</span>
+          </Link>
+          <Link to="/staff/my-timesheets" className={`tab-item ${isActive("/staff/my-timesheets")}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <span>Hours</span>
+          </Link>
+        </nav>
+      )}
+
+      {/* Profile Modal - Only show if we have some data to work with */}
+      {showProfile && fbUser && (
+      <MyProfileModal 
+        profile={profile} // Change 'user' to 'profile'
+        uid={fbUser.uid} 
+        onClose={() => setShowProfile(false)} 
+      />
+    )}
+    </>
+  );
+}
+
+
+import Router from "./routes/Router.jsx";
+import { ToastProvider } from "./context/ToastContext.jsx"; // Import here
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <Router />
+    </ToastProvider>
+  );
+}
+
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./styles/globals.css";
+import { AuthProvider } from "./auth/AuthProvider.jsx";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>
+);
