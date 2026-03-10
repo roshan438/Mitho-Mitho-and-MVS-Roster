@@ -60,8 +60,108 @@
 
 
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+// import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+// import { onAuthStateChanged } from "firebase/auth";
+// import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+// import { auth, db } from "../firebase/firebase";
+
+// const AuthCtx = createContext(null);
+
+// function splitDisplayName(displayName = "") {
+//   const parts = displayName.trim().split(/\s+/).filter(Boolean);
+//   if (parts.length === 0) return { firstName: "", lastName: "" };
+//   if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+//   return {
+//     firstName: parts[0],
+//     lastName: parts.slice(1).join(" "),
+//   };
+// }
+
+// export function AuthProvider({ children }) {
+//   const [fbUser, setFbUser] = useState(null);
+//   const [profile, setProfile] = useState(null);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const unsub = onAuthStateChanged(auth, async (u) => {
+//       setLoading(true);
+//       setFbUser(u);
+//       setProfile(null);
+
+//       if (!u) {
+//         setLoading(false);
+//         return;
+//       }
+
+//       try {
+//         const ref = doc(db, "users", u.uid);
+//         const snap = await getDoc(ref);
+
+//         if (!snap.exists()) {
+//           const name = splitDisplayName(u.displayName || "");
+
+//           await setDoc(
+//             ref,
+//             {
+//               uid: u.uid,
+//               email: u.email || "",
+//               firstName: name.firstName,
+//               lastName: name.lastName,
+//               dob: "",
+//               phone: "",
+//               addressLine1: "",
+//               suburb: "",
+//               state: "NSW",
+//               postcode: "",
+//               emergencyName: "",
+//               emergencyPhone: "",
+//               emergencyRelationship: "",
+//               taxInProgress: true,
+//               role: "staff",
+//               status: "pending",
+//               profileComplete: false,
+//               hourlyRate: null,
+//               provider: u.providerData?.[0]?.providerId || "unknown",
+//               createdAt: serverTimestamp(),
+//               updatedAt: serverTimestamp(),
+//             },
+//             { merge: true }
+//           );
+
+//           const newSnap = await getDoc(ref);
+//           setProfile(newSnap.data());
+//         } else {
+//           setProfile(snap.data());
+//         }
+//       } catch (err) {
+//         console.error("AuthProvider profile load error:", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     });
+
+//     return () => unsub();
+//   }, []);
+
+//   const value = useMemo(() => ({ fbUser, profile, loading }), [fbUser, profile, loading]);
+
+//   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+// }
+
+// export function useAuth() {
+//   return useContext(AuthCtx);
+// }
+
+
+
+
+
+
+
+
+
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 
@@ -77,16 +177,70 @@ function splitDisplayName(displayName = "") {
   };
 }
 
+const LAST_ACTIVITY_KEY = "mvs_last_activity";
+const STAFF_TIMEOUT_MS = 1000 * 60 * 60 * 2; // 12 hours
+const ADMIN_TIMEOUT_MS = 1000 * 60 * 60 * 4;  // 4 hours
+
 export function AuthProvider({ children }) {
   const [fbUser, setFbUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const logoutTimerRef = useRef(null);
+
+  function clearLogoutTimer() {
+    if (logoutTimerRef.current) {
+      clearTimeout(logoutTimerRef.current);
+      logoutTimerRef.current = null;
+    }
+  }
+
+  function getTimeoutForRole(role) {
+    return role === "admin" ? ADMIN_TIMEOUT_MS : STAFF_TIMEOUT_MS;
+  }
+
+  function markActivity() {
+    localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+  }
+
+  async function forceLogoutIfExpired(role) {
+    const lastActivity = Number(localStorage.getItem(LAST_ACTIVITY_KEY) || 0);
+    const timeoutMs = getTimeoutForRole(role);
+
+    if (!lastActivity) {
+      markActivity();
+      return false;
+    }
+
+    const expired = Date.now() - lastActivity > timeoutMs;
+    if (expired) {
+      clearLogoutTimer();
+      localStorage.removeItem(LAST_ACTIVITY_KEY);
+      await signOut(auth);
+      return true;
+    }
+
+    return false;
+  }
+
+  function startInactivityWatcher(role) {
+    clearLogoutTimer();
+
+    const timeoutMs = getTimeoutForRole(role);
+    const lastActivity = Number(localStorage.getItem(LAST_ACTIVITY_KEY) || Date.now());
+    const remaining = Math.max(timeoutMs - (Date.now() - lastActivity), 1000);
+
+    logoutTimerRef.current = setTimeout(async () => {
+      localStorage.removeItem(LAST_ACTIVITY_KEY);
+      await signOut(auth);
+    }, remaining);
+  }
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setLoading(true);
       setFbUser(u);
       setProfile(null);
+      clearLogoutTimer();
 
       if (!u) {
         setLoading(false);
@@ -96,6 +250,8 @@ export function AuthProvider({ children }) {
       try {
         const ref = doc(db, "users", u.uid);
         const snap = await getDoc(ref);
+
+        let nextProfile = null;
 
         if (!snap.exists()) {
           const name = splitDisplayName(u.displayName || "");
@@ -129,9 +285,17 @@ export function AuthProvider({ children }) {
           );
 
           const newSnap = await getDoc(ref);
-          setProfile(newSnap.data());
+          nextProfile = newSnap.data();
         } else {
-          setProfile(snap.data());
+          nextProfile = snap.data();
+        }
+
+        setProfile(nextProfile);
+
+        const expired = await forceLogoutIfExpired(nextProfile?.role || "staff");
+        if (!expired) {
+          markActivity();
+          startInactivityWatcher(nextProfile?.role || "staff");
         }
       } catch (err) {
         console.error("AuthProvider profile load error:", err);
@@ -140,10 +304,37 @@ export function AuthProvider({ children }) {
       }
     });
 
-    return () => unsub();
+    return () => {
+      clearLogoutTimer();
+      unsub();
+    };
   }, []);
 
-  const value = useMemo(() => ({ fbUser, profile, loading }), [fbUser, profile, loading]);
+  useEffect(() => {
+    if (!fbUser || !profile?.role) return;
+
+    const events = ["click", "keydown", "touchstart", "mousemove", "scroll"];
+
+    const handleActivity = () => {
+      markActivity();
+      startInactivityWatcher(profile.role);
+    };
+
+    events.forEach((event) => {
+      window.addEventListener(event, handleActivity, { passive: true });
+    });
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(event, handleActivity);
+      });
+    };
+  }, [fbUser, profile?.role]);
+
+  const value = useMemo(
+    () => ({ fbUser, profile, loading }),
+    [fbUser, profile, loading]
+  );
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }

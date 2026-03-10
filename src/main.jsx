@@ -1,13 +1,38 @@
+// import React from "react";
+// import ReactDOM from "react-dom/client";
+// import App from "./App.jsx";
+// import "./styles/globals.css";
+// import { AuthProvider } from "./auth/AuthProvider.jsx";
+
+// ReactDOM.createRoot(document.getElementById("root")).render(
+//   <React.StrictMode>
+//     <AuthProvider>
+//       <App />
+//     </AuthProvider>
+//   </React.StrictMode>
+// );
+
+
+
+
+
+
+
+
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./styles/globals.css";
 import { AuthProvider } from "./auth/AuthProvider.jsx";
+import { authReady } from "./firebase/firebase";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </React.StrictMode>
-);
+authReady.finally(() => {
+  ReactDOM.createRoot(document.getElementById("root")).render(
+    <React.StrictMode>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </React.StrictMode>
+  );
+});
