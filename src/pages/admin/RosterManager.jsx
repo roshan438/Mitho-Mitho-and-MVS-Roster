@@ -2022,1037 +2022,829 @@
 
 
 
-// import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-// import {
-//   addDoc,
-//   collection,
-//   deleteDoc,
-//   doc,
-//   getDoc,
-//   getDocs,
-//   query,
-//   setDoc,
-//   updateDoc,
-//   where,
-//   serverTimestamp,
-//   writeBatch,
-// } from "firebase/firestore";
-// import { db } from "../../firebase/firebase";
-// import {
-//   addDays,
-//   getWeekStartMonday,
-//   prettyDate,
-//   toYMD,
-//   weekDates,
-// } from "../../utils/dates";
-// import { useToast } from "../../context/ToastContext";
-// import "./RosterManager.css";
-// import { useStores } from "../../hooks/useStore";
-
-// function normalizeToMondayYMD(dateStr) {
-//   if (!dateStr) return "";
-//   const d = new Date(dateStr + "T00:00:00");
-//   return toYMD(getWeekStartMonday(d));
-// }
-
-// export default function RosterManager() {
-//   const { showToast } = useToast();
-//   const { stores, getStoreLabel } = useStores();
-
-//   const [weekStart, setWeekStart] = useState(
-//     toYMD(getWeekStartMonday(addDays(new Date(), 7)))
-//   );
-//   const [weekStatus, setWeekStatus] = useState("draft");
-//   const [publishedStores, setPublishedStores] = useState({});
-//   const [loading, setLoading] = useState(true);
-//   const [staffApproved, setStaffApproved] = useState([]);
-//   const [shifts, setShifts] = useState([]);
-//   const [openDays, setOpenDays] = useState({});
-//   const [selectedStoreId, setSelectedStoreId] = useState("all");
-//   const [viewMode, setViewMode] = useState("week");
-//   const [selectedDay, setSelectedDay] = useState("");
-
-//   const dayRefs = useRef({});
-
-//   const weekStartDateObj = useMemo(
-//     () => new Date(weekStart + "T00:00:00"),
-//     [weekStart]
-//   );
-
-//   const days = useMemo(() => weekDates(weekStartDateObj), [weekStartDateObj]);
-
-//   useEffect(() => {
-//     const monday = normalizeToMondayYMD(weekStart);
-//     if (weekStart && monday !== weekStart) {
-//       setWeekStart(monday);
-//     }
-//   }, [weekStart]);
-
-//   useEffect(() => {
-//     if (days.length > 0 && !selectedDay) {
-//       setSelectedDay(toYMD(days[0]));
-//     }
-//   }, [days, selectedDay]);
-
-//   useEffect(() => {
-//     const initial = {};
-//     days.forEach((d) => {
-//       initial[toYMD(d)] = false;
-//     });
-//     setOpenDays(initial);
-//   }, [weekStart]);
-
-//   const isLocked =
-//     selectedStoreId !== "all" && publishedStores?.[selectedStoreId] === true;
-
-//   const filteredShifts = useMemo(() => {
-//     let list = [...shifts];
-
-//     if (selectedStoreId !== "all") {
-//       list = list.filter((s) => s.storeId === selectedStoreId);
-//     }
-
-//     if (viewMode === "day" && selectedDay) {
-//       list = list.filter((s) => s.date === selectedDay);
-//     }
-
-//     return list;
-//   }, [shifts, selectedStoreId, viewMode, selectedDay]);
-
-//   const visibleDays = useMemo(() => {
-//     if (viewMode === "day" && selectedDay) {
-//       return days.filter((d) => toYMD(d) === selectedDay);
-//     }
-//     return days;
-//   }, [days, viewMode, selectedDay]);
-
-//   const shiftsByDate = useMemo(() => {
-//     const map = {};
-//     filteredShifts.forEach((s) => {
-//       if (!map[s.date]) map[s.date] = [];
-//       map[s.date].push(s);
-//     });
-//     return map;
-//   }, [filteredShifts]);
-
-//   const usedStaffByDate = useMemo(() => {
-//     const map = {};
-//     shifts.forEach((s) => {
-//       if (!s.date || !s.uid) return;
-//       if (!map[s.date]) map[s.date] = new Set();
-//       map[s.date].add(s.uid);
-//     });
-//     return map;
-//   }, [shifts]);
-
-//   const loadApprovedStaff = useCallback(async () => {
-//     try {
-//       const qs = query(
-//         collection(db, "users"),
-//         where("role", "==", "staff"),
-//         where("status", "==", "approved")
-//       );
-//       const snap = await getDocs(qs);
-//       const list = snap.docs
-//         .map((d) => ({
-//           uid: d.id,
-//           name:
-//             `${d.data().firstName || ""} ${d.data().lastName || ""}`.trim() ||
-//             d.data().email ||
-//             d.id,
-//         }))
-//         .sort((a, b) => a.name.localeCompare(b.name));
-//       setStaffApproved(list);
-//     } catch (e) {
-//       showToast("Error loading staff list", "error");
-//     }
-//   }, [showToast]);
-
-//   const loadWeek = useCallback(async () => {
-//     setLoading(true);
-//     try {
-//       const weekRef = doc(db, "rosterWeeks", weekStart);
-//       const weekSnap = await getDoc(weekRef);
-
-//       if (!weekSnap.exists()) {
-//         await setDoc(
-//           weekRef,
-//           {
-//             weekStart,
-//             status: "draft",
-//             publishedStores: {},
-//             createdAt: serverTimestamp(),
-//           },
-//           { merge: true }
-//         );
-//         setWeekStatus("draft");
-//         setPublishedStores({});
-//       } else {
-//         const data = weekSnap.data();
-//         setWeekStatus(data.status || "draft");
-//         setPublishedStores(data.publishedStores || {});
-//       }
-
-//       const shiftsSnap = await getDocs(
-//         collection(db, "rosterWeeks", weekStart, "shifts")
-//       );
-
-//       setShifts(
-//         shiftsSnap.docs
-//           .map((d) => ({ id: d.id, ...d.data() }))
-//           .sort(
-//             (a, b) =>
-//               a.date.localeCompare(b.date) ||
-//               (a.startPlanned || "").localeCompare(b.startPlanned || "")
-//           )
-//       );
-//     } catch (e) {
-//       showToast("Error loading roster week", "error");
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [weekStart, showToast]);
-
-//   useEffect(() => {
-//     loadApprovedStaff();
-//   }, [loadApprovedStaff]);
-
-//   useEffect(() => {
-//     loadWeek();
-//   }, [loadWeek]);
-
-//   const issues = useMemo(() => {
-//     const errs = [];
-//     const duplicateCheck = {};
-
-//     const relevantShifts =
-//       selectedStoreId === "all"
-//         ? shifts
-//         : shifts.filter((s) => s.storeId === selectedStoreId);
-
-//     relevantShifts.forEach((s) => {
-//       if (!s.uid) errs.push(`Missing staff on ${s.date}`);
-//       if (s.startPlanned >= s.endPlanned) errs.push(`Invalid time on ${s.date}`);
-
-//       if (s.uid && s.date) {
-//         const key = `${s.date}_${s.uid}`;
-//         duplicateCheck[key] = (duplicateCheck[key] || 0) + 1;
-//       }
-//     });
-
-//     Object.entries(duplicateCheck).forEach(([key, count]) => {
-//       if (count > 1) {
-//         const [date] = key.split("_");
-//         errs.push(`Duplicate staff assignment on ${date}`);
-//       }
-//     });
-
-//     return errs;
-//   }, [shifts, selectedStoreId]);
-
-//   const summary = useMemo(() => {
-//     const visible = filteredShifts;
-//     const uniqueStaff = new Set(visible.filter((s) => s.uid).map((s) => s.uid));
-
-//     return {
-//       totalShifts: visible.length,
-//       totalStaff: uniqueStaff.size,
-//       publishState:
-//         selectedStoreId === "all"
-//           ? "Select a store to publish"
-//           : publishedStores?.[selectedStoreId]
-//           ? "Published"
-//           : "Draft",
-//     };
-//   }, [filteredShifts, selectedStoreId, publishedStores]);
-
-//   function isDuplicateStaffForDay(targetShiftId, date, uid) {
-//     if (!uid || !date) return false;
-//     return shifts.some(
-//       (s) => s.id !== targetShiftId && s.date === date && s.uid === uid
-//     );
-//   }
-
-//   async function addShift(ymd) {
-//     if (isLocked) return;
-//     try {
-//       const defaultStoreId =
-//         selectedStoreId !== "all"
-//           ? selectedStoreId
-//           : stores?.[0]?.id || "";
-
-//       const shiftsCol = collection(db, "rosterWeeks", weekStart, "shifts");
-//       await addDoc(shiftsCol, {
-//         uid: "",
-//         staffName: "",
-//         storeId: defaultStoreId,
-//         date: ymd,
-//         startPlanned: "13:00",
-//         endPlanned: "22:00",
-//         updatedAt: serverTimestamp(),
-//       });
-//       loadWeek();
-//       showToast("Shift added", "success");
-//     } catch (e) {
-//       showToast("Could not add shift", "error");
-//     }
-//   }
-
-//   async function updateShift(shiftId, patch) {
-//     if (isLocked) return;
-
-//     const current = shifts.find((s) => s.id === shiftId);
-//     if (!current) return;
-
-//     const next = { ...current, ...patch };
-
-//     if (patch.uid && isDuplicateStaffForDay(shiftId, next.date, patch.uid)) {
-//       showToast("This staff is already assigned on this day", "error");
-//       return;
-//     }
-
-//     if (
-//       next.startPlanned &&
-//       next.endPlanned &&
-//       next.startPlanned >= next.endPlanned
-//     ) {
-//       showToast("End time must be after start time", "error");
-//       return;
-//     }
-
-//     try {
-//       await updateDoc(doc(db, "rosterWeeks", weekStart, "shifts", shiftId), {
-//         ...patch,
-//         updatedAt: serverTimestamp(),
-//       });
-
-//       setShifts((prev) =>
-//         prev.map((s) => (s.id === shiftId ? { ...s, ...patch } : s))
-//       );
-//     } catch (e) {
-//       showToast("Update failed", "error");
-//     }
-//   }
-
-//   async function togglePublish() {
-//     if (selectedStoreId === "all") {
-//       showToast("Please select a single store to publish", "error");
-//       return;
-//     }
-
-//     const selectedStoreShifts = shifts.filter((s) => s.storeId === selectedStoreId);
-
-//     if (selectedStoreShifts.length === 0) {
-//       showToast("No shifts found for selected store", "error");
-//       return;
-//     }
-
-//     const selectedStoreIssues = selectedStoreShifts.filter(
-//       (s) => !s.uid || s.startPlanned >= s.endPlanned
-//     );
-
-//     if (!isLocked && selectedStoreIssues.length > 0) {
-//       showToast(`Fix ${selectedStoreIssues.length} issues before publishing`, "error");
-//       return;
-//     }
-
-//     const nextPublished = !publishedStores?.[selectedStoreId];
-
-//     if (
-//       publishedStores?.[selectedStoreId] &&
-//       !window.confirm("Unlock this store roster for editing?")
-//     ) {
-//       return;
-//     }
-
-//     try {
-//       await updateDoc(doc(db, "rosterWeeks", weekStart), {
-//         [`publishedStores.${selectedStoreId}`]: nextPublished,
-//         updatedAt: serverTimestamp(),
-//       });
-
-//       setPublishedStores((prev) => ({
-//         ...prev,
-//         [selectedStoreId]: nextPublished,
-//       }));
-
-//       showToast(
-//         nextPublished
-//           ? `Roster published for ${getStoreLabel?.(selectedStoreId) || selectedStoreId}`
-//           : `Roster unlocked for ${getStoreLabel?.(selectedStoreId) || selectedStoreId}`,
-//         "success"
-//       );
-//     } catch (e) {
-//       showToast("Status update failed", "error");
-//     }
-//   }
-
-//   async function copyPreviousWeek() {
-//     if (isLocked) return;
-
-//     try {
-//       const prevWeek = toYMD(addDays(weekStartDateObj, -7));
-//       const prevSnap = await getDocs(collection(db, "rosterWeeks", prevWeek, "shifts"));
-
-//       if (prevSnap.empty) {
-//         showToast("No shifts found in previous week", "error");
-//         return;
-//       }
-
-//       let copied = prevSnap.docs.map((d) => {
-//         const s = d.data();
-//         return {
-//           ...s,
-//           date: toYMD(addDays(new Date(s.date + "T00:00:00"), 7)),
-//         };
-//       });
-
-//       if (selectedStoreId !== "all") {
-//         copied = copied.filter((s) => s.storeId === selectedStoreId);
-//       }
-
-//       if (copied.length === 0) {
-//         showToast("No shifts found for selected store in previous week", "error");
-//         return;
-//       }
-
-//       const duplicateCheck = new Set();
-//       for (const s of copied) {
-//         if (!s.uid || !s.date) continue;
-//         const key = `${s.date}_${s.uid}`;
-//         if (duplicateCheck.has(key)) {
-//           showToast("Previous week contains duplicate staff on same day", "error");
-//           return;
-//         }
-//         duplicateCheck.add(key);
-//       }
-
-//       const batch = writeBatch(db);
-
-//       const currentWeekMatchingShifts =
-//         selectedStoreId === "all"
-//           ? shifts
-//           : shifts.filter((s) => s.storeId === selectedStoreId);
-
-//       if (currentWeekMatchingShifts.length > 0) {
-//         if (
-//           !window.confirm(
-//             selectedStoreId === "all"
-//               ? "Replace current week shifts with previous week?"
-//               : "Replace current selected store shifts with previous week?"
-//           )
-//         ) {
-//           return;
-//         }
-
-//         currentWeekMatchingShifts.forEach((s) =>
-//           batch.delete(doc(db, "rosterWeeks", weekStart, "shifts", s.id))
-//         );
-//       }
-
-//       copied.forEach((s) => {
-//         const newRef = doc(collection(db, "rosterWeeks", weekStart, "shifts"));
-//         batch.set(newRef, {
-//           ...s,
-//           updatedAt: serverTimestamp(),
-//         });
-//       });
-
-//       await batch.commit();
-//       loadWeek();
-//       showToast("Roster copied from previous week", "success");
-//     } catch (e) {
-//       showToast("Error copying roster", "error");
-//     }
-//   }
-
-//   async function deleteShift(sid) {
-//     if (isLocked) return;
-//     if (!window.confirm("Delete this shift?")) return;
-
-//     try {
-//       await deleteDoc(doc(db, "rosterWeeks", weekStart, "shifts", sid));
-//       loadWeek();
-//       showToast("Shift deleted", "success");
-//     } catch (e) {
-//       showToast("Delete failed", "error");
-//     }
-//   }
-
-  
-
-//   function toggleDayOpen(ymd) {
-//     setOpenDays((prev) => {
-//       const isCurrentlyOpen = !!prev[ymd];
-  
-//       const next = {};
-//       Object.keys(prev).forEach((key) => {
-//         next[key] = false;
-//       });
-  
-//       if (!isCurrentlyOpen) {
-//         next[ymd] = true;
-  
-//         // Scroll into view after slight delay
-//         setTimeout(() => {
-//           dayRefs.current[ymd]?.scrollIntoView({
-//             behavior: "smooth",
-//             block: "start", // aligns nicely at top
-//           });
-//         }, 150);
-//       }
-  
-//       return next;
-//     });
-//   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//   // function toggleAddOpen(ymd) {
-//   //   setOpenDays((prev) => {
-//   //     const isCurrentlyOpen = !!prev[ymd];
-  
-//   //     const next = {};
-//   //     Object.keys(prev).forEach((key) => {
-//   //       next[key] = false;
-//   //     });
-  
-//   //     if (!isCurrentlyOpen) {
-//   //       next[ymd] = true;
-  
-//   //       setTimeout(() => {
-//   //         const el = dayRefs.current[ymd];
-//   //         if (!el) return;
-  
-//   //         const y = el.getBoundingClientRect().top + window.pageYOffset - 110;
-//   //         window.scrollTo({
-//   //           top: y,
-//   //           behavior: "smooth",
-//   //         });
-//   //       }, 150);
-//   //     }
-//   //   });
-//   // }
-
-
-//   function toggleAddOpen(ymd) {
-//     setOpenDays((prev) => {
-//       // If it's already open, do nothing and return the current state
-//       if (prev[ymd]) return prev;
-  
-//       // Otherwise, close everything else and open ONLY this one
-//       return { [ymd]: true };
-//     });
-  
-//     // Always attempt the scroll when the function is called
-//     setTimeout(() => {
-//       const el = dayRefs.current[ymd];
-//       if (!el) return;
-  
-//       const y = el.getBoundingClientRect().top + window.pageYOffset - 110;
-      
-//       window.scrollTo({
-//         top: y,
-//         behavior: "smooth",
-//       });
-//     }, 150);
-//   }
-
-
-
-  
-
-//   return (
-//     <div className="admin-wrapper roster-page">
-//       <header className="admin-header">
-//         <div className="title-area">
-//           <div>
-//             <h1 className="main-title">Roster Manager</h1>
-//             {/* <p className="roster-subtitle">Organize shifts for the selected week</p> */}
-//           </div>
-//           <span className={`status-pill ${selectedStoreId !== "all" && publishedStores?.[selectedStoreId] ? "published" : "draft"}`}>
-//             {summary.publishState.toUpperCase()}
-//           </span>
-//         </div>
-
-//         <div className="header-actions">
-//           <button className="refresh-circle" onClick={loadWeek}>
-//             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//               <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
-//             </svg>
-//           </button>
-//         </div>
-//       </header>
-
-//       <section className="roster-controls">
-//         <div className="control-group">
-//           <label>Week Starting</label>
-//           <input
-//             type="date"
-//             value={weekStart}
-//             onChange={(e) => setWeekStart(normalizeToMondayYMD(e.target.value))}
-//           />
-//         </div>
-
-//         <div className="control-group">
-//           <label>Store</label>
-//           <select
-//             value={selectedStoreId}
-//             onChange={(e) => setSelectedStoreId(e.target.value)}
-//           >
-//             <option value="all">All Stores</option>
-//             {stores.map((st) => (
-//               <option key={st.id} value={st.id}>
-//                 {st.label}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div className="control-group">
-//           <label>View</label>
-//           <select value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
-//             <option value="week">Week View</option>
-//             <option value="day">Day View</option>
-//           </select>
-//         </div>
-
-//         {viewMode === "day" && (
-//           <div className="control-group">
-//             <label>Day</label>
-//             <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
-//               {days.map((d) => {
-//                 const ymd = toYMD(d);
-//                 return (
-//                   <option key={ymd} value={ymd}>
-//                     {prettyDate(d)}
-//                   </option>
-//                 );
-//               })}
-//             </select>
-//           </div>
-//         )}
-
-//         <div className="button-row">
-//           <button className="btn-sec" onClick={copyPreviousWeek} disabled={isLocked}>
-//             Copy Prev
-//           </button>
-//           <button
-//             className={`btn-primary ${isLocked ? "unlock" : "lock"}`}
-//             onClick={togglePublish}
-//             disabled={selectedStoreId === "all"}
-//           >
-//             {isLocked ? "Unlock Store" : "Publish Store"}
-//           </button>
-//         </div>
-//       </section>
-
-//       <section className="roster-summary-grid">
-//         <div className="summary-card-mini">
-//           <span className="summary-label-mini">Store</span>
-//           <strong>{selectedStoreId === "all" ? "All Stores" : getStoreLabel?.(selectedStoreId) || selectedStoreId}</strong>
-//         </div>
-//         <div className="summary-card-mini">
-//           <span className="summary-label-mini">Visible Shifts</span>
-//           <strong>{summary.totalShifts}</strong>
-//         </div>
-//         <div className="summary-card-mini">
-//           <span className="summary-label-mini">Assigned Staff</span>
-//           <strong>{summary.totalStaff}</strong>
-//         </div>
-//         <div className="summary-card-mini">
-//           <span className="summary-label-mini">Status</span>
-//           <strong>{summary.publishState}</strong>
-//         </div>
-//       </section>
-
-//       {issues.length > 0 && selectedStoreId !== "all" && !isLocked && (
-//         <div className="validation-box">
-//           <strong>Validation Alert:</strong> Fix {issues.length} issue{issues.length > 1 ? "s" : ""} before publishing.
-//         </div>
-//       )}
-
-//       <div className="roster-grid cleaner">
-//         {visibleDays.map((d) => {
-//           const ymd = toYMD(d);
-//           const dayShifts = (shiftsByDate[ymd] || []).sort(
-//             (a, b) => (a.startPlanned || "").localeCompare(b.startPlanned || "")
-//           );
-
-//           return (
-//             // <div key={ymd} className="day-column clean collapsible-day">
-//               <div
-//                 key={ymd}
-//                 ref={(el) => (dayRefs.current[ymd] = el)}
-//                 className="day-column clean collapsible-day"
-//               >
-//               <button
-//                 type="button"
-//                 className="day-header clean collapsible-trigger"
-//                 onClick={() => toggleDayOpen(ymd)}
-//               >
-//                 <div className="day-text">
-//                   <span className="day-name">{prettyDate(d).split(",")[0]}</span>
-//                   <span className="day-date">{ymd}</span>
-//                 </div>
-
-//                 <div className="day-header-right">
-//                   <span className="day-count">
-//                     {dayShifts.length} shift{dayShifts.length !== 1 ? "s" : ""}
-//                   </span>
-
-//                   {!isLocked && (
-//                     <button
-//                       // className="add-shift-btn small-add"
-//                       className={`btn-primary ${isLocked ? "unlock" : "lock"}`}
-                      
-//                       disabled={selectedStoreId === "all"}
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         toggleAddOpen(ymd);
-//                         addShift(ymd);
-
-//                       }}
-//                     >
-//                       +
-//                     </button>
-//                   )}
-
-//                   <span className={`day-chevron ${openDays[ymd] ? "open" : ""}`}>⌄</span>
-//                 </div>
-//               </button>
-
-//               {openDays[ymd] && (
-//                 <div className="shift-list clean">
-//                   {dayShifts.length === 0 && <div className="empty-day">No shifts</div>}
-
-//                   {dayShifts.map((s, index) => {
-//                     const duplicateForThisShift =
-//                       !!s.uid && isDuplicateStaffForDay(s.id, s.date, s.uid);
-
-//                     return (
-//                       <div
-//                         key={s.id}
-//                         className={`shift-editor-card clean ${!s.uid || duplicateForThisShift ? "error" : ""}`}
-//                       >
-//                         <div className="shift-card-top">
-//                           <span className="shift-number">Shift {index + 1}</span>
-//                         </div>
-
-//                         <div className="shift-field">
-//                           <label style={{ display: "block" }}>Staff {index + 1}</label>
-//                           <select
-//                             disabled={isLocked}
-//                             value={s.uid}
-//                             onChange={(e) => {
-//                               const selectedUid = e.target.value;
-//                               const selectedStaff = staffApproved.find((st) => st.uid === selectedUid);
-//                               updateShift(s.id, {
-//                                 uid: selectedUid,
-//                                 staffName: selectedStaff?.name || "",
-//                               });
-//                             }}
-//                           >
-//                             <option value="">Select Staff</option>
-//                             {staffApproved.map((st) => {
-//                               const alreadyUsed =
-//                                 usedStaffByDate[s.date]?.has(st.uid) && s.uid !== st.uid;
-
-//                               return (
-//                                 <option key={st.uid} value={st.uid} disabled={alreadyUsed}>
-//                                   {st.name} {alreadyUsed ? "• already on this day" : ""}
-//                                 </option>
-//                               );
-//                             })}
-//                           </select>
-//                         </div>
-
-//                         <div className="shift-field">
-//                           <label>Store</label>
-//                           <select
-//                             disabled={isLocked}
-//                             value={s.storeId}
-//                             onChange={(e) => updateShift(s.id, { storeId: e.target.value })}
-//                           >
-//                             {stores.map((st) => (
-//                               <option key={st.id} value={st.id}>
-//                                 {st.label}
-//                               </option>
-//                             ))}
-//                           </select>
-//                         </div>
-
-//                         <div className="time-row clean">
-//                           <div className="shift-field">
-//                             <label>Start</label>
-//                             <input
-//                               type="time"
-//                               disabled={isLocked}
-//                               value={s.startPlanned}
-//                               onChange={(e) => updateShift(s.id, { startPlanned: e.target.value })}
-//                             />
-//                           </div>
-
-//                           <div className="shift-field">
-//                             <label>End</label>
-//                             <input
-//                               type="time"
-//                               disabled={isLocked}
-//                               value={s.endPlanned}
-//                               onChange={(e) => updateShift(s.id, { endPlanned: e.target.value })}
-//                             />
-//                           </div>
-//                         </div>
-
-//                         {!isLocked && (
-//                           <button className="del-btn compact" onClick={() => deleteShift(s.id)}>
-//                             Remove
-//                           </button>
-//                         )}
-
-//                         {duplicateForThisShift && (
-//                           <div className="shift-error-text">
-//                             This staff is already assigned on this day.
-//                           </div>
-//                         )}
-//                       </div>
-//                     );
-//                   })}
-//                 </div>
-//               )}
-//             </div>
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
+  addDoc,
   collection,
+  deleteDoc,
+  doc,
+  getDoc,
   getDocs,
   query,
-  where,
-  doc,
+  setDoc,
   updateDoc,
-  deleteDoc,
+  where,
   serverTimestamp,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { useStores } from "../../hooks/useStore";
-import { toYMD } from "../../utils/dates";
+import {
+  addDays,
+  getWeekStartMonday,
+  prettyDate,
+  toYMD,
+  weekDates,
+} from "../../utils/dates";
 import { useToast } from "../../context/ToastContext";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import "./StockManager.css";
-import { useNavigate } from "react-router-dom";
-// Import the modal
-// import StockTakeModal from "./StockTakeModal"; 
+import "./RosterManager.css";
+import { useStores } from "../../hooks/useStore";
 
-export default function StockManager() {
+function normalizeToMondayYMD(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T00:00:00");
+  return toYMD(getWeekStartMonday(d));
+}
+
+export default function RosterManager() {
   const { showToast } = useToast();
   const { stores, getStoreLabel } = useStores();
-  const navigate = useNavigate();
 
+  const [weekStart, setWeekStart] = useState(
+    toYMD(getWeekStartMonday(addDays(new Date(), 7)))
+  );
+  const [weekStatus, setWeekStatus] = useState("draft");
+  const [publishedStores, setPublishedStores] = useState({});
   const [loading, setLoading] = useState(true);
-  const [stockRecords, setStockRecords] = useState([]);
-  const [filterDate, setFilterDate] = useState(toYMD(new Date()));
-  const [filterStore, setFilterStore] = useState("all");
-  
-  // NEW: State for Add Modal
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [staffApproved, setStaffApproved] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [openDays, setOpenDays] = useState({});
+  const [selectedStoreId, setSelectedStoreId] = useState("all");
+  const [viewMode, setViewMode] = useState("week");
+  const [selectedDay, setSelectedDay] = useState("");
+
+  const dayRefs = useRef({});
+
+  const weekStartDateObj = useMemo(
+    () => new Date(weekStart + "T00:00:00"),
+    [weekStart]
+  );
+
+  const days = useMemo(() => weekDates(weekStartDateObj), [weekStartDateObj]);
 
   useEffect(() => {
-    loadStockRecords();
-  }, [filterDate, filterStore]);
+    const monday = normalizeToMondayYMD(weekStart);
+    if (weekStart && monday !== weekStart) {
+      setWeekStart(monday);
+    }
+  }, [weekStart]);
 
-  async function loadStockRecords() {
+  useEffect(() => {
+    if (days.length > 0 && !selectedDay) {
+      setSelectedDay(toYMD(days[0]));
+    }
+  }, [days, selectedDay]);
+
+  useEffect(() => {
+    const initial = {};
+    days.forEach((d) => {
+      initial[toYMD(d)] = false;
+    });
+    setOpenDays(initial);
+  }, [weekStart]);
+
+  const isLocked =
+    selectedStoreId !== "all" && publishedStores?.[selectedStoreId] === true;
+
+  const filteredShifts = useMemo(() => {
+    let list = [...shifts];
+
+    if (selectedStoreId !== "all") {
+      list = list.filter((s) => s.storeId === selectedStoreId);
+    }
+
+    if (viewMode === "day" && selectedDay) {
+      list = list.filter((s) => s.date === selectedDay);
+    }
+
+    return list;
+  }, [shifts, selectedStoreId, viewMode, selectedDay]);
+
+  const visibleDays = useMemo(() => {
+    if (viewMode === "day" && selectedDay) {
+      return days.filter((d) => toYMD(d) === selectedDay);
+    }
+    return days;
+  }, [days, viewMode, selectedDay]);
+
+  const shiftsByDate = useMemo(() => {
+    const map = {};
+    filteredShifts.forEach((s) => {
+      if (!map[s.date]) map[s.date] = [];
+      map[s.date].push(s);
+    });
+    return map;
+  }, [filteredShifts]);
+
+  const usedStaffByDate = useMemo(() => {
+    const map = {};
+    shifts.forEach((s) => {
+      if (!s.date || !s.uid) return;
+      if (!map[s.date]) map[s.date] = new Set();
+      map[s.date].add(s.uid);
+    });
+    return map;
+  }, [shifts]);
+
+  const loadApprovedStaff = useCallback(async () => {
+    try {
+      const qs = query(
+        collection(db, "users"),
+        where("role", "==", "staff"),
+        where("status", "==", "approved")
+      );
+      const snap = await getDocs(qs);
+      const list = snap.docs
+        .map((d) => ({
+          uid: d.id,
+          name:
+            `${d.data().firstName || ""} ${d.data().lastName || ""}`.trim() ||
+            d.data().email ||
+            d.id,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setStaffApproved(list);
+    } catch (e) {
+      showToast("Error loading staff list", "error");
+    }
+  }, [showToast]);
+
+  const loadWeek = useCallback(async () => {
     setLoading(true);
     try {
-      let q = query(
-        collection(db, "dailyStockTake"),
-        where("date", "==", filterDate)
-      );
-      const snap = await getDocs(q);
-      let records = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const weekRef = doc(db, "rosterWeeks", weekStart);
+      const weekSnap = await getDoc(weekRef);
 
-      if (filterStore !== "all") {
-        records = records.filter((r) => r.storeId === filterStore);
+      if (!weekSnap.exists()) {
+        await setDoc(
+          weekRef,
+          {
+            weekStart,
+            status: "draft",
+            publishedStores: {},
+            createdAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+        setWeekStatus("draft");
+        setPublishedStores({});
+      } else {
+        const data = weekSnap.data();
+        setWeekStatus(data.status || "draft");
+        setPublishedStores(data.publishedStores || {});
       }
-      setStockRecords(records);
+
+      const shiftsSnap = await getDocs(
+        collection(db, "rosterWeeks", weekStart, "shifts")
+      );
+
+      setShifts(
+        shiftsSnap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort(
+            (a, b) =>
+              a.date.localeCompare(b.date) ||
+              (a.startPlanned || "").localeCompare(b.startPlanned || "")
+          )
+      );
     } catch (e) {
-      showToast("Error loading records", "error");
+      showToast("Error loading roster week", "error");
     } finally {
       setLoading(false);
     }
+  }, [weekStart, showToast]);
+
+  useEffect(() => {
+    loadApprovedStaff();
+  }, [loadApprovedStaff]);
+
+  useEffect(() => {
+    loadWeek();
+  }, [loadWeek]);
+
+  const issues = useMemo(() => {
+    const errs = [];
+    const duplicateCheck = {};
+
+    const relevantShifts =
+      selectedStoreId === "all"
+        ? shifts
+        : shifts.filter((s) => s.storeId === selectedStoreId);
+
+    relevantShifts.forEach((s) => {
+      if (!s.uid) errs.push(`Missing staff on ${s.date}`);
+      if (s.startPlanned >= s.endPlanned) errs.push(`Invalid time on ${s.date}`);
+
+      if (s.uid && s.date) {
+        const key = `${s.date}_${s.uid}`;
+        duplicateCheck[key] = (duplicateCheck[key] || 0) + 1;
+      }
+    });
+
+    Object.entries(duplicateCheck).forEach(([key, count]) => {
+      if (count > 1) {
+        const [date] = key.split("_");
+        errs.push(`Duplicate staff assignment on ${date}`);
+      }
+    });
+
+    return errs;
+  }, [shifts, selectedStoreId]);
+
+  const summary = useMemo(() => {
+    const visible = filteredShifts;
+    const uniqueStaff = new Set(visible.filter((s) => s.uid).map((s) => s.uid));
+
+    return {
+      totalShifts: visible.length,
+      totalStaff: uniqueStaff.size,
+      publishState:
+        selectedStoreId === "all"
+          ? "Select a store to publish"
+          : publishedStores?.[selectedStoreId]
+          ? "Published"
+          : "Draft",
+    };
+  }, [filteredShifts, selectedStoreId, publishedStores]);
+
+  function isDuplicateStaffForDay(targetShiftId, date, uid) {
+    if (!uid || !date) return false;
+    return shifts.some(
+      (s) => s.id !== targetShiftId && s.date === date && s.uid === uid
+    );
   }
 
-  const updateItemQtySent = (recordId, itemIndex, val) => {
-    setStockRecords((prev) =>
-      prev.map((record) => {
-        if (record.id !== recordId) return record;
-        const newItems = [...record.items];
-        newItems[itemIndex] = { ...newItems[itemIndex], qtySent: val };
-        return { ...record, items: newItems };
-      })
-    );
-  };
-
-  const deleteItemFromRecord = async (record, itemIndex) => {
-    if (!window.confirm("Delete this item?")) return;
+  async function addShift(ymd) {
+    if (isLocked) return;
     try {
-      const updatedItems = record.items.filter((_, idx) => idx !== itemIndex);
-      if (updatedItems.length === 0) {
-        showToast("Cannot delete last item. Delete full record.", "warning");
-        return;
-      }
-      await updateDoc(doc(db, "dailyStockTake", record.id), {
-        items: updatedItems,
+      const defaultStoreId =
+        selectedStoreId !== "all"
+          ? selectedStoreId
+          : stores?.[0]?.id || "";
+
+      const shiftsCol = collection(db, "rosterWeeks", weekStart, "shifts");
+      await addDoc(shiftsCol, {
+        uid: "",
+        staffName: "",
+        storeId: defaultStoreId,
+        date: ymd,
+        startPlanned: "13:00",
+        endPlanned: "22:00",
         updatedAt: serverTimestamp(),
       });
-      showToast("Item deleted", "success");
-      loadStockRecords();
-    } catch (e) { showToast("Delete failed", "error"); }
-  };
+      loadWeek();
+      showToast("Shift added", "success");
+    } catch (e) {
+      showToast("Could not add shift", "error");
+    }
+  }
 
-  const deleteEntireRecord = async (record) => {
-    if (!window.confirm(`Delete record for ${getStoreLabel(record.storeId)}?`)) return;
-    try {
-      await deleteDoc(doc(db, "dailyStockTake", record.id));
-      showToast("Deleted", "success");
-      loadStockRecords();
-    } catch (e) { showToast("Delete failed", "error"); }
-  };
+  async function updateShift(shiftId, patch) {
+    if (isLocked) return;
 
-  const markAsDone = async (record) => {
+    const current = shifts.find((s) => s.id === shiftId);
+    if (!current) return;
+
+    const next = { ...current, ...patch };
+
+    if (patch.uid && isDuplicateStaffForDay(shiftId, next.date, patch.uid)) {
+      showToast("This staff is already assigned on this day", "error");
+      return;
+    }
+
+    if (
+      next.startPlanned &&
+      next.endPlanned &&
+      next.startPlanned >= next.endPlanned
+    ) {
+      showToast("End time must be after start time", "error");
+      return;
+    }
+
     try {
-      const updatedItems = record.items.map((it) => ({
-        ...it,
-        status: Number(it.qtySent) >= Number(it.qtyRequested) ? "fulfilled" : "partial",
-      }));
-      await updateDoc(doc(db, "dailyStockTake", record.id), {
-        items: updatedItems,
-        adminProcessed: true,
-        processedAt: serverTimestamp(),
+      await updateDoc(doc(db, "rosterWeeks", weekStart, "shifts", shiftId), {
+        ...patch,
+        updatedAt: serverTimestamp(),
       });
-      showToast("Updated", "success");
-      loadStockRecords();
-    } catch (e) { showToast("Update failed", "error"); }
-  };
 
-  const downloadPDF = (record) => {
-    const docPdf = new jsPDF();
-    docPdf.text("Stock Dispatch Manifest", 14, 15);
-    const tableRows = record.items.map((it) => [it.name, it.qtyRequested, it.qtySent, it.status || ""]);
-    autoTable(docPdf, { head: [["Item", "Req", "Sent", "Status"]], body: tableRows, startY: 30 });
-    docPdf.save(`Dispatch_${record.date}.pdf`);
-  };
+      setShifts((prev) =>
+        prev.map((s) => (s.id === shiftId ? { ...s, ...patch } : s))
+      );
+    } catch (e) {
+      showToast("Update failed", "error");
+    }
+  }
+
+  async function togglePublish() {
+    if (selectedStoreId === "all") {
+      showToast("Please select a single store to publish", "error");
+      return;
+    }
+
+    const selectedStoreShifts = shifts.filter((s) => s.storeId === selectedStoreId);
+
+    if (selectedStoreShifts.length === 0) {
+      showToast("No shifts found for selected store", "error");
+      return;
+    }
+
+    const selectedStoreIssues = selectedStoreShifts.filter(
+      (s) => !s.uid || s.startPlanned >= s.endPlanned
+    );
+
+    if (!isLocked && selectedStoreIssues.length > 0) {
+      showToast(`Fix ${selectedStoreIssues.length} issues before publishing`, "error");
+      return;
+    }
+
+    const nextPublished = !publishedStores?.[selectedStoreId];
+
+    if (
+      publishedStores?.[selectedStoreId] &&
+      !window.confirm("Unlock this store roster for editing?")
+    ) {
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "rosterWeeks", weekStart), {
+        [`publishedStores.${selectedStoreId}`]: nextPublished,
+        updatedAt: serverTimestamp(),
+      });
+
+      setPublishedStores((prev) => ({
+        ...prev,
+        [selectedStoreId]: nextPublished,
+      }));
+
+      showToast(
+        nextPublished
+          ? `Roster published for ${getStoreLabel?.(selectedStoreId) || selectedStoreId}`
+          : `Roster unlocked for ${getStoreLabel?.(selectedStoreId) || selectedStoreId}`,
+        "success"
+      );
+    } catch (e) {
+      showToast("Status update failed", "error");
+    }
+  }
+
+  async function copyPreviousWeek() {
+    if (isLocked) return;
+
+    try {
+      const prevWeek = toYMD(addDays(weekStartDateObj, -7));
+      const prevSnap = await getDocs(collection(db, "rosterWeeks", prevWeek, "shifts"));
+
+      if (prevSnap.empty) {
+        showToast("No shifts found in previous week", "error");
+        return;
+      }
+
+      let copied = prevSnap.docs.map((d) => {
+        const s = d.data();
+        return {
+          ...s,
+          date: toYMD(addDays(new Date(s.date + "T00:00:00"), 7)),
+        };
+      });
+
+      if (selectedStoreId !== "all") {
+        copied = copied.filter((s) => s.storeId === selectedStoreId);
+      }
+
+      if (copied.length === 0) {
+        showToast("No shifts found for selected store in previous week", "error");
+        return;
+      }
+
+      const duplicateCheck = new Set();
+      for (const s of copied) {
+        if (!s.uid || !s.date) continue;
+        const key = `${s.date}_${s.uid}`;
+        if (duplicateCheck.has(key)) {
+          showToast("Previous week contains duplicate staff on same day", "error");
+          return;
+        }
+        duplicateCheck.add(key);
+      }
+
+      const batch = writeBatch(db);
+
+      const currentWeekMatchingShifts =
+        selectedStoreId === "all"
+          ? shifts
+          : shifts.filter((s) => s.storeId === selectedStoreId);
+
+      if (currentWeekMatchingShifts.length > 0) {
+        if (
+          !window.confirm(
+            selectedStoreId === "all"
+              ? "Replace current week shifts with previous week?"
+              : "Replace current selected store shifts with previous week?"
+          )
+        ) {
+          return;
+        }
+
+        currentWeekMatchingShifts.forEach((s) =>
+          batch.delete(doc(db, "rosterWeeks", weekStart, "shifts", s.id))
+        );
+      }
+
+      copied.forEach((s) => {
+        const newRef = doc(collection(db, "rosterWeeks", weekStart, "shifts"));
+        batch.set(newRef, {
+          ...s,
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      await batch.commit();
+      loadWeek();
+      showToast("Roster copied from previous week", "success");
+    } catch (e) {
+      showToast("Error copying roster", "error");
+    }
+  }
+
+  async function deleteShift(sid) {
+    if (isLocked) return;
+    if (!window.confirm("Delete this shift?")) return;
+
+    try {
+      await deleteDoc(doc(db, "rosterWeeks", weekStart, "shifts", sid));
+      loadWeek();
+      showToast("Shift deleted", "success");
+    } catch (e) {
+      showToast("Delete failed", "error");
+    }
+  }
+
+  
+
+  function toggleDayOpen(ymd) {
+    setOpenDays((prev) => {
+      const isCurrentlyOpen = !!prev[ymd];
+  
+      const next = {};
+      Object.keys(prev).forEach((key) => {
+        next[key] = false;
+      });
+  
+      if (!isCurrentlyOpen) {
+        next[ymd] = true;
+  
+        // Scroll into view after slight delay
+        setTimeout(() => {
+          dayRefs.current[ymd]?.scrollIntoView({
+            behavior: "smooth",
+            block: "start", // aligns nicely at top
+          });
+        }, 150);
+      }
+  
+      return next;
+    });
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // function toggleAddOpen(ymd) {
+  //   setOpenDays((prev) => {
+  //     const isCurrentlyOpen = !!prev[ymd];
+  
+  //     const next = {};
+  //     Object.keys(prev).forEach((key) => {
+  //       next[key] = false;
+  //     });
+  
+  //     if (!isCurrentlyOpen) {
+  //       next[ymd] = true;
+  
+  //       setTimeout(() => {
+  //         const el = dayRefs.current[ymd];
+  //         if (!el) return;
+  
+  //         const y = el.getBoundingClientRect().top + window.pageYOffset - 110;
+  //         window.scrollTo({
+  //           top: y,
+  //           behavior: "smooth",
+  //         });
+  //       }, 150);
+  //     }
+  //   });
+  // }
+
+
+  function toggleAddOpen(ymd) {
+    setOpenDays((prev) => {
+      // If it's already open, do nothing and return the current state
+      if (prev[ymd]) return prev;
+  
+      // Otherwise, close everything else and open ONLY this one
+      return { [ymd]: true };
+    });
+  
+    // Always attempt the scroll when the function is called
+    setTimeout(() => {
+      const el = dayRefs.current[ymd];
+      if (!el) return;
+  
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 110;
+      
+      window.scrollTo({
+        top: y,
+        behavior: "smooth",
+      });
+    }, 150);
+  }
+
+
+
+  
 
   return (
-    <div className="stock-admin-wrapper">
-      <header className="stock-admin-header">
-        <div className="title-block">
-          <button className="back-btn" onClick={() => navigate("/admin/dashboard")}>
-            ← Back
-          </button>
-          <h1>Stock Management</h1>
+    <div className="admin-wrapper roster-page">
+      <header className="admin-header">
+        <div className="title-area">
+          <div>
+            <h1 className="main-title">Roster Manager</h1>
+            {/* <p className="roster-subtitle">Organize shifts for the selected week</p> */}
+          </div>
+          <span className={`status-pill ${selectedStoreId !== "all" && publishedStores?.[selectedStoreId] ? "published" : "draft"}`}>
+            {summary.publishState.toUpperCase()}
+          </span>
         </div>
 
-        <div className="admin-filters-bar">
-          <input type="date" className="filter-input" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
-          <select className="filter-select" value={filterStore} onChange={(e) => setFilterStore(e.target.value)}>
-            <option value="all">All Stores</option>
-            {stores.map((s) => ( <option key={s.id} value={s.id}>{s.label}</option> ))}
-          </select>
-          
-          {/* NEW: CREATE BUTTON */}
-          <button 
-            className="btn-dispatch primary" 
-            onClick={() => setIsAddModalOpen(true)}
-            style={{ marginLeft: '10px', padding: '10px 20px' }}
-          >
-            + Add New Request
+        <div className="header-actions">
+          <button className="refresh-circle" onClick={loadWeek}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
           </button>
         </div>
       </header>
 
-      {loading ? (
-        <div className="admin-loader">Loading...</div>
-      ) : (
-        <div className="stock-grid">
-          {stockRecords.map((record) => (
-             <div key={record.id} className={`admin-stock-card ${record.adminProcessed ? "processed" : ""}`}>
-                {/* ... existing card JSX (same as you provided) ... */}
-                <div className="card-header">
-                  <h3>{getStoreLabel(record.storeId)}</h3>
-                  <div style={{display:'flex', gap:'5px'}}>
-                    <button onClick={() => downloadPDF(record)} className="btn-pdf">PDF</button>
-                    <button onClick={() => deleteEntireRecord(record)} className="btn-delete">Delete</button>
-                  </div>
-                </div>
-                <table className="stock-fulfillment-table">
-                    <thead><tr><th>Item</th><th>Req</th><th>Sending</th></tr></thead>
-                    <tbody>
-                      {record.items.map((item, idx) => (
-                        <tr key={idx}>
-                          <td>{item.name}</td>
-                          <td>{item.qtyRequested}</td>
-                          <td>
-                            <input 
-                              type="number" 
-                              value={item.qtySent} 
-                              onChange={(e) => updateItemQtySent(record.id, idx, e.target.value)}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                </table>
-                <button className="btn-dispatch primary" onClick={() => markAsDone(record)}>
-                  Confirm Dispatch
-                </button>
-             </div>
-          ))}
+      <section className="roster-controls">
+        <div className="control-group">
+          <label>Week Starting</label>
+          <input
+            type="date"
+            value={weekStart}
+            onChange={(e) => setWeekStart(normalizeToMondayYMD(e.target.value))}
+          />
+        </div>
+
+        <div className="control-group">
+          <label>Store</label>
+          <select
+            value={selectedStoreId}
+            onChange={(e) => setSelectedStoreId(e.target.value)}
+          >
+            <option value="all">All Stores</option>
+            {stores.map((st) => (
+              <option key={st.id} value={st.id}>
+                {st.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="control-group">
+          <label>View</label>
+          <select value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+            <option value="week">Week View</option>
+            <option value="day">Day View</option>
+          </select>
+        </div>
+
+        {viewMode === "day" && (
+          <div className="control-group">
+            <label>Day</label>
+            <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+              {days.map((d) => {
+                const ymd = toYMD(d);
+                return (
+                  <option key={ymd} value={ymd}>
+                    {prettyDate(d)}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        )}
+
+        <div className="button-row">
+          <button className="btn-sec" onClick={copyPreviousWeek} disabled={isLocked}>
+            Copy Prev
+          </button>
+          <button
+            className={`btn-primary ${isLocked ? "unlock" : "lock"}`}
+            onClick={togglePublish}
+            disabled={selectedStoreId === "all"}
+          >
+            {isLocked ? "Unlock Store" : "Publish Store"}
+          </button>
+        </div>
+      </section>
+
+      <section className="roster-summary-grid">
+        <div className="summary-card-mini">
+          <span className="summary-label-mini">Store</span>
+          <strong>{selectedStoreId === "all" ? "All Stores" : getStoreLabel?.(selectedStoreId) || selectedStoreId}</strong>
+        </div>
+        <div className="summary-card-mini">
+          <span className="summary-label-mini">Visible Shifts</span>
+          <strong>{summary.totalShifts}</strong>
+        </div>
+        <div className="summary-card-mini">
+          <span className="summary-label-mini">Assigned Staff</span>
+          <strong>{summary.totalStaff}</strong>
+        </div>
+        <div className="summary-card-mini">
+          <span className="summary-label-mini">Status</span>
+          <strong>{summary.publishState}</strong>
+        </div>
+      </section>
+
+      {issues.length > 0 && selectedStoreId !== "all" && !isLocked && (
+        <div className="validation-box">
+          <strong>Validation Alert:</strong> Fix {issues.length} issue{issues.length > 1 ? "s" : ""} before publishing.
         </div>
       )}
 
-      {/* NEW: ADD MODAL COMPONENT */}
-      {isAddModalOpen && (
-        <StockTakeModal
-          storeId={filterStore === "all" ? "" : filterStore}
-          date={filterDate}
-          uid="ADMIN_USER"
-          profile={{ firstName: "Admin", lastName: "(Manual)" }}
-          stores={stores} // Pass stores list for dropdown
-          onClose={() => setIsAddModalOpen(false)}
-          onComplete={() => {
-            setIsAddModalOpen(false);
-            loadStockRecords();
-          }}
-        />
-      )}
+      <div className="roster-grid cleaner">
+        {visibleDays.map((d) => {
+          const ymd = toYMD(d);
+          const dayShifts = (shiftsByDate[ymd] || []).sort(
+            (a, b) => (a.startPlanned || "").localeCompare(b.startPlanned || "")
+          );
+
+          return (
+            // <div key={ymd} className="day-column clean collapsible-day">
+              <div
+                key={ymd}
+                ref={(el) => (dayRefs.current[ymd] = el)}
+                className="day-column clean collapsible-day"
+              >
+              <button
+                type="button"
+                className="day-header clean collapsible-trigger"
+                onClick={() => toggleDayOpen(ymd)}
+              >
+                <div className="day-text">
+                  <span className="day-name">{prettyDate(d).split(",")[0]}</span>
+                  <span className="day-date">{ymd}</span>
+                </div>
+
+                <div className="day-header-right">
+                  <span className="day-count">
+                    {dayShifts.length} shift{dayShifts.length !== 1 ? "s" : ""}
+                  </span>
+
+                  {!isLocked && (
+                    <button
+                      // className="add-shift-btn small-add"
+                      className={`btn-primary ${isLocked ? "unlock" : "lock"}`}
+                      
+                      disabled={selectedStoreId === "all"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleAddOpen(ymd);
+                        addShift(ymd);
+
+                      }}
+                    >
+                      +
+                    </button>
+                  )}
+
+                  <span className={`day-chevron ${openDays[ymd] ? "open" : ""}`}>⌄</span>
+                </div>
+              </button>
+
+              {openDays[ymd] && (
+                <div className="shift-list clean">
+                  {dayShifts.length === 0 && <div className="empty-day">No shifts</div>}
+
+                  {dayShifts.map((s, index) => {
+                    const duplicateForThisShift =
+                      !!s.uid && isDuplicateStaffForDay(s.id, s.date, s.uid);
+
+                    return (
+                      <div
+                        key={s.id}
+                        className={`shift-editor-card clean ${!s.uid || duplicateForThisShift ? "error" : ""}`}
+                      >
+                        <div className="shift-card-top">
+                          <span className="shift-number">Shift {index + 1}</span>
+                        </div>
+
+                        <div className="shift-field">
+                          <label style={{ display: "block" }}>Staff {index + 1}</label>
+                          <select
+                            disabled={isLocked}
+                            value={s.uid}
+                            onChange={(e) => {
+                              const selectedUid = e.target.value;
+                              const selectedStaff = staffApproved.find((st) => st.uid === selectedUid);
+                              updateShift(s.id, {
+                                uid: selectedUid,
+                                staffName: selectedStaff?.name || "",
+                              });
+                            }}
+                          >
+                            <option value="">Select Staff</option>
+                            {staffApproved.map((st) => {
+                              const alreadyUsed =
+                                usedStaffByDate[s.date]?.has(st.uid) && s.uid !== st.uid;
+
+                              return (
+                                <option key={st.uid} value={st.uid} disabled={alreadyUsed}>
+                                  {st.name} {alreadyUsed ? "• already on this day" : ""}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+
+                        <div className="shift-field">
+                          <label>Store</label>
+                          <select
+                            disabled={isLocked}
+                            value={s.storeId}
+                            onChange={(e) => updateShift(s.id, { storeId: e.target.value })}
+                          >
+                            {stores.map((st) => (
+                              <option key={st.id} value={st.id}>
+                                {st.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="time-row clean">
+                          <div className="shift-field">
+                            <label>Start</label>
+                            <input
+                              type="time"
+                              disabled={isLocked}
+                              value={s.startPlanned}
+                              onChange={(e) => updateShift(s.id, { startPlanned: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="shift-field">
+                            <label>End</label>
+                            <input
+                              type="time"
+                              disabled={isLocked}
+                              value={s.endPlanned}
+                              onChange={(e) => updateShift(s.id, { endPlanned: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        {!isLocked && (
+                          <button className="del-btn compact" onClick={() => deleteShift(s.id)}>
+                            Remove
+                          </button>
+                        )}
+
+                        {duplicateForThisShift && (
+                          <div className="shift-error-text">
+                            This staff is already assigned on this day.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
