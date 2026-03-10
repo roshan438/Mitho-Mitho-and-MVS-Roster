@@ -85,9 +85,21 @@
 
 .card-header {
     display: flex;
+    /* gap: 40px; */
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 15px;
+}
+.card-actions{
+    /* max-width: 50px; */
+    display: flex;
+    gap: 4px;
+    flex-direction: column;
+    align-items: end;
+}
+.edit-delete-btn{
+    display: flex;
+    gap: 4px;
 }
 
 .shop-info h3 { margin: 4px 0 0 0; font-size: 1.25rem; }
