@@ -85,147 +85,167 @@
 
 
 
-import React, { useMemo, useState } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
 
-function parseStockLines(text) {
-  const lines = String(text || "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
 
-  const items = [];
 
-  for (const line of lines) {
-    // Match: "item name 3" -> name="item name", qty=3
-    const match = line.match(/^(.*?)(?:\s+(\d+))?$/);
 
-    if (!match) continue;
 
-    const rawName = (match[1] || "").trim();
-    const rawQty = match[2];
+// import React, { useMemo, useState } from "react";
+// import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+// import { db } from "../../firebase/firebase";
 
-    if (!rawName) continue;
+// function parseStockLines(text) {
+//   const lines = String(text || "")
+//     .split("\n")
+//     .map((line) => line.trim())
+//     .filter(Boolean);
 
-    items.push({
-      name: rawName,
-      qty: rawQty ? Number(rawQty) : 1,
-    });
-  }
+//   const items = [];
 
-  return items;
-}
+//   for (const line of lines) {
+//     // Match: "item name 3" -> name="item name", qty=3
+//     const match = line.match(/^(.*?)(?:\s+(\d+))?$/);
 
-export default function StockTakeModal({
-  storeId,
-  date,
-  uid,
-  profile,
-  onComplete,
-  onClose,
-}) {
-  const [rawText, setRawText] = useState("");
-  const [loading, setLoading] = useState(false);
+//     if (!match) continue;
 
-  const previewItems = useMemo(() => parseStockLines(rawText), [rawText]);
+//     const rawName = (match[1] || "").trim();
+//     const rawQty = match[2];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+//     if (!rawName) continue;
 
-    const items = parseStockLines(rawText);
+//     items.push({
+//       name: rawName,
+//       qty: rawQty ? Number(rawQty) : 1,
+//     });
+//   }
 
-    if (items.length === 0) {
-      alert("Please enter at least one item");
-      return;
-    }
+//   return items;
+// }
 
-    setLoading(true);
-    try {
-      const stockId = `${storeId}_${date}`;
+// export default function StockTakeModal({
+//   storeId,
+//   date,
+//   uid,
+//   profile,
+//   onComplete,
+//   onClose,
+// }) {
+//   const [rawText, setRawText] = useState("");
+//   const [loading, setLoading] = useState(false);
 
-      await setDoc(doc(db, "dailyStockTake", stockId), {
-        storeId,
-        date,
-        submittedBy: uid,
-        staffName: `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim(),
-        items,
-        rawText: rawText.trim(),
-        timestamp: serverTimestamp(),
-      });
+//   const previewItems = useMemo(() => parseStockLines(rawText), [rawText]);
 
-      alert("Stock take submitted successfully!");
-      onComplete();
-    } catch (error) {
-      console.error(error);
-      alert("Submission failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="profile-modal stock-modal-box"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="modal-header">
-          <h2>Daily Stock Take</h2>
-          <button className="close-btn" onClick={onClose}>
-            ×
-          </button>
-        </div>
+//     const items = parseStockLines(rawText);
 
-        <form onSubmit={handleSubmit} className="modal-content">
-          <p className="hint-text">
-            Enter one item per line. Add quantity at the end if needed.
-          </p>
+//     if (items.length === 0) {
+//       alert("Please enter at least one item");
+//       return;
+//     }
 
-          <div className="stock-text-help">
-            Example:
-            <br />
-            Momo wrappers 3
-            <br />
-            Coke cans 2
-            <br />
-            Napkins
-          </div>
+//     setLoading(true);
+//     try {
+//       const stockId = `${storeId}_${date}`;
 
-          <textarea
-            className="stock-textarea"
-            placeholder={`Momo wrappers 3\nCoke cans 2\nNapkins`}
-            value={rawText}
-            onChange={(e) => setRawText(e.target.value)}
-            rows={8}
-          />
+//       await setDoc(doc(db, "dailyStockTake", stockId), {
+//         storeId,
+//         date,
+//         submittedBy: uid,
+//         staffName: `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim(),
+//         items,
+//         rawText: rawText.trim(),
+//         timestamp: serverTimestamp(),
+//       });
 
-          <div className="stock-preview-box">
-            <div className="stock-preview-title">
-              Preview ({previewItems.length})
-            </div>
+//       alert("Stock take submitted successfully!");
+//       onComplete();
+//     } catch (error) {
+//       console.error(error);
+//       alert("Submission failed");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-            {previewItems.length === 0 ? (
-              <div className="stock-preview-empty">No items yet</div>
-            ) : (
-              <div className="stock-preview-list">
-                {previewItems.map((item, idx) => (
-                  <div key={`${item.name}-${idx}`} className="stock-preview-row">
-                    <span className="stock-preview-name">{item.name}</span>
-                    <span className="stock-preview-qty">x{item.qty}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+//   return (
+//     <div className="modal-overlay" onClick={onClose}>
+//       <div
+//         className="profile-modal stock-modal-box"
+//         onClick={(e) => e.stopPropagation()}
+//       >
+//         <div className="modal-header">
+//           <h2>Daily Stock Take</h2>
+//           <button className="close-btn" onClick={onClose}>
+//             ×
+//           </button>
+//         </div>
 
-          <div className="modal-footer" style={{ marginTop: "20px" }}>
-            <button type="submit" className="save-btn" disabled={loading}>
-              {loading ? "Submitting..." : "Submit Stock Take"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+//         <form onSubmit={handleSubmit} className="modal-content">
+//           <p className="hint-text">
+//             Enter one item per line. Add quantity at the end if needed.
+//           </p>
+
+//           <div className="stock-text-help">
+//             Example:
+//             <br />
+//             Momo wrappers 3
+//             <br />
+//             Coke cans 2
+//             <br />
+//             Napkins
+//           </div>
+
+//           <textarea
+//             className="stock-textarea"
+//             placeholder={`Momo wrappers 3\nCoke cans 2\nNapkins`}
+//             value={rawText}
+//             onChange={(e) => setRawText(e.target.value)}
+//             rows={8}
+//           />
+
+//           <div className="stock-preview-box">
+//             <div className="stock-preview-title">
+//               Preview ({previewItems.length})
+//             </div>
+
+//             {previewItems.length === 0 ? (
+//               <div className="stock-preview-empty">No items yet</div>
+//             ) : (
+//               <div className="stock-preview-list">
+//                 {previewItems.map((item, idx) => (
+//                   <div key={`${item.name}-${idx}`} className="stock-preview-row">
+//                     <span className="stock-preview-name">{item.name}</span>
+//                     <span className="stock-preview-qty">x{item.qty}</span>
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+
+//           <div className="modal-footer" style={{ marginTop: "20px" }}>
+//             <button type="submit" className="save-btn" disabled={loading}>
+//               {loading ? "Submitting..." : "Submit Stock Take"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
