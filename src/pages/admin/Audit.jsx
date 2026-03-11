@@ -936,7 +936,7 @@ export default function Audit() {
       </header>
 
       <main className="scroll-content">
-        <section className="audit-filters-container">
+        <section className="audit-filters-container" style={{margin: '0px 12px 8px 12px'}}>
           <div className="preset-tabs">
             {["day", "week", "custom"].map((p) => (
               <button key={p} className={`tab-item ${preset === p ? "active" : ""}`} onClick={() => setPreset(p)}>
@@ -976,7 +976,7 @@ export default function Audit() {
           </div>
         </section>
 
-        <section className="stats-bar">
+        <section className="stats-bar" style={{margin: '8px 12px 8px 12px'}}>
           <div className="stat-item">
             <label>Total Logs</label>
             <div className="value">{timesheets.length}</div>

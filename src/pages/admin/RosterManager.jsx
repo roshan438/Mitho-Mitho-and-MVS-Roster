@@ -2481,30 +2481,30 @@ export default function RosterManager() {
 
   
 
-  function toggleDayOpen(ymd) {
-    setOpenDays((prev) => {
-      const isCurrentlyOpen = !!prev[ymd];
+  // function toggleDayOpen(ymd) {
+  //   setOpenDays((prev) => {
+  //     const isCurrentlyOpen = !!prev[ymd];
   
-      const next = {};
-      Object.keys(prev).forEach((key) => {
-        next[key] = false;
-      });
+  //     const next = {};
+  //     Object.keys(prev).forEach((key) => {
+  //       next[key] = false;
+  //     });
   
-      if (!isCurrentlyOpen) {
-        next[ymd] = true;
+  //     if (!isCurrentlyOpen) {
+  //       next[ymd] = true;
   
-        // Scroll into view after slight delay
-        setTimeout(() => {
-          dayRefs.current[ymd]?.scrollIntoView({
-            behavior: "smooth",
-            block: "start", // aligns nicely at top
-          });
-        }, 150);
-      }
+  //       // Scroll into view after slight delay
+  //       setTimeout(() => {
+  //         dayRefs.current[ymd]?.scrollIntoView({
+  //           behavior: "smooth",
+  //           block: "start", // aligns nicely at top
+  //         });
+  //       }, 150);
+  //     }
   
-      return next;
-    });
-  }
+  //     return next;
+  //   });
+  // }
 
 
 
@@ -2544,6 +2544,49 @@ export default function RosterManager() {
   //     }
   //   });
   // }
+
+
+
+
+
+  function toggleDayOpen(ymd) {
+    setOpenDays((prev) => {
+      const isCurrentlyOpen = !!prev[ymd];
+      const isMobile = window.innerWidth <= 768; // Standard mobile breakpoint
+  
+      // 1. If NOT mobile, allow multiple sections to stay open (standard desktop feel)
+      if (!isMobile) {
+        return {
+          ...prev,
+          [ymd]: !isCurrentlyOpen
+        };
+      }
+  
+      // 2. If IS mobile, keep the original "One-at-a-time + Scroll" logic
+      const next = {};
+      Object.keys(prev).forEach((key) => {
+        next[key] = false;
+      });
+  
+      if (!isCurrentlyOpen) {
+        next[ymd] = true;
+  
+        setTimeout(() => {
+          dayRefs.current[ymd]?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 150);
+      }
+  
+      return next;
+    });
+  }
+
+
+
+
+  
 
 
   function toggleAddOpen(ymd) {
