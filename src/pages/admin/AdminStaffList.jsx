@@ -591,9 +591,9 @@ export default function AdminStaffList() {
                      </div>
                  </div>
 
-                 <div className="contact-row">
+                 <div className="contact-row" style={{background: '#ef44441f'}}>
                      <div className="contact-info">
-                     <label>Emergency Contact</label>
+                     <label style={{color: '#ef4444'}}>Emergency Contact</label>
                      <p>{selectedProfile.emergencyName} ({selectedProfile.emergencyRelationship})</p>
                      <p className="sub-text">{selectedProfile.emergencyPhone}</p>
                      </div>
