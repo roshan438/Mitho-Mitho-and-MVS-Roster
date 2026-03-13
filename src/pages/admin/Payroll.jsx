@@ -937,7 +937,7 @@ export default function Payroll() {
 
                   <div className="payroll-staff-summary">
                     <span className="hours-pill">
-                      {group.totalHours}h
+                      {(group.totalHours).toFixed(2)}h
                     </span>
                     <span className="amount-pill">
                       {money(group.totalAmount)}
