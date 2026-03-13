@@ -2699,7 +2699,7 @@
     margin-bottom: 4px;
 }
 .flexdisp{
-  grid-template-columns: 150px minmax(10px, 1fr) 50px !important;
+  /* grid-template-columns: 150px minmax(10px, 1fr) 50px !important; */
 }
 .staff-heading{
   margin: 0 !important;
