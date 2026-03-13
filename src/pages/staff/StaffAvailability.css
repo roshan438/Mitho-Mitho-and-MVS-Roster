@@ -1,0 +1,110 @@
+:root {
+    --bg: #0b0f14;
+    --card: #121826;
+    --text: #e6edf3;
+    --muted: #9aa4b2;
+    --border: rgba(255, 255, 255, 0.12);
+    --brand: #f6a600;
+  }
+  
+  .availability-page {
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .availability-card {
+    width: 100%;
+    max-width: 500px;
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    margin-bottom: 90px;
+  }
+  
+  .availability-header { text-align: center; margin-bottom: 24px; }
+  .availability-header h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .availability-header p { font-size: 0.85rem; color: var(--muted); }
+  
+  /* Copy Button */
+  .copy-btn {
+    margin-top: 12px;
+    background: rgba(246, 166, 0, 0.1);
+    border: 1px solid var(--brand);
+    color: var(--brand);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .availability-grid { display: flex; flex-direction: column; gap: 8px; }
+  
+  /* The Row - Single Line on Mobile */
+  .availability-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid transparent;
+  }
+  
+  .availability-row.enabled {
+    background: rgba(246, 166, 0, 0.05);
+    border-color: rgba(246, 166, 0, 0.2);
+  }
+  
+  .day-side { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .day-label { font-weight: 600; font-size: 0.9rem; width: 35px; }
+  
+  .time-side { display: flex; align-items: center; gap: 6px; }
+  
+  /* Smaller Time Inputs for iPhone */
+  .time-side input[type="time"] {
+    background: #000;
+    border: 1px solid var(--border);
+    color: #fff;
+    padding: 6px 4px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    width: 85px; /* Fixed width to prevent jumping */
+    text-align: center;
+  }
+  
+  .sep { color: var(--muted); font-size: 0.8rem; }
+  
+  /* Custom iOS Switch */
+  .ios-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+  }
+  .ios-switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background-color: #333; transition: .3s; border-radius: 20px;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 16px; width: 16px;
+    left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--brand); }
+  input:checked + .slider:before { transform: translateX(16px); }
+  
+  .availability-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .btn-primary.availability { background: var(--brand); flex: 2; border: none; padding: 14px; border-radius: 12px; font-weight: 700; }
+  .btn-secondary.availability { background: transparent; flex: 1; border: 1px solid var(--border); color: #fff; border-radius: 12px; }
+  
+  /* iPhone Small Screen Fixes */
+  @media (max-width: 380px) {
+    .availability-card { padding: 15px; margin-bottom: 90px;}
+    .time-side input[type="time"] { width: 75px; font-size: 0.8rem; }
+    .day-label { font-size: 0.8rem; width: 30px; }
+  }

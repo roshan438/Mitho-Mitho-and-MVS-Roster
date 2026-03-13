@@ -300,13 +300,14 @@ body {
 /* --- Staff Bottom Tab Bar --- */
 .bottom-tab-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
   background: #ffffff;
   display: flex;
   justify-content: space-around;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.2rem;
+  gap: 8px;
   border-top: 1px solid #e2e8f0;
   padding-bottom: env(safe-area-inset-bottom); /* For iPhone notches */
   z-index: 100;
@@ -345,4 +346,182 @@ body {
 .logout-icon-btn:hover {
   background: #f1f5f9;
   color: #dc2626;
+}
+
+
+
+
+
+
+
+
+
+
+/* --- Hamburger Menu Button --- */
+.hamburger-btn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 18px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.hamburger-btn:hover {
+  background: #f8fafc;
+  color: var(--brand);
+  border-color: #cbd5e1;
+}
+
+/* --- Side Menu Overlay --- */
+.side-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 999;
+  display: flex;
+  justify-content: flex-end;
+  backdrop-filter: blur(2px);
+}
+
+/* --- Side Drawer --- */
+.side-menu {
+  width: min(320px, 85vw);
+  height: 100%;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -8px 0 30px rgba(15, 23, 42, 0.12);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideInMenu 0.2s ease;
+}
+
+@keyframes slideInMenu {
+  from {
+    transform: translateX(18px);
+    opacity: 0.96;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.side-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.side-menu-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.close-menu-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.close-menu-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* --- Side Menu Links --- */
+.side-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.side-menu-links a {
+  text-decoration: none;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.side-menu-links a:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: var(--brand);
+}
+
+/* --- User Name Click --- */
+.clickable-user {
+  cursor: pointer;
+}
+
+.clickable-user:hover {
+  color: var(--brand);
+}
+
+/* --- Better Top Nav Responsive --- */
+@media (max-width: 767px) {
+  .top-nav {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .brand {
+    gap: 6px;
+    font-size: 0.92rem;
+  }
+
+  .admin-tag {
+    font-size: 0.58rem;
+    padding: 2px 5px;
+  }
+
+  .top-nav-actions {
+    gap: 8px;
+  }
+
+  .user-email {
+    display: none;
+  }
+
+  .logout-icon-btn {
+    padding: 7px;
+  }
+}
+
+/* --- Keep Bottom Tab Bar Clear on Mobile --- */
+@media (max-width: 767px) {
+  .bottom-tab-bar {
+    padding-top: 0.45rem;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+
+  .tab-item {
+    font-size: 0.68rem;
+  }
+
+  .tab-item svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* --- Tablet polish --- */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .side-menu {
+    width: min(360px, 52vw);
+  }
 }
