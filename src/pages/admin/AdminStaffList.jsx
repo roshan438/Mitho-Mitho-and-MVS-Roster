@@ -503,6 +503,9 @@ export default function AdminStaffList() {
   const saveChanges = async () => {
     try {
       const userRef = doc(db, "users", selectedProfile.id);
+      if(editData.role === 'manager'){
+        editData.department = "manager"
+      }
       await updateDoc(userRef, {
         hourlyRate: Number(editData.hourlyRate),
         status: editData.status,
