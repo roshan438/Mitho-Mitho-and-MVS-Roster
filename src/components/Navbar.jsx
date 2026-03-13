@@ -447,7 +447,8 @@ export default function Navbar() {
         </nav>
       )}
 
-      {fbUser && role === "staff" && (
+      {/* {fbUser && role === "staff" && ( */}
+      {fbUser && (role === "staff" || role === "manager") && (
         <nav className="bottom-tab-bar">
           <Link to="/staff/today" className={`tab-item ${isActive("/staff/today")}`}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

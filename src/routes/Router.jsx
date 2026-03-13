@@ -840,7 +840,8 @@ export default function Router() {
           path="/staff"
           element={
             <AuthGate>
-              <RoleGate allow={["staff"]}>
+              {/* <RoleGate allow={["staff"]}> */}
+              <RoleGate allow={["staff", "manager"]}>
                 <ProfileGate>
                   <ApprovalGate />
                 </ProfileGate>
