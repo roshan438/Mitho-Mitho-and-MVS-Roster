@@ -62,13 +62,40 @@
 
 
 
+// import { Navigate, Outlet } from "react-router-dom";
+// import { useAuthUser } from "./useAuthUser";
+
+// export default function ApprovalGate({ children }) {
+//   const { status, loading, role } = useAuthUser();
+
+//   if (loading) {
+//     return (
+//       <div className="container">
+//         <div className="card">Verifying approval status...</div>
+//       </div>
+//     );
+//   }
+
+//   if (role === "admin") return children || <Outlet />;
+
+//   if (status !== "approved") return <Navigate to="/pending" replace />;
+
+//   return children || <Outlet />;
+// }
+
+
+
+
+
+
+
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthUser } from "./useAuthUser";
 
 export default function ApprovalGate({ children }) {
-  const { status, loading, role } = useAuthUser();
+  const { fbUser, profile, status, loading, role } = useAuthUser();
 
-  if (loading) {
+  if (loading || (fbUser && !profile)) {
     return (
       <div className="container">
         <div className="card">Verifying approval status...</div>
