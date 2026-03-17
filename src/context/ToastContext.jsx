@@ -72,6 +72,7 @@ export function ToastProvider({ children }) {
             onClick={() => removeToast(toast.id)}
             type="button"
           >
+            {/* khoe */}
             <div className="toast-icon">
               {toast.type === "success" && "✓"}
               {toast.type === "error" && "!"}
