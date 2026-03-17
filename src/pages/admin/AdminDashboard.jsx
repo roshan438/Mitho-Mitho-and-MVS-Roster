@@ -70,6 +70,7 @@ export default function AdminDashboard() {
           const data = d.data();
           if (data.uid) map[data.uid] = data;
         });
+        // ok
         const stockQ = query(collection(db, "dailyStockTake"), where("date", "==", today));
         const stockSnap = await getDocs(stockQ);
         const stocks = stockSnap.docs.map(d => ({ id: d.id, ...d.data() }));
