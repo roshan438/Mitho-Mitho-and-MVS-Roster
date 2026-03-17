@@ -82,100 +82,112 @@ export default function MyProfileModal({ profile, uid, onClose }) {
     }
   };
 
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>My Settings</h2>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+    <div className="ps-modal-overlay" onClick={onClose}>
+      <div className="ps-modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="ps-modal-header">
+          <div className="ps-header-titles">
+            <h2>Account Settings</h2>
+            <p>Manage your personal information and security</p>
+          </div>
+          <button className="ps-close-x" onClick={onClose}>&times;</button>
         </div>
 
-        <div className="modal-content">
-          <section className="profile-section">
-            <div className="section-header">
-              <h3>Personal & Contact</h3>
-              <button className="text-btn" onClick={() => setIsEditing(!isEditing)}>
-                {isEditing ? "Cancel" : "Edit"}
+        <div className="ps-modal-body">
+          <section className="ps-section">
+            <div className="ps-section-header">
+              <h3>Personal Details</h3>
+              <button className={`ps-edit-toggle ${isEditing ? 'active' : ''}`} onClick={() => setIsEditing(!isEditing)}>
+                {isEditing ? "Cancel" : "Edit Profile"}
               </button>
             </div>
 
-            <div className="profile-grid">
-              <div className="input-group">
+            <div className="ps-grid">
+              <div className="ps-field">
                 <label>First Name</label>
-                {isEditing ? <input value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} /> : <p>{profile?.firstName || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} /> : <p className="ps-value">{profile?.firstName || "---"}</p>}
               </div>
-              <div className="input-group">
+              <div className="ps-field">
                 <label>Last Name</label>
-                {isEditing ? <input value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} /> : <p>{profile?.lastName || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} /> : <p className="ps-value">{profile?.lastName || "---"}</p>}
               </div>
-              <div className="input-group">
-                <label>Phone</label>
-                {isEditing ? <input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} /> : <p>{profile?.phone || "---"}</p>}
+              <div className="ps-field">
+                <label>Phone Number</label>
+                {isEditing ? <input className="ps-input" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} /> : <p className="ps-value">{profile?.phone || "---"}</p>}
               </div>
-              <div className="input-group">
+              <div className="ps-field">
                 <label>Date of Birth</label>
-                {isEditing ? <input type="date" value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} /> : <p>{profile?.dob || "---"}</p>}
+                {isEditing ? <input type="date" className="ps-input" value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} /> : <p className="ps-value">{profile?.dob || "---"}</p>}
               </div>
-              <div className="input-group full-width">
+              <div className="ps-field full-width">
                 <label>Street Address</label>
-                {isEditing ? <input value={formData.addressLine1} onChange={e => setFormData({...formData, addressLine1: e.target.value})} /> : <p>{profile?.addressLine1 || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.addressLine1} onChange={e => setFormData({...formData, addressLine1: e.target.value})} /> : <p className="ps-value">{profile?.addressLine1 || "---"}</p>}
               </div>
-              <div className="input-group">
+              <div className="ps-field">
                 <label>Suburb</label>
-                {isEditing ? <input value={formData.suburb} onChange={e => setFormData({...formData, suburb: e.target.value})} /> : <p>{profile?.suburb || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.suburb} onChange={e => setFormData({...formData, suburb: e.target.value})} /> : <p className="ps-value">{profile?.suburb || "---"}</p>}
               </div>
-              <div className="input-group">
+              <div className="ps-field">
                 <label>State</label>
-                {isEditing ? <input value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} /> : <p>{profile?.state || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} /> : <p className="ps-value">{profile?.state || "---"}</p>}
               </div>
-              <div className="input-group">
+              <div className="ps-field">
                 <label>Postcode</label>
-                {isEditing ? <input value={formData.postcode} onChange={e => setFormData({...formData, postcode: e.target.value})} /> : <p>{profile?.postcode || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.postcode} onChange={e => setFormData({...formData, postcode: e.target.value})} /> : <p className="ps-value">{profile?.postcode || "---"}</p>}
               </div>
             </div>
           </section>
 
-          <section className="profile-section">
-            <h3>Emergency Contact</h3>
-            <div className="profile-grid">
-              <div className="input-group">
-                <label>Name</label>
-                {isEditing ? <input value={formData.emergencyName} onChange={e => setFormData({...formData, emergencyName: e.target.value})} /> : <p>{profile?.emergencyName || "---"}</p>}
+          <section className="ps-section">
+            <h3 className="ps-sub-title">Emergency Contact</h3>
+            <div className="ps-grid">
+              <div className="ps-field">
+                <label>Full Name</label>
+                {isEditing ? <input className="ps-input" value={formData.emergencyName} onChange={e => setFormData({...formData, emergencyName: e.target.value})} /> : <p className="ps-value">{profile?.emergencyName || "---"}</p>}
               </div>
-              <div className="input-group">
+              <div className="ps-field">
                 <label>Relationship</label>
-                {isEditing ? <input value={formData.emergencyRelationship} onChange={e => setFormData({...formData, emergencyRelationship: e.target.value})} /> : <p>{profile?.emergencyRelationship || "---"}</p>}
+                {isEditing ? <input className="ps-input" value={formData.emergencyRelationship} onChange={e => setFormData({...formData, emergencyRelationship: e.target.value})} /> : <p className="ps-value">{profile?.emergencyRelationship || "---"}</p>}
               </div>
-              <div className="input-group">
-                <label>Emergency Phone</label>
-                {isEditing ? <input value={formData.emergencyPhone} onChange={e => setFormData({...formData, emergencyPhone: e.target.value})} /> : <p>{profile?.emergencyPhone || "---"}</p>}
+              <div className="ps-field">
+                <label>Phone Number</label>
+                {isEditing ? <input className="ps-input" value={formData.emergencyPhone} onChange={e => setFormData({...formData, emergencyPhone: e.target.value})} /> : <p className="ps-value">{profile?.emergencyPhone || "---"}</p>}
               </div>
             </div>
-            {isEditing && <button className="save-btn" onClick={handleSaveProfile} disabled={loading}>{loading ? "Saving..." : "Save Changes"}</button>}
+            {isEditing && (
+              <button className="ps-save-main-btn" onClick={handleSaveProfile} disabled={loading}>
+                {loading ? "Syncing Data..." : "Save Profile Changes"}
+              </button>
+            )}
           </section>
 
-          <section className="profile-section security-box">
-             <div className="section-header">
-               <h3>Security</h3>
-               {!isChangingPass && <button className="text-btn" onClick={() => setIsChangingPass(true)}>Change Password</button>}
+          <section className="ps-section ps-security-zone">
+             <div className="ps-section-header">
+               <h3>Login Security</h3>
+               {!isChangingPass && <button className="ps-link-btn" onClick={() => setIsChangingPass(true)}>Update Password</button>}
              </div>
              {isChangingPass && (
-               <form className="password-form" onSubmit={handlePasswordUpdate}>
-                 <div className="input-group">
+               <form className="ps-pass-form" onSubmit={handlePasswordUpdate}>
+                 <div className="ps-field">
                    <label>Current Password</label>
-                   <input type="password" required value={passwords.current} onChange={e => setPasswords({...passwords, current: e.target.value})} />
+                   <input className="ps-input" type="password" required value={passwords.current} onChange={e => setPasswords({...passwords, current: e.target.value})} />
                  </div>
-                 <div className="input-group">
-                   <label>New Password</label>
-                   <input type="password" required value={passwords.new} onChange={e => setPasswords({...passwords, new: e.target.value})} />
+                 <div className="ps-grid">
+                    <div className="ps-field">
+                      <label>New Password</label>
+                      <input className="ps-input" type="password" required value={passwords.new} onChange={e => setPasswords({...passwords, new: e.target.value})} />
+                    </div>
+                    <div className="ps-field">
+                      <label>Confirm New Password</label>
+                      <input className="ps-input" type="password" required value={passwords.confirm} onChange={e => setPasswords({...passwords, confirm: e.target.value})} />
+                    </div>
                  </div>
-                 <div className="input-group">
-                   <label>Confirm New Password</label>
-                   <input type="password" required value={passwords.confirm} onChange={e => setPasswords({...passwords, confirm: e.target.value})} />
-                 </div>
-                 <div className="form-actions">
-                   <button type="submit" className="confirm-btn" disabled={loading}>{loading ? "Updating..." : "Update Password"}</button>
-                   <button type="button" className="cancel-btn" onClick={() => setIsChangingPass(false)}>Cancel</button>
+                 <div className="ps-form-actions">
+                   <button type="submit" className="ps-confirm-btn" disabled={loading}>
+                     {loading ? "Updating..." : "Update Password"}
+                   </button>
+                   <button type="button" className="ps-cancel-btn" onClick={() => setIsChangingPass(false)}>Cancel</button>
                  </div>
                </form>
              )}
@@ -184,4 +196,5 @@ export default function MyProfileModal({ profile, uid, onClose }) {
       </div>
     </div>
   );
+
 }

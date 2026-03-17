@@ -1,47 +1,4 @@
-/* .signup { display: flex; justify-content: center; padding-top: 20px; }
-.signup-card { width: min(900px, 100%); }
-.full { width: 100%; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-@media (max-width: 720px) {
-  .grid { grid-template-columns: 1fr; }
-}
 
-.error {
-  margin: 10px 0;
-  padding: 10px;
-  border: 1px solid rgba(255, 100, 100, 0.35);
-  border-radius: 10px;
-  color: #ffb3b3;
-  background: rgba(255, 100, 100, 0.08);
-}
-.divider {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-}
-.divider::before, .divider::after {
-  content: "";
-  height: 1px;
-  background: var(--border);
-}
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  grid-column: 1 / -1;
-}
-.muted { color: var(--muted); }
-.muted a { color: var(--text); } */
 
 
 
@@ -50,16 +7,16 @@
 
 
 :root {
-  --brand-color: #f6a600; /* Your brand color */
+  --brand-color: #f6a600;
   --brand-hover: #d99200;
   --error-color: #ff4d4d;
 }
 
 .signup-wrapper {
-  padding: 40px 20px;
+  padding: 32px 20px;
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Better for long forms */
+  align-items: flex-start;
 }
 
 .signup-container {
@@ -87,22 +44,21 @@
 .input-group {
   display: flex;
   flex-direction: column;
-  /* margin-bottom: 1.5rem; */
 }
 
 .input-group label {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   margin-bottom: 8px;
-  color: #fff;
+  color: var(--muted-strong);
 }
 
 .auth-input {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 208, 168, 0.12);
+  background: rgba(12, 10, 8, 0.92);
+  color: #fff8f1;
   font-size: 1rem;
 }
 
@@ -110,11 +66,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 16px;
   margin: 20px 0;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 208, 168, 0.1);
 }
 
 .tax-toggle input[type="checkbox"] {
@@ -125,12 +81,12 @@
 
 .tax-toggle label {
   font-size: 0.85rem;
-  color: #fff;
+  color: var(--text);
   cursor: pointer;
   margin-bottom: 0;
 }
 
-/* Password Strength Meter Logic */
+
 .strength-meter {
   margin-top: 8px;
   display: flex;
@@ -138,22 +94,22 @@
   gap: 4px;
 }
 
-/* Target the track div from the React code */
+
 .strength-meter > div {
   height: 4px;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.1); /* Darker track for dark mode */
+  background-color: rgba(255, 255, 255, 0.1); 
   border-radius: 10px;
   overflow: hidden;
 }
 
-/* Target the filling div from the React code */
+
 .strength-meter > div > div {
   height: 100%;
   transition: width 0.4s ease, background-color 0.4s ease;
 }
 
-/* The label (Weak, Fair, etc) */
+
 .strength-meter span {
   font-size: 11px;
   font-weight: 600;
@@ -161,7 +117,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Error Text for Mismatch */
+
 .input-group span {
   font-size: 11px;
   color: var(--error-color);
@@ -181,17 +137,18 @@
 }
 
 .btn-brand {
-  background: var(--brand-color);
-  color: #000;
+  background: linear-gradient(180deg, #ffbf47, #f6a600);
+  color: #24180b;
   font-weight: 800;
-  border: none;
+  border: 1px solid rgba(255, 208, 126, 0.36);
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
   cursor: pointer;
   font-size: 1rem;
-  transition: background 0.2s, transform 0.1s;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
   margin-top: 10px;
+  box-shadow: 0 14px 30px rgba(246, 166, 0, 0.22);
 }
 
 .btn-brand:hover { background: var(--brand-hover); }
@@ -210,7 +167,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  color: var(--brand); /* Updated to match your brand */
+  color: var(--brand);
   font-weight: 500;
 }
 
@@ -218,7 +175,7 @@
   text-decoration: underline;
 }
 
-/* Mobile Adjustments */
+
 @media (max-width: 480px) {
   .form-grid {
     grid-template-columns: 1fr;

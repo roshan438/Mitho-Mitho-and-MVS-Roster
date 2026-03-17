@@ -4,7 +4,6 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
 import { useToast } from "../../context/ToastContext";
 import getFirebaseErrorMessage from "../../utils/getFirebaseErrorMessage";
-// import "./CompleteProfile.css";
 
 export default function CompleteProfile() {
   const nav = useNavigate();
@@ -80,8 +79,12 @@ export default function CompleteProfile() {
 
     setLoading(true);
     try {
+      const userRef = doc(db, "users", user.uid);
+      const existingSnap = await getDoc(userRef);
+      const existingData = existingSnap.exists() ? existingSnap.data() : {};
+
       await setDoc(
-        doc(db, "users", user.uid),
+        userRef,
         {
           uid: user.uid,
           email: user.email,
@@ -97,9 +100,9 @@ export default function CompleteProfile() {
           emergencyPhone: emergencyPhone.trim(),
           emergencyRelationship: emergencyRelationship.trim(),
           taxInProgress,
-          role: "staff",
-          status: "pending",
           profileComplete: true,
+          role: existingData.role || "staff",
+          status: existingData.status || "pending",
           updatedAt: serverTimestamp(),
         },
         { merge: true }

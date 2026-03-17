@@ -1,0 +1,18 @@
+{
+  "name": "RAS Roster",
+  "short_name": "RAS",
+  "description": "Restaurant and food trailer staff roster, payroll, attendance and daily ops.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0908",
+  "theme_color": "#f6a600",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

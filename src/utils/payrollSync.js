@@ -1,4 +1,3 @@
-// src/utils/payrollSync.js
 import {
     collection,
     doc,
@@ -12,8 +11,6 @@ import {
   } from "firebase/firestore";
   import { db } from "../firebase/firebase";
   import { addDays, toYMD, getPaydayForWeek } from "./payrollCalc";
-  
-  // --- Time helpers (same logic you used) ---
   const hmToMinutes = (hm) => {
     if (!hm || typeof hm !== "string") return null;
     const [h, m] = hm.split(":").map(Number);
@@ -27,9 +24,7 @@ import {
     if (start == null || end == null) return 0;
   
     let worked = end - start;
-    if (worked < 0) worked += 1440; // overnight safety
-  
-    // break is optional
+    if (worked < 0) worked += 1440;
     const bs = hmToMinutes(ts.breakStartInput);
     const be = hmToMinutes(ts.breakEndInput);
     if (bs != null && be != null) {
@@ -43,24 +38,11 @@ import {
   
   const round2 = (n) => Math.round((Number(n || 0) + Number.EPSILON) * 100) / 100;
   
-  /**
-   * Admin sync:
-   * - Reads all timesheets in week range [weekStart, weekStart+7)
-   * - Writes/updates daily payroll entries:
-   *      payrollDays/{date}/entries/{uid}
-   * - Recomputes weekly totals and updates:
-   *      payrollWeeks/{weekStart}/staff/{uid}
-   *   while PRESERVING paidTotal already recorded.
-   *
-   * weekStartYMD: "YYYY-MM-DD" (Monday)
-   */
   export async function syncPayrollWeekFromTimesheets(weekStartYMD) {
     const weekStart = new Date(weekStartYMD + "T00:00:00");
     const weekEndExclusive = addDays(weekStart, 7);
     const weekEndYMD = toYMD(addDays(weekStart, 6)); // Sunday
     const paydayYMD = getPaydayForWeek(weekStartYMD);
-  
-    // 1) Pull all approved staff users (need hourlyRate + names)
     const staffSnap = await getDocs(
       query(collection(db, "users"), where("role", "==", "staff"), where("status", "==", "approved"))
     );
@@ -69,8 +51,6 @@ import {
     staffSnap.docs.forEach((d) => {
       usersByUid[d.id] = { uid: d.id, ...d.data() };
     });
-  
-    // 2) Pull all timesheets in this week (all staff, no uid filter)
     const startYMD = weekStartYMD;
     const endYMD = toYMD(weekEndExclusive);
   
@@ -81,11 +61,8 @@ import {
         where("date", "<", endYMD)
       )
     );
-  
-    // 3) Build totals per uid + daily ledger
-    // dailyEntries[date][uid] = {hours, amount, storeId}
-    const dailyEntries = {}; // { "2026-03-02": { uid1: {...}, uid2: {...} } }
-    const totalsByUid = {};  // { uid: { totalMinutes, totalHours, totalAmount } }
+    const dailyEntries = {};
+    const totalsByUid = {};
   
     tsSnap.docs.forEach((d) => {
       const ts = d.data();
@@ -93,7 +70,6 @@ import {
       const date = ts.date;
   
       if (!uid || !date) return;
-      // Only staff we know (approved). If you want include all, remove this check.
       const user = usersByUid[uid];
       if (!user) return;
   
@@ -119,11 +95,7 @@ import {
       totalsByUid[uid].totalHours = round2(totalsByUid[uid].totalMinutes / 60);
       totalsByUid[uid].totalAmount = round2(totalsByUid[uid].totalHours * rate);
     });
-  
-    // 4) Batch write daily payroll entries + update weekly summaries
     const batch = writeBatch(db);
-  
-    // 4a) Write daily entries
     Object.keys(dailyEntries).forEach((dayId) => {
       const byUid = dailyEntries[dayId];
       Object.keys(byUid).forEach((uid) => {
@@ -144,20 +116,13 @@ import {
             source: "timesheet",
             timesheetId: e.timesheetId,
             updatedAt: serverTimestamp(),
-            // keep createdAt if already exists (but batch can't read)
-            // so we set createdAt only if missing using merge and do not overwrite:
             createdAt: serverTimestamp(),
           },
           { merge: true }
         );
       });
     });
-  
-    // 4b) Update weekly summary per uid (preserve paidTotal)
-    // We can't read inside a batch, so we do per-user getDoc before setting summary.
     await batch.commit(); // commit daily first (fast + reliable)
-  
-    // Now update summaries (separate loop)
     for (const uid of Object.keys(usersByUid)) {
       const user = usersByUid[uid];
       const totals = totalsByUid[uid] || { totalMinutes: 0, totalHours: 0, totalAmount: 0 };

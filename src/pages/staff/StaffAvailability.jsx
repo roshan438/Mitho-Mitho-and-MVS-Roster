@@ -1,185 +1,3 @@
-// import { useMemo, useState, useEffect } from "react";
-// import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import { db } from "../../firebase/firebase";
-// import { useAuth } from "../../auth/AuthProvider";
-// import { useToast } from "../../context/ToastContext";
-// import "./StaffAvailability.css";
-
-// const DAY_KEYS = [
-//   "monday",
-//   "tuesday",
-//   "wednesday",
-//   "thursday",
-//   "friday",
-//   "saturday",
-//   "sunday",
-// ];
-
-// function makeDefaultAvailability() {
-//   return {
-//     monday: { enabled: false, start: "", end: "" },
-//     tuesday: { enabled: false, start: "", end: "" },
-//     wednesday: { enabled: false, start: "", end: "" },
-//     thursday: { enabled: false, start: "", end: "" },
-//     friday: { enabled: false, start: "", end: "" },
-//     saturday: { enabled: false, start: "", end: "" },
-//     sunday: { enabled: false, start: "", end: "" },
-//   };
-// }
-
-// function labelize(day) {
-//   return day.charAt(0).toUpperCase() + day.slice(1);
-// }
-
-// export default function StaffAvailability() {
-//   const { fbUser, profile } = useAuth();
-//   const { showToast } = useToast();
-//   const nav = useNavigate();
-//   const location = useLocation();
-
-//   const isSetupMode = location.pathname.includes("/setup");
-
-//   const initialAvailability = useMemo(() => {
-//     return profile?.availability || makeDefaultAvailability();
-//   }, [profile]);
-
-//   const [availability, setAvailability] = useState(initialAvailability);
-//   const [saving, setSaving] = useState(false);
-
-//   useEffect(() => {
-//     setAvailability(profile?.availability || makeDefaultAvailability());
-//   }, [profile]);
-
-//   function updateDay(day, field, value) {
-//     setAvailability((prev) => ({
-//       ...prev,
-//       [day]: {
-//         ...prev[day],
-//         [field]: value,
-//       },
-//     }));
-//   }
-
-//   function validate() {
-//     const enabledDays = DAY_KEYS.filter((day) => availability[day]?.enabled);
-
-//     if (enabledDays.length === 0) {
-//       showToast("Please select at least one available day", "error");
-//       return false;
-//     }
-
-//     for (const day of enabledDays) {
-//       const row = availability[day];
-//       if (!row.start || !row.end) {
-//         showToast(`Please set start and end time for ${labelize(day)}`, "error");
-//         return false;
-//       }
-//       if (row.end <= row.start) {
-//         showToast(`End time must be after start time for ${labelize(day)}`, "error");
-//         return false;
-//       }
-//     }
-
-//     return true;
-//   }
-
-//   async function handleSave() {
-//     if (!fbUser?.uid) return;
-//     if (!validate()) return;
-
-//     try {
-//       setSaving(true);
-
-//       await setDoc(
-//         doc(db, "users", fbUser.uid),
-//         {
-//           availability,
-//           availabilitySubmitted: true,
-//           availabilityUpdatedAt: serverTimestamp(),
-//         },
-//         { merge: true }
-//       );
-
-//       showToast(
-//         isSetupMode ? "Availability submitted successfully" : "Availability updated",
-//         "success"
-//       );
-
-//       if (isSetupMode) {
-//         nav("/staff/today", { replace: true });
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       showToast("Failed to save availability", "error");
-//     } finally {
-//       setSaving(false);
-//     }
-//   }
-
-//   return (
-//     <div className="availability-page">
-//       <div className="availability-card">
-//         <div className="availability-header">
-//           <h1>{isSetupMode ? "Set Your Availability" : "Edit Availability"}</h1>
-//           <p>
-//             {isSetupMode
-//               ? "Please complete your weekly availability before continuing."
-//               : "Update the days and times you are available to work."}
-//           </p>
-//         </div>
-
-//         <div className="availability-grid">
-//           {DAY_KEYS.map((day) => {
-//             const row = availability[day] || { enabled: false, start: "", end: "" };
-
-//             return (
-//               <div key={day} className={`availability-row ${row.enabled ? "enabled" : ""}`}>
-//                 <div className="availability-day">
-//                   <label className="toggle-wrap">
-//                     <input
-//                       type="checkbox"
-//                       checked={row.enabled}
-//                       onChange={(e) => updateDay(day, "enabled", e.target.checked)}
-//                     />
-//                     <span>{labelize(day)}</span>
-//                   </label>
-//                 </div>
-
-//                 <div className="availability-times">
-//                   <input
-//                     type="time"
-//                     value={row.start}
-//                     disabled={!row.enabled}
-//                     onChange={(e) => updateDay(day, "start", e.target.value)}
-//                   />
-//                   <span className="to-separator">to</span>
-//                   <input
-//                     type="time"
-//                     value={row.end}
-//                     disabled={!row.enabled}
-//                     onChange={(e) => updateDay(day, "end", e.target.value)}
-//                   />
-//                 </div>
-//               </div>
-//             );
-//           })}
-//         </div>
-
-//         <div className="availability-actions">
-//           {!isSetupMode && (
-//             <button className="btn-secondary" onClick={() => nav(-1)}>
-//               Back
-//             </button>
-//           )}
-//           <button className="btn-primary" onClick={handleSave} disabled={saving}>
-//             {saving ? "Saving..." : isSetupMode ? "Submit Availability" : "Save Changes"}
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 
 
@@ -191,12 +9,13 @@
 
 
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate, useLocation } from "react-router-dom";
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
+import ClearableTimeInput from "../../components/ClearableTimeInput";
 import "./StaffAvailability.css";
 
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -230,7 +49,29 @@ export default function StaffAvailability() {
     }));
   }
 
-  // Quick Action: Copy Monday's times to all other enabled days
+  function validateAvailability() {
+    const enabledDays = DAY_KEYS.filter((day) => availability[day]?.enabled);
+
+    if (enabledDays.length === 0) {
+      showToast("Please select at least one available day", "error");
+      return false;
+    }
+
+    for (const day of enabledDays) {
+      const row = availability[day];
+      if (!row.start || !row.end) {
+        showToast(`Please set start and end time for ${labelize(day)}`, "error");
+        return false;
+      }
+
+      if (row.end <= row.start) {
+        showToast(`End time must be after start time for ${labelize(day)}`, "error");
+        return false;
+      }
+    }
+
+    return true;
+  }
   function copyMondayToAll() {
     const { start, end } = availability.monday;
     if (!start || !end) {
@@ -249,6 +90,8 @@ export default function StaffAvailability() {
 
   async function handleSave() {
     if (!fbUser?.uid) return;
+    if (!validateAvailability()) return;
+
     try {
       setSaving(true);
       await setDoc(doc(db, "users", fbUser.uid), {
@@ -258,8 +101,8 @@ export default function StaffAvailability() {
       }, { merge: true });
 
       showToast(isSetupMode ? "Availability set!" : "Updated", "success");
-      if (!isSetupMode) nav("/staff/today", { replace: true });
-    } catch (error) {
+      nav("/staff/today", { replace: true });
+    } catch {
       showToast("Failed to save", "error");
     } finally { setSaving(false); }
   }
@@ -293,18 +136,18 @@ export default function StaffAvailability() {
                 </div>
 
                 <div className="time-side">
-                  <input
-                    type="time"
+                  <ClearableTimeInput
                     value={row.start}
                     disabled={!row.enabled}
                     onChange={(e) => updateDay(day, "start", e.target.value)}
+                    clearLabel={`Clear ${labelize(day)} start time`}
                   />
                   <span className="sep">-</span>
-                  <input
-                    type="time"
+                  <ClearableTimeInput
                     value={row.end}
                     disabled={!row.enabled}
                     onChange={(e) => updateDay(day, "end", e.target.value)}
+                    clearLabel={`Clear ${labelize(day)} end time`}
                   />
                 </div>
               </div>

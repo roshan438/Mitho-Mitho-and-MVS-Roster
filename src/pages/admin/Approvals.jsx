@@ -1,149 +1,3 @@
-// import { useEffect, useState } from "react";
-// import {
-//   collection,
-//   query,
-//   where,
-//   getDocs,
-//   updateDoc,
-//   doc,
-//   serverTimestamp,
-//   orderBy,
-// } from "firebase/firestore";
-// import { db } from "../../firebase/firebase";
-// import "./Approvals.css";
-
-// export default function Approvals() {
-//   const [pendingUsers, setPendingUsers] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [err, setErr] = useState("");
-
-//   useEffect(() => {
-//     fetchPending();
-//   }, []);
-
-//   async function fetchPending() {
-//     setLoading(true);
-//     setErr("");
-//     try {
-//       const q = query(
-//         collection(db, "users"),
-//         where("status", "==", "pending"),
-//         orderBy("createdAt", "desc")
-//       );
-
-//       const snap = await getDocs(q);
-
-//       const list = snap.docs.map((d) => ({
-//         id: d.id,
-//         ...d.data(),
-//         hourlyRateInput: "",
-//       }));
-
-//       setPendingUsers(list);
-//     } catch (e) {
-//       setErr(e.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }
-
-//   function updateRate(uid, val) {
-//     setPendingUsers((prev) =>
-//       prev.map((u) => (u.id === uid ? { ...u, hourlyRateInput: val } : u))
-//     );
-//   }
-
-//   async function approveUser(user) {
-//     const rate = Number(user.hourlyRateInput);
-//     if (!rate || rate <= 0) {
-//       alert("Enter a valid hourly rate");
-//       return;
-//     }
-
-//     await updateDoc(doc(db, "users", user.id), {
-//       status: "approved",
-//       hourlyRate: rate,
-//       updatedAt: serverTimestamp(),
-//     });
-
-//     await fetchPending();
-//   }
-
-//   async function rejectUser(user) {
-//     await updateDoc(doc(db, "users", user.id), {
-//       status: "rejected",
-//       updatedAt: serverTimestamp(),
-//     });
-
-//     await fetchPending();
-//   }
-
-//   return (
-//     <div className="container">
-//       <div className="card">
-//         <div className="row approvals-header">
-//           <div>
-//             <h1 className="h1">Approvals</h1>
-//             <p className="p">Approve staff signups and set their hourly rate.</p>
-//           </div>
-
-//           <button className="btn" onClick={fetchPending}>
-//             Refresh
-//           </button>
-//         </div>
-
-//         <div className="spacer" />
-
-//         {err && <div className="errorBox">{err}</div>}
-
-//         {loading && <p className="p">Loading pending users…</p>}
-
-//         {!loading && pendingUsers.length === 0 && (
-//           <p className="p">No pending users right now.</p>
-//         )}
-
-//         {!loading &&
-//           pendingUsers.map((u) => (
-//             <div key={u.id} className="approvalCard">
-//               <div className="approvalLeft">
-//                 <div className="title">
-//                   {u.firstName || ""} {u.lastName || ""}
-//                 </div>
-//                 <div className="meta">{u.email}</div>
-//                 <div className="meta">Phone: {u.phone || "-"}</div>
-//                 <div className="meta">DOB: {u.dob || "-"}</div>
-//                 <div className="meta">
-//                   TFN/Tax in progress: {u.taxInProgress ? "Yes" : "No"}
-//                 </div>
-//               </div>
-
-//               <div className="approvalRight">
-//                 <input
-//                   className="input"
-//                   type="number"
-//                   placeholder="Hourly rate (e.g. 28)"
-//                   value={u.hourlyRateInput}
-//                   onChange={(e) => updateRate(u.id, e.target.value)}
-//                 />
-
-//                 <button
-//                   className="btn primary"
-//                   disabled={!u.hourlyRateInput || Number(u.hourlyRateInput) <= 0}
-//                   onClick={() => approveUser(u)}
-//                 >
-//                   Approve
-//                 </button>
-
-//                 <button className="btn" onClick={() => rejectUser(u)}>
-//                   Reject
-//                 </button>
-//               </div>
-//             </div>
-//           ))}
-//       </div>
-//     </div>
-//   );
-// }
 
 
 
@@ -180,11 +34,6 @@ export default function Approvals() {
     setLoading(true);
     setErr("");
     try {
-      // const q = query(
-      //   collection(db, "users"),
-      //   where("status", "==", "pending"),
-      //   orderBy("createdAt", "desc")
-      // );
 
         const q = query(
           collection(db, "users"),
@@ -241,7 +90,6 @@ export default function Approvals() {
   }
 
   async function rejectUser(user) {
-    // Keeping confirm for safety, but toast for feedback
     if (!window.confirm(`Are you sure you want to reject ${user.firstName}?`)) return;
     
     try {

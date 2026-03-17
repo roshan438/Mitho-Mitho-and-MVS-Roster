@@ -17,8 +17,6 @@ export default function QRScanner({
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [detected, setDetected] = useState(false);
-  const [detectedText, setDetectedText] = useState("");
-
   useEffect(() => {
     if (!open) return;
 
@@ -29,7 +27,6 @@ export default function QRScanner({
       setErr("");
       setBusy(true);
       setDetected(false);
-      setDetectedText("");
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -89,12 +86,7 @@ export default function QRScanner({
 
           const value = String(code.data).trim();
           setDetected(true);
-          setDetectedText(value);
-
-          // return the value immediately (so input fills)
           onResult(value);
-
-          // hold UI for a moment then close
           setTimeout(() => {
             stop();
             onClose();

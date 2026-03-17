@@ -1,213 +1,357 @@
-/* .grid2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  
-  .qrBox {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 12px;
-  
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 16px;
-    background: rgba(255,255,255,0.02);
-    padding: 12px;
-  }
-  
-  .qrLeft .strong { font-weight: 950; }
-  
-  .qrRight {
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    background: rgba(255,255,255,0.01);
-    padding: 10px;
-  }
-  
-  .qrImg {
-    width: 320px;
-    max-width: 100%;
-    height: auto;
-    border-radius: 12px;
-  }
-  
-  @media (max-width: 820px) {
-    .grid2 { grid-template-columns: 1fr; }
-    .qrBox { grid-template-columns: 1fr; }
-  } */
-
-
-
-
-
-
-
-
-
-
-
-
-  .settings-card, .qr-management-card {
-    background: #1c2230;
-    margin: 15px;
-    padding: 20px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  
-  .section-label {
-    display: block;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #7d859a;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-  }
-  
-  .app-input {
-    width: 100%;
-    background: #0f1420;
-    border: 1px solid #2b3548;
-    color: #fff;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 1rem;
-  }
-  
-  .input-with-btn {
-    display: flex;
-    gap: 10px;
-  }
-  
-  /* .input-with-btn .app-input { flex: 2; } */
-  
-  .field-hint {
-    font-size: 0.7rem;
-    color: #5d667a;
-    margin-top: 8px;
-  }
-  
-  /* QR Section */
-  .qr-preview-area {
-    background: #0f1420;
-    border-radius: 16px;
-    padding: 30px;
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 2px dashed #2b3548;
-  }
-  
-  .qr-display {
-    border: #fff solid 0.08rem;
-    width: 200px;
-    height: 200px;
-    filter: drop-shadow(0 0 15px rgba(0,255,136,0.2));
-  }
-  
-  .qr-code-text {
-    text-align: center;
-    margin-top: 15px;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: 700;
-    color: #7d859a;
-    font-size: 0.8rem;
-  }
-  
-  .qr-actions-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  
-  .qr-actions-grid .full-width {
-    grid-column: span 2;
-    margin-top: 5px;
-  }
-
-  .store-add-button{
-    margin: 0 !important;
-    width: 80%;
-  }
-  
-  .btn-brand, .btn-sec {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 14px;
-    border-radius: 12px;
-    font-weight: 700;
-    border: none;
-    transition: opacity 0.2s;
-  }
-  .btn-brand.save {
-    width: 50% !important;
-  }
-  
-  .btn-brand { background: #f6a600; color: #000; }
-  .btn-sec { background: #2b3548; color: #fff; }
-  .btn-brand:active, .btn-sec:active { opacity: 0.7; }
-
-  /* The Plus Button */
-.add-store-btn {
-  background: rgba(0, 255, 136, 0.1); /* Subtle green background */
-  border: 1px solid rgba(0, 255, 136, 0.3);
-  color: #00ff88; /* Brand green */
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+.store-settings-page .header-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 300;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  gap: 10px;
 }
 
-.add-store-btn:hover {
-  background: #00ff88;
-  color: #0f1420;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+.store-settings-page .app-header {
+  align-items: flex-start;
 }
 
-.add-store-btn:active {
-  transform: translateY(0);
+.store-settings-page .header-text {
+  min-width: 0;
+  flex: 1;
 }
 
+.store-settings-page .main-title {
+  max-width: 100%;
+  line-height: 0.94;
+}
 
-/* .btn-delete {
-  background: rgba(255, 68, 68, 0.1);
-  border: 1px solid rgba(255, 68, 68, 0.3);
-  color: #ff4444;
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
-  display: flex;
+.store-settings-page .store-subtitle {
+  margin: 6px 0 0;
+  color: rgba(230, 220, 208, 0.66);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.store-settings-page .add-store-btn {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  font-size: 1.4rem;
+  font-weight: 500;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-} */
-
-.btn-delete:hover {
-  background: #ff4444;
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
 }
 
-/* Adjusting the input-with-btn to accommodate 3 items */
-.input-with-btn {
-  display: flex;
+.store-settings-page .settings-card,
+.store-settings-page .qr-management-card {
+  margin: 0 0 14px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(251, 191, 36, 0.14);
+  background:
+    linear-gradient(180deg, rgba(22, 28, 43, 0.98), rgba(14, 19, 31, 0.98)),
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.08), transparent 42%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.store-settings-page .section-label {
+  display: block;
+  margin-bottom: 7px;
+  color: rgba(230, 220, 208, 0.56);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.store-settings-page .app-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(96, 165, 250, 0.14);
+  background: rgba(15, 23, 42, 0.84);
+  color: #fffaf0;
+  font-size: 0.96rem;
+}
+
+.store-settings-page .field-group {
+  margin-top: 14px;
+}
+
+.store-settings-page .settings-card .field-group {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
 }
 
-.input-with-btn .app-input {
+.store-settings-page .settings-card .field-group .section-label,
+.store-settings-page .settings-card .field-group .field-hint {
+  margin: 0;
+}
+
+.store-settings-page .settings-card .field-group .field-hint {
+  grid-column: 2;
+  font-size: 0.7rem;
+}
+
+.store-settings-page .input-with-btn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.store-settings-page .field-hint {
+  margin-top: 6px;
+  color: rgba(200, 213, 231, 0.62);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.store-settings-page .btn-brand,
+.store-settings-page .btn-sec,
+.store-settings-page .btn-delete {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.store-settings-page .btn-brand {
+  border: none;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #231815;
+}
+
+.store-settings-page .btn-brand.save {
+  width: auto !important;
+  min-width: 90px;
+}
+
+.store-settings-page .btn-sec {
+  border: 1px solid rgba(255, 245, 235, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff7ed;
+}
+
+.store-settings-page .btn-delete {
+  min-width: 42px;
+  padding: 0;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.store-settings-page .qr-header {
+  margin-bottom: 12px;
+}
+
+.store-settings-page .card-title {
+  margin: 0;
+  color: #fffaf0;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.store-settings-page .card-desc {
+  margin: 6px 0 0;
+  color: rgba(230, 220, 208, 0.68);
+  font-size: 0.84rem;
+}
+
+.store-settings-page .qr-preview-area {
+  margin: 14px 0;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px dashed rgba(96, 165, 250, 0.18);
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.store-settings-page .qr-container {
+  text-align: center;
+}
+
+.store-settings-page .qr-display {
+  width: min(200px, 52vw);
+  height: min(200px, 52vw);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #fff;
+}
+
+.store-settings-page .qr-code-text {
+  margin-top: 10px;
+  color: rgba(230, 220, 208, 0.76);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.store-settings-page .qr-placeholder {
+  color: rgba(200, 213, 231, 0.62);
+  font-size: 0.84rem;
+}
+
+.store-settings-page .qr-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.store-settings-page .qr-actions-grid .full-width {
+  grid-column: auto;
+}
+
+.store-settings-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.store-settings-page .modal-content {
+  width: min(100%, 520px);
+}
+
+.store-settings-page .modal-content .app-input + .app-input,
+.store-settings-page .modal-content .store-coord-row,
+.store-settings-page .modal-content .store-modal-actions {
+  margin-top: 10px;
+}
+
+.store-settings-page .store-coord-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.store-settings-page .store-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.store-settings-page .store-add-button {
+  width: auto;
   flex: 1;
+  margin: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .store-settings-page .app-header {
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .store-settings-page .header-actions {
+    width: auto;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+
+  .store-settings-page .add-store-btn,
+  .store-settings-page .refresh-circle {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .store-settings-page .main-title {
+    font-size: 1.5rem;
+    line-height: 0.98;
+  }
+
+  .store-settings-page .store-subtitle {
+    font-size: 0.74rem;
+  }
+
+  .store-settings-page .settings-card,
+  .store-settings-page .qr-management-card {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .store-settings-page .settings-card .field-group {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .store-settings-page .section-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+  }
+
+  .store-settings-page .app-input {
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 0.88rem;
+  }
+
+  .store-settings-page .input-with-btn {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .store-settings-page .input-with-btn .app-input {
+    grid-column: 1 / -1;
+  }
+
+  .store-settings-page .btn-brand.save,
+  .store-settings-page .btn-delete {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .store-settings-page .qr-actions-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .store-settings-page .qr-actions-grid .full-width {
+    grid-column: auto;
+  }
+
+  .store-settings-page .qr-actions-grid .btn-sec,
+  .store-settings-page .qr-actions-grid .btn-brand {
+    min-height: 38px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+  }
+
+  .store-settings-page .store-coord-row,
+  .store-settings-page .store-modal-actions {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}
+
+@media (max-width: 420px) {
+  .store-settings-page .settings-card .field-group {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .store-settings-page .main-title {
+    font-size: 1.34rem;
+  }
+
+  .store-settings-page .store-subtitle {
+    display: none;
+  }
+
+  .store-settings-page .qr-actions-grid .btn-sec,
+  .store-settings-page .qr-actions-grid .btn-brand {
+    font-size: 0.66rem;
+    gap: 5px;
+  }
 }

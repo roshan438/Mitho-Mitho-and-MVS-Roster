@@ -1,44 +1,4 @@
-/* .approvals-header {
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .approvalCard {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    margin-bottom: 12px;
-  }
-  
-  .approvalLeft .title {
-    font-weight: 800;
-    margin-bottom: 6px;
-  }
-  
-  .approvalLeft .meta {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 2px;
-  }
-  
-  .approvalRight {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 240px;
-  }
-  
-  .errorBox {
-    border: 1px solid rgba(255, 100, 100, 0.35);
-    background: rgba(255, 100, 100, 0.08);
-    border-radius: 10px;
-    padding: 10px;
-    color: #ffb3b3;
-  } */
+
 
 
 
@@ -104,7 +64,7 @@
   .detail-box label { display: block; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
   .detail-box span { font-size: 0.8rem; font-weight: 600; color: #e6edf3; }
   
-  /* Action Section */
+  
   .approval-actions {
     padding: 20px;
     border-top: 1px solid var(--border);

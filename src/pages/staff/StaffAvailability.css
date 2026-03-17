@@ -29,7 +29,7 @@
   .availability-header h1 { font-size: 1.4rem; margin-bottom: 4px; }
   .availability-header p { font-size: 0.85rem; color: var(--muted); }
   
-  /* Copy Button */
+  
   .copy-btn {
     margin-top: 12px;
     background: rgba(246, 166, 0, 0.1);
@@ -44,7 +44,7 @@
   
   .availability-grid { display: flex; flex-direction: column; gap: 8px; }
   
-  /* The Row - Single Line on Mobile */
+  
   .availability-row {
     display: flex;
     align-items: center;
@@ -63,9 +63,14 @@
   .day-side { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .day-label { font-weight: 600; font-size: 0.9rem; width: 35px; }
   
-  .time-side { display: flex; align-items: center; gap: 6px; }
+.time-side { display: flex; align-items: center; gap: 6px; }
+
+.time-side .clearable-time-field {
+  width: auto;
+  gap: 4px;
+}
+
   
-  /* Smaller Time Inputs for iPhone */
   .time-side input[type="time"] {
     background: #000;
     border: 1px solid var(--border);
@@ -73,13 +78,19 @@
     padding: 6px 4px;
     border-radius: 6px;
     font-size: 0.85rem;
-    width: 85px; /* Fixed width to prevent jumping */
+    width: 85px; 
     text-align: center;
+  }
+
+  .time-side .clear-time-button {
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 0.62rem;
   }
   
   .sep { color: var(--muted); font-size: 0.8rem; }
   
-  /* Custom iOS Switch */
+  
   .ios-switch {
     position: relative;
     display: inline-block;
@@ -102,9 +113,10 @@
   .btn-primary.availability { background: var(--brand); flex: 2; border: none; padding: 14px; border-radius: 12px; font-weight: 700; }
   .btn-secondary.availability { background: transparent; flex: 1; border: 1px solid var(--border); color: #fff; border-radius: 12px; }
   
-  /* iPhone Small Screen Fixes */
+  
   @media (max-width: 380px) {
     .availability-card { padding: 15px; margin-bottom: 90px;}
     .time-side input[type="time"] { width: 75px; font-size: 0.8rem; }
+    .time-side .clear-time-button { padding: 0 6px; }
     .day-label { font-size: 0.8rem; width: 30px; }
   }

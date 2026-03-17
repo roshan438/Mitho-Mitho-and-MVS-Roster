@@ -1,206 +1,3 @@
-// import { useEffect, useMemo, useState } from "react";
-// import { collectionGroup, getDocs, query, where } from "firebase/firestore";
-// import { db } from "../../firebase/firebase";
-// import { STORES } from "../../utils/constants";
-// import { subDays, addDays, getWeekStartMonday, prettyDate, toYMD, weekDates } from "../../utils/dates";
-// import { useAuth } from "../../auth/AuthProvider";
-// import "./MyRoster.css";
-
-// function storeLabel(storeId) {
-//   return STORES.find((s) => s.id === storeId)?.label || storeId || "-";
-// }
-
-// export default function MyRoster() {
-//   const { fbUser } = useAuth();
-
-//   const [weekStart, setWeekStart] = useState(toYMD(getWeekStartMonday(new Date())));
-//   const [loading, setLoading] = useState(true);
-//   const [shifts, setShifts] = useState([]);
-
-//   const weekStartDateObj = useMemo(() => new Date(weekStart + "T00:00:00"), [weekStart]);
-//   const days = useMemo(() => weekDates(weekStartDateObj), [weekStartDateObj]);
-
-//   useEffect(() => {
-//     if (!fbUser?.uid) return;
-//     loadMyWeek();
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [fbUser?.uid, weekStart]);
-
-//   async function loadMyWeek() {
-//     setLoading(true);
-
-//     const startYMD = weekStart;
-//     const endYMD = toYMD(addDays(weekStartDateObj, 7)); // exclusive
-
-//     // Query across all week subcollections using collectionGroup
-//     const q = query(
-//       collectionGroup(db, "shifts"),
-//       where("uid", "==", fbUser.uid),
-//       where("date", ">=", startYMD),
-//       where("date", "<", endYMD)
-//     );
-
-//     const snap = await getDocs(q);
-//     const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-//       .sort((a, b) => (a.date + a.startPlanned).localeCompare(b.date + b.startPlanned));
-
-//     setShifts(list);
-//     setLoading(false);
-//   }
-
-//   function shiftsForDate(ymd) {
-//     return shifts.filter((s) => s.date === ymd);
-//   }
-
-//   return (
-//     // <div className="container">
-//     //   <div className="card">
-//     //     <div className="top">
-//     //       <div>
-//     //         <h1 className="h1">My Roster</h1>
-//     //         <p className="p">Your shifts for the selected week.</p>
-//     //       </div>
-
-//     //       <div className="controls">
-//     //         <div className="field">
-//     //           <div className="label">Week starting (Monday)</div>
-//     //           <input className="input" type="date" value={weekStart} onChange={(e) => setWeekStart(e.target.value)} />
-//     //         </div>
-
-            
-//     //         <div className="row">
-//     //         <button className="btn" onClick={() => setWeekStart(toYMD(getWeekStartMonday(subDays(new Date(), 7))))}>
-//     //             Prev week
-//     //           </button>
-//     //           <button className="btn" onClick={() => setWeekStart(toYMD(getWeekStartMonday(new Date())))}>
-//     //             This week
-//     //           </button>
-//     //           <button className="btn" onClick={() => setWeekStart(toYMD(getWeekStartMonday(addDays(new Date(), 7))))}>
-//     //             Next week
-//     //           </button>
-//     //           <button className="btn" onClick={loadMyWeek}>Refresh</button>
-//     //         </div>
-//     //       </div>
-//     //     </div>
-
-//     //     <div className="spacer" />
-
-//     //     {loading ? (
-//     //       <p className="p">Loading…</p>
-//     //     ) : (
-//     //       <div className="week">
-//     //         {days.map((d) => {
-//     //           const ymd = toYMD(d);
-//     //           const dayShifts = shiftsForDate(ymd);
-
-//     //           return (
-//     //             <div key={ymd} className="day">
-//     //               <div className="dayHead">
-//     //                 <div className="dayTitle">{prettyDate(d)}</div>
-//     //                 <div className="daySub">{ymd}</div>
-//     //               </div>
-
-//     //               {dayShifts.length === 0 ? (
-//     //                 <div className="empty">No shift</div>
-//     //               ) : (
-//     //                 dayShifts.map((s) => (
-//     //                   <div key={s.id} className="shift">
-//     //                     <div className="shiftMain">
-//     //                       <div className="store">{storeLabel(s.storeId)}</div>
-//     //                       <div className="time">
-//     //                         {s.startPlanned} – {s.endPlanned}
-//     //                       </div>
-//     //                     </div>
-//     //                   </div>
-//     //                 ))
-//     //               )}
-//     //             </div>
-//     //           );
-//     //         })}
-//     //       </div>
-//     //     )}
-//     //   </div>
-//     // </div>
-
-//     <div className="roster-container">
-//     <div className="roster-header">
-//       <div>
-//         <h1 className="roster-title">My Roster</h1>
-//         <p className="roster-subtitle">Your schedule for the week</p>
-//       </div>
-//       <button className="icon-button-refresh" onClick={loadMyWeek}>
-//          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-//       </button>
-//     </div>
-  
-//     <div className="roster-controls">
-//       <div className="date-input-wrapper">
-//         <label className="input-label">Jump to Date</label>
-//         <input 
-//           className="date-picker-minimal" 
-//           type="date" 
-//           value={weekStart} 
-//           onChange={(e) => setWeekStart(e.target.value)} 
-//         />
-//       </div>
-  
-//       <div className="nav-pills">
-//         <button className="pill-btn" onClick={() => setWeekStart(toYMD(getWeekStartMonday(subDays(new Date(weekStart), 7))))}>
-//           Prev
-//         </button>
-//         <button 
-//           className={`pill-btn ${weekStart === toYMD(getWeekStartMonday(new Date())) ? 'active' : ''}`} 
-//           onClick={() => setWeekStart(toYMD(getWeekStartMonday(new Date())))}
-//         >
-//           This Week
-//         </button>
-//         <button className="pill-btn" onClick={() => setWeekStart(toYMD(getWeekStartMonday(addDays(new Date(weekStart), 7))))}>
-//           Next
-//         </button>
-//       </div>
-//     </div>
-  
-//     {loading ? (
-//       <div className="loader">Searching for shifts...</div>
-//     ) : (
-//       <div className="week-timeline">
-//         {days.map((d) => {
-//           const ymd = toYMD(d);
-//           const dayShifts = shiftsForDate(ymd);
-//           const isToday = ymd === toYMD(new Date());
-  
-//           return (
-//             <div key={ymd} className={`day-card ${isToday ? 'is-today' : ''}`}>
-//               <div className="day-sidebar">
-//                 <span className="day-name">{prettyDate(d).split(',')[0]}</span>
-//                 <span className="day-number">{prettyDate(d).split(' ')[1]}</span>
-//               </div>
-  
-//               <div className="day-content">
-//                 {dayShifts.length === 0 ? (
-//                   <div className="no-shift-text">Day Off</div>
-//                 ) : (
-//                   dayShifts.map((s) => (
-//                     <div key={s.id} className="shift-entry">
-//                       <div className="shift-accent" />
-//                       <div className="shift-details">
-//                         <div className="shift-store">{storeLabel(s.storeId)}</div>
-//                         <div className="shift-time">
-//                           {s.startPlanned} — {s.endPlanned}
-//                         </div>
-//                       </div>
-//                     </div>
-//                   ))
-//                 )}
-//               </div>
-//             </div>
-//           );
-//         })}
-//       </div>
-//     )}
-//   </div>
-//   );
-// }
 
 
 
@@ -209,17 +6,30 @@
 
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { collectionGroup, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  collectionGroup,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-// import { STORES } from "../../utils/constants";
 import { useStores } from "../../hooks/useStore";
 import { subDays, addDays, getWeekStartMonday, prettyDate, toYMD, weekDates } from "../../utils/dates";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext"; // Import Toast Hook
 import "./MyRoster.css";
 import { prettyTime } from "../../utils/dates";
-
-// const storeLabel = (storeId) => STORES.find((s) => s.id === storeId)?.label || storeId || "-";
+import {
+  getShiftRequestStatusLabel,
+  isFutureOrToday,
+  isShiftRequestActive,
+  SHIFT_REQUEST_STATUS,
+} from "../../utils/shiftRequests";
 
 export default function MyRoster() {
   const { fbUser } = useAuth();
@@ -230,6 +40,9 @@ export default function MyRoster() {
   const [weekStart, setWeekStart] = useState(toYMD(getWeekStartMonday(new Date())));
   const [loading, setLoading] = useState(true);
   const [shifts, setShifts] = useState([]);
+  const [shiftRequests, setShiftRequests] = useState([]);
+  const [requestingShiftId, setRequestingShiftId] = useState(null);
+  const [claimingRequestId, setClaimingRequestId] = useState(null);
 
   const weekStartDateObj = useMemo(() => new Date(weekStart + "T00:00:00"), [weekStart]);
   const days = useMemo(() => weekDates(weekStartDateObj), [weekStartDateObj]);
@@ -250,12 +63,26 @@ export default function MyRoster() {
       );
 
       const snap = await getDocs(q);
-      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      const list = snap.docs.map((d) => ({
+        id: d.id,
+        weekKey: d.ref.parent.parent?.id || "",
+        ...d.data(),
+      }))
         .sort((a, b) => (a.date + a.startPlanned).localeCompare(b.date + b.startPlanned));
 
       setShifts(list);
-      
-      // Only show success toast if user manually clicked refresh
+
+      const requestSnap = await getDocs(collection(db, "shiftRequests"));
+
+      const requestList = requestSnap.docs
+        .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+        .sort((a, b) => {
+          const aCreated = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+          const bCreated = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+          return bCreated - aCreated;
+        });
+
+      setShiftRequests(requestList);
       if (silent) showToast("Roster updated", "success");
     } catch (e) {
       console.error("Roster Load Error:", e);
@@ -270,6 +97,81 @@ export default function MyRoster() {
   }, [loadMyWeek]);
 
   const shiftsForDate = (ymd) => shifts.filter((s) => s.date === ymd);
+  const activeRequestByShiftId = useMemo(() => {
+    const map = {};
+    shiftRequests.forEach((request) => {
+      if (!request.shiftId || !isShiftRequestActive(request.status)) return;
+      map[request.shiftId] = request;
+    });
+    return map;
+  }, [shiftRequests]);
+
+  const myShiftRequests = useMemo(() => {
+    return shiftRequests.filter((request) => request.requestorUid === uid).slice(0, 5);
+  }, [shiftRequests, uid]);
+
+  const openShiftRequests = useMemo(() => {
+    return shiftRequests.filter(
+      (request) =>
+        request.requestorUid !== uid &&
+        request.status === SHIFT_REQUEST_STATUS.open &&
+        isFutureOrToday(request.shiftDate)
+    );
+  }, [shiftRequests, uid]);
+
+  async function submitShiftRequest(shift) {
+    if (!uid) return;
+
+    setRequestingShiftId(shift.id);
+    try {
+      await addDoc(collection(db, "shiftRequests"), {
+        requestorUid: uid,
+        requestorName: shift.staffName || fbUser?.email || uid,
+        shiftId: shift.id,
+        shiftWeekKey: shift.weekKey || "",
+        shiftDate: shift.date,
+        shiftStart: shift.startPlanned,
+        shiftEnd: shift.endPlanned,
+        storeId: shift.storeId || "",
+        storeLabel: getStoreLabel(shift.storeId),
+        status: SHIFT_REQUEST_STATUS.pending,
+        note: "Staff requested release/swap",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      showToast("Shift request submitted", "success");
+      await loadMyWeek(true);
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to submit shift request", "error");
+    } finally {
+      setRequestingShiftId(null);
+    }
+  }
+
+  async function claimOpenShift(request) {
+    if (!uid) return;
+
+    setClaimingRequestId(request.id);
+    try {
+      await updateDoc(doc(db, "shiftRequests", request.id), {
+        status: SHIFT_REQUEST_STATUS.claimed,
+        claimantUid: uid,
+        claimantName: fbUser?.displayName || fbUser?.email || uid,
+        claimedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      showToast("Shift claim sent for approval", "success");
+      await loadMyWeek(true);
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to claim open shift", "error");
+    } finally {
+      setClaimingRequestId(null);
+    }
+  }
 
   return (
     <div className="mobile-app-wrapper">
@@ -289,7 +191,8 @@ export default function MyRoster() {
   
       <main className="scroll-content">
         <section className="date-nav">
-          <div className="date-display">
+          <div className="date-display calendar-shell">
+            <span className="calendar-label">Week Starting</span>
             <input 
               className="date-picker-minimal" 
               type="date" 
@@ -311,6 +214,68 @@ export default function MyRoster() {
             <button className="pill-btn" onClick={() => setWeekStart(toYMD(addDays(weekStartDateObj, 7)))}>
               Next
             </button>
+          </div>
+        </section>
+
+        <section className="roster-section dual-grid">
+          <div className="panel-card">
+            <div className="section-heading">
+              <h2>My Shift Requests</h2>
+              <p>Swaps & releases</p>
+            </div>
+
+            {myShiftRequests.length === 0 ? (
+              <div className="inline-empty">No shift requests yet.</div>
+            ) : (
+              <div className="mini-request-list">
+                {myShiftRequests.map((request) => (
+                  <div key={request.id} className="mini-request-card">
+                    <div>
+                      <strong>{request.shiftDate}</strong>
+                      <span>
+                        {prettyTime(request.shiftStart)} - {prettyTime(request.shiftEnd)}
+                      </span>
+                    </div>
+                    <span className={`mini-status ${request.status || "pending"}`}>
+                      {getShiftRequestStatusLabel(request.status)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="panel-card">
+            <div className="section-heading">
+              <h2>Open Shifts</h2>
+              <p>Claim extras</p>
+            </div>
+
+            {openShiftRequests.length === 0 ? (
+              <div className="inline-empty">No open shifts right now.</div>
+            ) : (
+              <div className="open-shift-list">
+                {openShiftRequests.slice(0, 5).map((request) => (
+                  <article key={request.id} className="open-shift-card">
+                    <div>
+                      <strong>{request.shiftDate}</strong>
+                      <p>
+                        {request.storeLabel || getStoreLabel(request.storeId)} •{" "}
+                        {prettyTime(request.shiftStart)} - {prettyTime(request.shiftEnd)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="claim-btn"
+                      disabled={claimingRequestId === request.id}
+                      onClick={() => claimOpenShift(request)}
+                    >
+                      {claimingRequestId === request.id ? "Claiming..." : "Claim"}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
   
@@ -346,6 +311,20 @@ export default function MyRoster() {
                               {prettyTime(s.startPlanned)} — {prettyTime(s.endPlanned)}
                             </div>
                           </div>
+                          {isFutureOrToday(s.date) && (
+                            <button
+                              type="button"
+                              className="shift-action-btn"
+                              disabled={Boolean(activeRequestByShiftId[s.id]) || requestingShiftId === s.id}
+                              onClick={() => submitShiftRequest(s)}
+                            >
+                              {requestingShiftId === s.id
+                                ? "Sending..."
+                                : activeRequestByShiftId[s.id]
+                                ? getShiftRequestStatusLabel(activeRequestByShiftId[s.id].status)
+                                : "Request Swap"}
+                            </button>
+                          )}
                         </div>
                       ))
                     )}

@@ -1,84 +1,384 @@
-.payroll-card {
-    background: #1c2230;
-    border-radius: 16px;
-    padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    margin: 0 16px 16px 16px;
+.payroll-week-state {
+  margin: 0 12px 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(251, 191, 36, 0.14);
+  background: linear-gradient(180deg, rgba(36, 25, 14, 0.9), rgba(25, 18, 12, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
 
+.payroll-week-state strong {
+  display: block;
+  color: #fffaf0;
+  font-size: 0.92rem;
+}
+
+.payroll-week-state p {
+  margin: 4px 0 0;
+  color: rgba(230, 220, 208, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.payroll-week-state.reviewed {
+  border-color: rgba(56, 189, 248, 0.24);
+}
+
+.payroll-week-state.locked {
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+.stats-bar.mid {
+  margin: 8px calc(var(--safe-area) + 0px) 10px;
+}
+
+.stats-bar.mid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0;
+  padding: 10px 12px;
+}
+
+.stats-bar.mid .stat-item {
+  min-width: 0;
+  text-align: center;
+}
+
+.stats-bar.mid .stat-item .value {
+  font-size: clamp(1.2rem, 4.8vw, 2rem);
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.stats-bar.mid .stat-divider {
+  justify-self: center;
+}
+
+.remain-balance {
+  color: #f87171 !important;
+}
+
+.paid-balance,
+.pay-col.total span.brand,
+.mini-chip.money {
+  color: #22c55e !important;
+}
+
+.payroll-card {
+  margin: 0 12px 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(96, 165, 250, 0.12);
+  background:
+    linear-gradient(180deg, rgba(25, 34, 52, 0.98), rgba(18, 24, 38, 0.98)),
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.06), transparent 44%);
+  overflow: hidden;
+}
+
+.payroll-card-main {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+.payroll-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.payroll-card .staff-header.compact {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.payroll-card .staff-name {
+  display: block;
+  color: #fffaf0;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payroll-row-chips {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mini-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mini-chip.neutral {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+.mini-chip.hours {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  color: #38bdf8;
+}
+
+.mini-chip.money {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+.mini-chip.soft {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(230, 220, 208, 0.72);
+}
+
+.payroll-card-details {
+  padding: 0 14px 14px;
+  border-top: 1px solid rgba(251, 191, 36, 0.08);
+}
+
+.payroll-details.compact {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.payroll-card .pay-col {
+  min-width: 0;
+}
+
+.payroll-card .pay-col label {
+  display: block;
+  margin-bottom: 3px;
+  color: rgba(230, 220, 208, 0.52);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.payroll-card .pay-col span {
+  display: block;
+  color: #fffaf0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payroll-actions-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) repeat(3, minmax(0, auto));
+  gap: 8px;
+  align-items: end;
+  margin-top: 10px;
+}
+
+.pay-input-col input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(96, 165, 250, 0.14);
+  color: #fffaf0;
+}
+
+.payroll-card .tab-item {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+}
+
+.pay-history-link {
+  color: #fbbf24 !important;
+}
+
+@media (max-width: 720px) {
+  .payroll-filters-container {
+    margin: 10px;
+    padding: 12px;
   }
-  
-  .staff-header {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding-bottom: 10px;
+
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
-  
-  .staff-name {
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: #fff;
-  }
-  
-  .shift-tag {
-    font-size: 0.75rem;
-    color: #7d859a;
-    margin-top: 2px;
-  }
-  
-  .payroll-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr;
-    gap: 10px;
-  }
-  
-  .pay-col label {
-    display: block;
-    font-size: 0.65rem;
-    color: #7d859a;
-    text-transform: uppercase;
+
+  .filter-field label {
+    font-size: 0.62rem;
     margin-bottom: 4px;
   }
-  
-  .pay-col span {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #fff;
-  }
-  
-  .pay-col.total span.brand {
-    color: #00ff88; 
-    font-weight: 800;
-  }
-  
-  .stat-item .value.brand {
-    color: #00ff88;
+
+  .filter-field input,
+  .filter-field select,
+  .filter-field .tab-item {
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 0.76rem;
   }
 
-  .pay-col input{
-    width: 100%;
-    background: #0f1420;
-    border: 1px solid #2b3548;
-    color: #fff;
+  .payroll-details.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payroll-actions-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pay-input-col {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .payroll-week-state,
+  .payroll-card {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .stats-bar.mid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
     padding: 10px;
-    border-radius: 8px;
-    font-size: 0.85rem;
+  }
+
+  .stats-bar.mid .stat-divider {
+    display: none;
+  }
+
+  .stats-bar.mid .stat-item {
+    text-align: center;
+  }
+
+  .stats-bar.mid .stat-item .value {
+    font-size: 0.88rem;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .stats-bar.mid .stat-item label {
+    margin-bottom: 3px;
+    font-size: 0.58rem;
+  }
+
+  .payroll-filters-container {
+    margin: 10px;
+    padding: 10px;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .filter-field:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .payroll-card-toggle {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    padding: 11px 12px;
+  }
+
+  .payroll-row-chips {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .mini-chip {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 0.6rem;
+  }
+
+  .payroll-card-details {
+    padding: 0 12px 12px;
+  }
+
+  .payroll-details.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .payroll-card .pay-col span {
+    font-size: 0.8rem;
+  }
+
+  .payroll-actions-row {
+    grid-template-columns: minmax(0, 1fr) 1fr;
+    align-items: stretch;
+  }
+
+  .pay-input-col {
+    grid-column: 1 / -1;
+  }
+
+  .payroll-card .tab-item {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .payroll-actions-row .tab-item:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .payroll-card .tab-item {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
 }
 
-.stat-item.mid .value {
-    font-size: 1.2rem;
-}
-.stats-bar.mid{
-    margin: 8px calc(var(--safe-area) + 0px) 8px;
-}
+@media (max-width: 460px) {
+  .stats-bar.mid {
+    padding: 8px;
+  }
 
-.remain-balance{
-    color: #F32013 !important;
-}
+  .stats-bar.mid .stat-item .value {
+    font-size: 0.76rem;
+  }
 
-.paid-balance{
-    color: #00ff88 !important;
-}
+  .stats-bar.mid .stat-item label {
+    font-size: 0.54rem;
+  }
 
+  .payroll-actions-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pay-input-col,
+  .payroll-actions-row .tab-item:last-child {
+    grid-column: auto;
+  }
+}
