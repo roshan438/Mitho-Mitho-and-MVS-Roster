@@ -268,7 +268,7 @@ export default function Navbar() {
                     </Link>
                     {(profile?.department === "kitchen" || role === "manager") && (
                       <Link to="/staff/kitchen-stock-take" onClick={closeMenu}>
-                        Kitchen Stock Take
+                        Stock Take
                       </Link>
                     )}
                     <Link to="/staff/availability" onClick={closeMenu}>
