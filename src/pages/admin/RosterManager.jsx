@@ -55,7 +55,7 @@ import {
   getLeaveTypeLabel,
   requestTouchesDate,
 } from "../../utils/leaveRequests";
-import { notifyUsers } from "../../utils/notifications";
+import { notifyUsers, pushUsers } from "../../utils/notifications";
 import { useToast } from "../../context/ToastContext";
 import { useStores } from "../../hooks/useStore";
 import ClearableTimeInput from "../../components/ClearableTimeInput";
@@ -393,6 +393,13 @@ export default function RosterManager() {
           title: "Roster Published",
           message: `Your ${storeLabelMap[selectedStoreId] || "store"} roster for week ${currentWeekKey} is now live.`,
           type: "success",
+          link: "/staff/my-roster",
+          metadata: { weekKey: currentWeekKey, storeId: selectedStoreId, kind: "roster-published" },
+        });
+
+        await pushUsers(affectedUids, {
+          title: "Roster Published",
+          message: `Your ${storeLabelMap[selectedStoreId] || "store"} roster for week ${currentWeekKey} is now live.`,
           link: "/staff/my-roster",
           metadata: { weekKey: currentWeekKey, storeId: selectedStoreId, kind: "roster-published" },
         });

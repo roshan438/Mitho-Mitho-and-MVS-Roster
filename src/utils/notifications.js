@@ -1,4 +1,5 @@
 import { collection, doc, serverTimestamp, setDoc, writeBatch } from "firebase/firestore";
+import { auth } from "../firebase/firebase";
 
 function uniqueTruthy(values = []) {
   return Array.from(new Set(values.filter(Boolean)));
@@ -52,4 +53,31 @@ export async function notifyUsers(db, uids, notification) {
   });
 
   await batch.commit();
+}
+
+export async function pushUsers(uids, notification) {
+  const recipients = uniqueTruthy(uids);
+  if (recipients.length === 0) return;
+  if (!auth.currentUser) return;
+
+  const idToken = await auth.currentUser.getIdToken();
+
+  const response = await fetch("/api/push/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({
+      uids: recipients,
+      notification,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Failed to send push notifications");
+  }
+
+  return response.json();
 }

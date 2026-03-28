@@ -32,7 +32,7 @@ import { addDays, getWeekStartMonday, toYMD } from "../../utils/dates";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
 import ClearableTimeInput from "../../components/ClearableTimeInput";
-import { createNotification } from "../../utils/notifications";
+import { createNotification, pushUsers } from "../../utils/notifications";
 import "./AdminEditTimesheets.css";
 
 function hhmmToMinutes(hm) {
@@ -322,6 +322,17 @@ export default function AdminEditTimesheets() {
             status: edit.auditStatus,
           },
         });
+
+        await pushUsers([t.uid], {
+          title: edit.auditStatus === "approved" ? "Timesheet approved" : "Timesheet reviewed",
+          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was ${edit.auditStatus}.`,
+          link: "/staff/my-timesheets",
+          metadata: {
+            timesheetId: t.id,
+            status: edit.auditStatus,
+            kind: "timesheet-status",
+          },
+        });
       }
 
       showToast("Timesheet updated successfully.", "success", { title: "Saved" });
@@ -381,6 +392,17 @@ export default function AdminEditTimesheets() {
           metadata: {
             timesheetId: t.id,
             status: "approved",
+          },
+        });
+
+        await pushUsers([t.uid], {
+          title: "Timesheet approved",
+          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was approved.`,
+          link: "/staff/my-timesheets",
+          metadata: {
+            timesheetId: t.id,
+            status: "approved",
+            kind: "timesheet-approved",
           },
         });
       }

@@ -12,7 +12,7 @@ import {
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
-import { notifyUsers } from "../../utils/notifications";
+import { notifyUsers, pushUsers } from "../../utils/notifications";
 import {
   getShiftRequestStatusLabel,
   SHIFT_REQUEST_STATUS,
@@ -160,6 +160,13 @@ export default function ShiftRequestsAdmin() {
         title: "Shift Claim Approved",
         message: `The ${request.shiftDate} shift has been reassigned successfully.`,
         type: "success",
+        link: "/staff/my-roster",
+        metadata: { shiftRequestId: request.id, kind: "shift-request-approved" },
+      });
+
+      await pushUsers([request.requestorUid, request.claimantUid], {
+        title: "Shift Claim Approved",
+        message: `The ${request.shiftDate} shift has been reassigned successfully.`,
         link: "/staff/my-roster",
         metadata: { shiftRequestId: request.id, kind: "shift-request-approved" },
       });

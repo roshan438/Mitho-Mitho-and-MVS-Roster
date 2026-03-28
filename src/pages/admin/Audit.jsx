@@ -25,7 +25,7 @@ import { useStores } from "../../hooks/useStore";
 import { addDays, getWeekStartMonday, toYMD } from "../../utils/dates";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
-import { createNotification } from "../../utils/notifications";
+import { createNotification, pushUsers } from "../../utils/notifications";
 import "./Audit.css";
 
 function fmtTime(ts) {
@@ -227,6 +227,17 @@ export default function Audit() {
           metadata: {
             timesheetId: t.id,
             status: edit.auditStatus,
+          },
+        });
+
+        await pushUsers([t.uid], {
+          title: edit.auditStatus === "approved" ? "Timesheet approved" : "Timesheet reviewed",
+          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was ${edit.auditStatus}.`,
+          link: "/staff/my-timesheets",
+          metadata: {
+            timesheetId: t.id,
+            status: edit.auditStatus,
+            kind: "timesheet-status",
           },
         });
       }
