@@ -107,14 +107,16 @@ export default function PushNotificationPrompt() {
   }
 
   return (
-    <div className="push-prompt">
-      <div>
-        <strong>Turn on roster alerts</strong>
-        <p>{promptCopy.description}</p>
+    <div className="push-prompt-overlay">
+      <div className="push-prompt" role="dialog" aria-modal="true" aria-labelledby="push-title">
+        <div>
+          <strong id="push-title">Turn on roster alerts</strong>
+          <p>{promptCopy.description}</p>
+        </div>
+        <button className="push-prompt-button" onClick={handleEnableNotifications} disabled={busy}>
+          {busy ? "Enabling..." : "Enable notifications"}
+        </button>
       </div>
-      <button className="push-prompt-button" onClick={handleEnableNotifications} disabled={busy}>
-        {busy ? "Enabling..." : "Enable notifications"}
-      </button>
     </div>
   );
 }

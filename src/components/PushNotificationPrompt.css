@@ -1,16 +1,24 @@
-.push-prompt {
+.push-prompt-overlay {
   position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: 20px;
-  z-index: 60;
+  inset: 0;
+  z-index: 80;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 8, 15, 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.push-prompt {
+  width: min(100%, 440px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 16px;
-  padding: 14px 16px;
+  padding: 22px 20px;
   border: 1px solid rgba(246, 166, 0, 0.35);
-  border-radius: 18px;
+  border-radius: 24px;
   background:
     linear-gradient(135deg, rgba(246, 166, 0, 0.16), rgba(18, 24, 38, 0.96)),
     rgba(11, 15, 20, 0.96);
@@ -20,26 +28,26 @@
 
 .push-prompt strong {
   display: block;
-  margin-bottom: 4px;
-  font-size: 0.95rem;
+  margin-bottom: 8px;
+  font-size: 1.08rem;
 }
 
 .push-prompt p {
   margin: 0;
   color: rgba(230, 237, 243, 0.82);
-  font-size: 0.88rem;
-  line-height: 1.4;
+  font-size: 0.94rem;
+  line-height: 1.5;
 }
 
 .push-prompt-button {
   border: 0;
-  border-radius: 999px;
-  padding: 12px 16px;
+  border-radius: 14px;
+  padding: 14px 18px;
   background: #f6a600;
   color: #111;
   font-weight: 800;
   cursor: pointer;
-  white-space: nowrap;
+  width: 100%;
 }
 
 .push-prompt-button:disabled {
@@ -48,9 +56,7 @@
 }
 
 @media (max-width: 700px) {
-  .push-prompt {
-    flex-direction: column;
-    align-items: stretch;
-    bottom: 84px;
+  .push-prompt-overlay {
+    padding: 16px;
   }
 }
