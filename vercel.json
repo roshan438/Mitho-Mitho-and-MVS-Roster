@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/break-reminders",
-      "schedule": "*/10 * * * *"
-    }
-  ],
   "rewrites": [
     {
       "source": "/((?!api/).*)",
