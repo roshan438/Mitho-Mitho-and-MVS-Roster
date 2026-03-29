@@ -169,6 +169,141 @@
   font-size: 0.85rem;
 }
 
+.ps-settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ps-setting-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ps-setting-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ps-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ps-toggle-row.compact {
+  margin-bottom: 14px;
+}
+
+.ps-toggle-row strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.ps-toggle-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.ps-switch {
+  width: 54px;
+  min-width: 54px;
+  height: 32px;
+  min-height: 32px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.ps-switch span {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fff7ed;
+  transition: transform 0.2s ease;
+}
+
+.ps-switch.active {
+  background: rgba(246, 166, 0, 0.22);
+  border-color: rgba(246, 166, 0, 0.38);
+}
+
+.ps-switch.active span {
+  transform: translateX(22px);
+  background: #f6a600;
+}
+
+.ps-inline-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ps-choice-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ps-choice-btn.active {
+  background: rgba(246, 166, 0, 0.18);
+  border-color: rgba(246, 166, 0, 0.38);
+  color: #ffd899;
+}
+
+.ps-grid-tight {
+  gap: 12px;
+}
+
+.ps-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ps-chip-toggle {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ps-chip-toggle.active {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.28);
+  color: #bbf7d0;
+}
+
+.ps-chip-toggle.muted {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.18);
+  color: #fda4af;
+}
+
 
 .ps-security-zone {
   background: rgba(239, 68, 68, 0.03);

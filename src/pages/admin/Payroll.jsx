@@ -56,23 +56,30 @@ const money = (n) =>
 const hours = (mins) => Math.round((mins / 60) * 100) / 100;
 export default function Payroll() {
   const { showToast } = useToast();
-  const { getStoreLabel } = useStores();
+  const { stores, getStoreLabel } = useStores();
+  const currentWeekStart = useMemo(() => getWeekStartMonday(new Date()), []);
+  const lastWeekStart = useMemo(() => addDays(currentWeekStart, -7), [currentWeekStart]);
 
   const [rangePreset, setRangePreset] = useState("week");
   const [dateFrom, setDateFrom] = useState(
-    toYMD(getWeekStartMonday(new Date()))
+    toYMD(currentWeekStart)
   );
   const [dateTo, setDateTo] = useState(
-    toYMD(addDays(getWeekStartMonday(new Date()), 7))
+    toYMD(addDays(currentWeekStart, 6))
   );
   const [storeId, setStoreId] = useState("all");
   const [employeeUid, setEmployeeUid] = useState("all");
 
   const [loading, setLoading] = useState(true);
-  const [, setStaffList] = useState([]);
+  const [staffList, setStaffList] = useState([]);
   const [ratesByUid, setRatesByUid] = useState({});
   const [timesheets, setTimesheets] = useState([]);
   const [openStaffUid, setOpenStaffUid] = useState(null);
+  const queryDateTo = useMemo(() => {
+    if (!dateTo) return "";
+    return toYMD(addDays(new Date(`${dateTo}T00:00:00`), 1));
+  }, [dateTo]);
+
   const loadStaffDropdown = useCallback(async () => {
     try {
       const qs = query(
@@ -115,7 +122,7 @@ export default function Payroll() {
       let qTs = query(
         collection(db, "timesheets"),
         where("date", ">=", dateFrom),
-        where("date", "<", dateTo)
+        where("date", "<", queryDateTo)
       );
 
       if (employeeUid !== "all") {
@@ -123,7 +130,7 @@ export default function Payroll() {
           collection(db, "timesheets"),
           where("uid", "==", employeeUid),
           where("date", ">=", dateFrom),
-          where("date", "<", dateTo)
+          where("date", "<", queryDateTo)
         );
       }
 
@@ -166,21 +173,23 @@ export default function Payroll() {
     } finally {
       setLoading(false);
     }
-  }, [dateFrom, dateTo, storeId, employeeUid, ratesByUid, showToast]);
+  }, [dateFrom, queryDateTo, storeId, employeeUid, ratesByUid, showToast]);
 
   useEffect(() => {
     loadStaffDropdown();
   }, [loadStaffDropdown]);
 
   useEffect(() => {
-    const now = new Date();
-
     if (rangePreset === "week") {
-      const ws = getWeekStartMonday(now);
-      setDateFrom(toYMD(ws));
-      setDateTo(toYMD(addDays(ws, 7)));
+      setDateFrom(toYMD(currentWeekStart));
+      setDateTo(toYMD(addDays(currentWeekStart, 6)));
     }
-  }, [rangePreset]);
+
+    if (rangePreset === "lastWeek") {
+      setDateFrom(toYMD(lastWeekStart));
+      setDateTo(toYMD(addDays(lastWeekStart, 6)));
+    }
+  }, [rangePreset, currentWeekStart, lastWeekStart]);
 
   useEffect(() => {
     loadPayroll();
@@ -209,6 +218,18 @@ export default function Payroll() {
     );
   }, [timesheets]);
 
+  const payrollSummary = useMemo(() => {
+    return groupedPayroll.reduce(
+      (acc, group) => {
+        acc.staff += 1;
+        acc.hours += Number(group.totalHours || 0);
+        acc.amount += Number(group.totalAmount || 0);
+        return acc;
+      },
+      { staff: 0, hours: 0, amount: 0 }
+    );
+  }, [groupedPayroll]);
+
   return (
     <div className="mobile-app-wrapper">
       <header className="app-header">
@@ -222,10 +243,100 @@ export default function Payroll() {
        </header>      
 
       <main className="scroll-content">
+        <section className="payroll-filters-container">
+          <div className="preset-tabs">
+            <button
+              type="button"
+              className={`tab-item ${rangePreset === "week" ? "active" : ""}`}
+              onClick={() => setRangePreset("week")}
+            >
+              This Week
+            </button>
+            <button
+              type="button"
+              className={`tab-item ${rangePreset === "lastWeek" ? "active" : ""}`}
+              onClick={() => setRangePreset("lastWeek")}
+            >
+              Last Week
+            </button>
+            <button
+              type="button"
+              className={`tab-item ${rangePreset === "custom" ? "active" : ""}`}
+              onClick={() => setRangePreset("custom")}
+            >
+              Custom
+            </button>
+          </div>
+
+          <div className="filters-grid">
+            <div className="filter-field">
+              <label>From</label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                  setRangePreset("custom");
+                  setDateFrom(e.target.value);
+                }}
+              />
+            </div>
+
+            <div className="filter-field">
+              <label>To</label>
+              <input
+                type="date"
+                value={dateTo}
+                min={dateFrom}
+                onChange={(e) => {
+                  setRangePreset("custom");
+                  setDateTo(e.target.value);
+                }}
+              />
+            </div>
+
+            <div className="filter-field">
+              <label>Store</label>
+              <select value={storeId} onChange={(e) => setStoreId(e.target.value)}>
+                <option value="all">All Stores</option>
+                {stores.map((store) => (
+                  <option key={store.id} value={store.id}>
+                    {store.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-field">
+              <label>Staff</label>
+              <select value={employeeUid} onChange={(e) => setEmployeeUid(e.target.value)}>
+                <option value="all">All Staff</option>
+                {staffList.map((staff) => (
+                  <option key={staff.uid} value={staff.uid}>
+                    {staff.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="payroll-range-summary">
+            <span>{dateFrom} to {dateTo}</span>
+            <span>{payrollSummary.staff} staff</span>
+            <span>{payrollSummary.hours.toFixed(2)}h</span>
+            <span>{money(payrollSummary.amount)}</span>
+          </div>
+        </section>
+
         {loading ? (
-          <div className="loader-inline">
+          <div className="app-inline-loader">
             <div className="spinner"></div>
             <span>Calculating...</span>
+          </div>
+        ) : groupedPayroll.length === 0 ? (
+          <div className="app-empty-state">
+            <div className="app-empty-icon">◎</div>
+            <h2>No payroll records in this range</h2>
+            <p>Try a different date range, store, or staff filter.</p>
           </div>
         ) : (
           <div className="payroll-grouped-list">

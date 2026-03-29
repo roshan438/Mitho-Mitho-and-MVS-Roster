@@ -31,14 +31,14 @@ export function getPushPromptCopy() {
   if (requiresStandaloneInstallForPush()) {
     return {
       description:
-        "On iPhone and iPad, install this app to your Home Screen first, then enable notifications for roster alerts.",
+        "On iPhone and iPad, install this app to your Home Screen first, then enable priority roster alerts.",
       blockedMessage: "Install to Home Screen first on iPhone, then reopen the app.",
     };
   }
 
   return {
     description:
-      "Enable notifications to get roster alerts on this device, even when the browser or screen is not open.",
+      "Enable notifications to get priority roster alerts on this device, even when the browser or screen is not open.",
     blockedMessage: "",
   };
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { collection, doc, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
@@ -16,11 +16,12 @@ export default function LeaveRequestsAdmin() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [requests, setRequests] = useState([]);
   const [reviewNotes, setReviewNotes] = useState({});
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const loadRequests = useCallback(async (isManual = false) => {
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, "leaveRequests"));
+      const snap = await getDocs(query(collection(db, "leaveRequests"), orderBy("createdAt", "desc"), limit(60)));
       const items = sortLeaveRequests(
         snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
       );
@@ -51,6 +52,14 @@ export default function LeaveRequestsAdmin() {
       statusFilter === "all" ? true : request.status === statusFilter
     );
   }, [requests, statusFilter]);
+  const visibleRequests = useMemo(
+    () => filteredRequests.slice(0, visibleCount),
+    [filteredRequests, visibleCount]
+  );
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [statusFilter]);
 
   async function updateRequestStatus(request, status) {
     if (!fbUser?.uid) return;
@@ -65,26 +74,29 @@ export default function LeaveRequestsAdmin() {
         updatedAt: serverTimestamp(),
       });
 
-      await createNotification(db, {
-        uid: request.uid,
-        title: status === "approved" ? "Leave approved" : "Leave update",
-        message:
-          status === "approved"
-            ? `Your ${getLeaveTypeLabel(request.type).toLowerCase()} request for ${formatLeaveDateRange(
-                request.startDate,
-                request.endDate
-              )} was approved.`
-            : `Your ${getLeaveTypeLabel(request.type).toLowerCase()} request for ${formatLeaveDateRange(
-                request.startDate,
-                request.endDate
-              )} was ${status}.`,
-        type: status === "approved" ? "success" : "warning",
-        link: "/staff/leave",
-        metadata: {
-          leaveRequestId: request.id,
-          status,
-        },
-      });
+      if (request.status !== status) {
+        await createNotification(db, {
+          uid: request.uid,
+          title: status === "approved" ? "Leave approved" : "Leave update",
+          message:
+            status === "approved"
+              ? `Your ${getLeaveTypeLabel(request.type).toLowerCase()} request for ${formatLeaveDateRange(
+                  request.startDate,
+                  request.endDate
+                )} has been approved.`
+              : `Your ${getLeaveTypeLabel(request.type).toLowerCase()} request for ${formatLeaveDateRange(
+                  request.startDate,
+                  request.endDate
+                )} was ${status}.`,
+          type: status === "approved" ? "success" : "warning",
+          link: "/staff/leave",
+          metadata: {
+            leaveRequestId: request.id,
+            status,
+            kind: "leave-status",
+          },
+        });
+      }
 
       showToast(`Leave request ${status}`, "success");
       await loadRequests();
@@ -138,7 +150,7 @@ export default function LeaveRequestsAdmin() {
           <div className="leave-empty-state">No leave requests match this filter.</div>
         ) : (
           <div className="leave-admin-list">
-            {filteredRequests.map((request) => (
+            {visibleRequests.map((request) => (
               <article key={request.id} className="leave-admin-card">
                 <div className="leave-admin-top">
                   <div>
@@ -187,6 +199,11 @@ export default function LeaveRequestsAdmin() {
                 </div>
               </article>
             ))}
+            {visibleCount < filteredRequests.length ? (
+              <button className="pill-btn" type="button" onClick={() => setVisibleCount((prev) => prev + 20)}>
+                Load more
+              </button>
+            ) : null}
           </div>
         )}
       </main>

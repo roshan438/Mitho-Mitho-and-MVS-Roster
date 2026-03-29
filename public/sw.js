@@ -23,6 +23,9 @@ self.addEventListener("push", (event) => {
       icon: payload.icon || "/icon-app.svg",
       badge: payload.badge || "/icon-app.svg",
       tag: payload.tag,
+      renotify: Boolean(payload.renotify),
+      requireInteraction: Boolean(payload.requireInteraction),
+      timestamp: payload.timestamp || Date.now(),
       data: payload.data || {},
     })
   );

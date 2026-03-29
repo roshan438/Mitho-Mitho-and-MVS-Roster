@@ -75,9 +75,15 @@ export default async function handler(req, res) {
               tag: `break-reminder-${docSnap.id}`,
               icon: "/icon-app.svg",
               badge: "/icon-app.svg",
+              renotify: false,
+              requireInteraction: true,
+              timestamp: Date.now(),
               data: {
                 url: "/staff/today",
                 timesheetId: docSnap.id,
+                metadata: {
+                  kind: "break-reminder",
+                },
               },
             });
 
@@ -109,9 +115,15 @@ export default async function handler(req, res) {
               tag: `break-end-reminder-${docSnap.id}`,
               icon: "/icon-app.svg",
               badge: "/icon-app.svg",
+              renotify: false,
+              requireInteraction: true,
+              timestamp: Date.now(),
               data: {
                 url: "/staff/today",
                 timesheetId: docSnap.id,
+                metadata: {
+                  kind: "break-end-reminder",
+                },
               },
             });
 

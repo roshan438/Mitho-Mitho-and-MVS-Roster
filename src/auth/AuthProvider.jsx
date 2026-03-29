@@ -11,6 +11,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
+import { DEFAULT_NOTIFICATION_SETTINGS, normalizeNotificationSettings } from "../utils/notificationSettings";
 
 const AuthCtx = createContext(null);
 
@@ -125,6 +126,7 @@ export function AuthProvider({ children }) {
               profileComplete: false,
               hourlyRate: null,
               provider: u.providerData?.[0]?.providerId || "unknown",
+              notificationSettings: DEFAULT_NOTIFICATION_SETTINGS,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             },
@@ -137,6 +139,10 @@ export function AuthProvider({ children }) {
           nextProfile = snap.data();
         }
 
+        nextProfile = {
+          ...nextProfile,
+          notificationSettings: normalizeNotificationSettings(nextProfile?.notificationSettings),
+        };
         setProfile(nextProfile);
 
         const expired = await forceLogoutIfExpired(nextProfile?.role || "staff");

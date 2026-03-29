@@ -1,72 +1,9 @@
 
   
   
-  
-  
-  
-  
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-  :root {
-    --bg: #0b0f14;
-    --card: #121826;
-    --text: #e6edf3;
-    --muted: #9aa4b2;
-    --border: rgba(255, 255, 255, 0.08);
-    --brand: #f6a600;
-    --safe-area: 20px;
-  }
-  
-  .mobile-app-wrapper {
-    background: var(--bg);
-    min-height: 100vh;
-    color: var(--text);
-    padding-bottom: 50px;
-  }
-  
-  .app-header {
-    padding: 32px var(--safe-area) 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .main-title { font-size: 1.8rem; font-weight: 800; margin: 0; color: #fff; }
-  .subtitle { color: var(--muted); font-size: 0.9rem; font-weight: 500; }
-  
-  .refresh-circle {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--brand);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
-  
-  .refresh-circle.spinning svg { animation: rotate 1s linear infinite; }
-  
-  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  
   .stats-bar {
-    margin: 8px var(--safe-area) 8px;
-    background: linear-gradient(165deg, #1a2235 0%, #121826 100%);
+    margin: 0 0 8px;
+    background: linear-gradient(165deg, rgba(29, 23, 18, 0.98) 0%, rgba(17, 14, 11, 0.98) 100%);
     border-radius: 24px;
     padding: 12px;
     display: flex;
@@ -82,39 +19,27 @@
   .stat-divider { width: 1px; height: 40px; background: var(--border); }
   
   
-  .date-nav { margin: 0 var(--safe-area) 24px; }
+  .date-nav { margin: 0 0 20px; }
   .date-display input {
-    background: #ffffff36;
-    border: #fff solid 0.08rem;
-    border-radius: 4px;
-    color: #fff;
-    font-weight: 400;
-    font-size: 0.8rem;
-    padding: 6px 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.84rem;
+    padding: 10px 12px;
     margin-bottom: 12px;
     width: 100%;
     color-scheme: dark;
   }
   
   .button-group { display: flex; gap: 10px; }
-  .pill-btn {
-    flex: 1;
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px;
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 0.85rem;
-  }
-  
-  .pill-btn.active { background: var(--brand); color: #000; border-color: var(--brand); font-weight: 800; }
   
   .timeline-card {
     display: flex;
-    background: var(--card);
+    background: rgba(255,255,255,0.03);
     border-radius: 20px;
-    margin: 0 var(--safe-area) 12px;
+    margin: 0 0 12px;
     border: 1px solid var(--border);
     transition: transform 0.2s;
   }
@@ -144,22 +69,3 @@
   .time-box span { font-size: 0.9rem; font-weight: 600; color: var(--text); }
   
   .no-entry { color: var(--muted); font-size: 0.85rem; font-style: italic; display: block; padding: 10px 0; }
-  
-  
-  .loader-inline {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px;
-    color: var(--muted);
-    gap: 12px;
-  }
-  
-  .spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--border);
-    border-top: 3px solid var(--brand);
-    border-radius: 50%;
-    animation: rotate 0.8s linear infinite;
-  }

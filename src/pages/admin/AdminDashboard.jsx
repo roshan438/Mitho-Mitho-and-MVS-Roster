@@ -1,34 +1,14 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { collection, collectionGroup, getDocs, query, where } from "firebase/firestore";
+import { collection, collectionGroup, getDocs, limit, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useStores } from "../../hooks/useStore";
 import { toYMD } from "../../utils/dates";
 import { useToast } from "../../context/ToastContext";
-import { useNavigate } from "react-router-dom"; // ✅ Added for navigation
+import { useNavigate } from "react-router-dom";
+import { deleteSavedView, loadSavedViews, saveSavedView } from "../../utils/adminSavedViews";
 import "./AdminDashboard.css";
 
+const PAGE_SIZE = 16;
 
 const fmtTime = (ts) => {
   if (!ts?.toDate) return "-";
@@ -44,44 +24,57 @@ const statusFromTimesheet = (ts) => {
   return { label: "Absent", cls: "stNot" };
 };
 
+const DEFAULT_FILTERS = {
+  storeId: "all",
+  department: "all",
+  status: "all",
+  search: "",
+};
+
 export default function AdminDashboard() {
   const { showToast } = useToast();
-  const navigate = useNavigate(); // ✅ Hook for moving to Stock Manager
+  const navigate = useNavigate();
   const { stores, getStoreLabel } = useStores();
   const today = useMemo(() => toYMD(new Date()), []);
   const [loading, setLoading] = useState(true);
-  const [storeFilter, setStoreFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [savedViews, setSavedViews] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [rosterToday, setRosterToday] = useState([]);
   const [tsByUid, setTsByUid] = useState({});
   const [dailyStocks, setDailyStocks] = useState([]);
+  const [usersByUid, setUsersByUid] = useState({});
 
   const loadToday = useCallback(
     async (manual = false) => {
       setLoading(true);
       try {
-        const rosterQ = query(collectionGroup(db, "shifts"), where("date", "==", today));
-        const rosterSnap = await getDocs(rosterQ);
-        const roster = rosterSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        const tsQ = query(collection(db, "timesheets"), where("date", "==", today));
-        const tsSnap = await getDocs(tsQ);
-        const map = {};
-        tsSnap.docs.forEach((d) => {
-          const data = d.data();
-          if (data.uid) map[data.uid] = data;
+        const [rosterSnap, tsSnap, stockSnap, userSnap] = await Promise.all([
+          getDocs(query(collectionGroup(db, "shifts"), where("date", "==", today))),
+          getDocs(query(collection(db, "timesheets"), where("date", "==", today))),
+          getDocs(query(collection(db, "dailyStockTake"), where("date", "==", today))),
+          getDocs(query(collection(db, "users"), where("role", "in", ["staff", "manager"]), limit(160))),
+        ]);
+
+        const roster = rosterSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        const tsMap = {};
+        tsSnap.docs.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.uid) tsMap[data.uid] = data;
         });
-        // ok
-        const stockQ = query(collection(db, "dailyStockTake"), where("date", "==", today));
-        const stockSnap = await getDocs(stockQ);
-        const stocks = stockSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const userMap = {};
+        userSnap.docs.forEach((docSnap) => {
+          userMap[docSnap.id] = docSnap.data();
+        });
 
         setRosterToday(roster);
-        setTsByUid(map);
-        setDailyStocks(stocks);
+        setTsByUid(tsMap);
+        setDailyStocks(stockSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+        setUsersByUid(userMap);
 
-        if (manual) showToast("Data synced successfully", "success");
-      } catch (e) {
-        console.error(e);
+        if (manual) showToast("Dashboard refreshed", "success");
+      } catch (error) {
+        console.error(error);
         showToast("Failed to sync dashboard data", "error");
       } finally {
         setLoading(false);
@@ -92,38 +85,72 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadToday(false);
+    setSavedViews(loadSavedViews("dashboard"));
   }, [loadToday]);
 
   const filteredRows = useMemo(() => {
-    let rows = rosterToday;
-    if (storeFilter !== "all") rows = rows.filter((r) => r.storeId === storeFilter);
-    const q = search.trim().toLowerCase();
-    if (q) {
-      rows = rows.filter(
-        (r) =>
-          (r.staffName || "").toLowerCase().includes(q) ||
-          (r.uid || "").toLowerCase().includes(q)
-      );
-    }
-    return rows
-      .map((r) => {
-        const ts = tsByUid[r.uid] || null;
-        const st = statusFromTimesheet(ts);
-        return { ...r, ts, statusLabel: st.label, statusCls: st.cls };
+    const queryText = filters.search.trim().toLowerCase();
+
+    return rosterToday
+      .map((row) => {
+        const ts = tsByUid[row.uid] || null;
+        const status = statusFromTimesheet(ts);
+        const profile = usersByUid[row.uid] || {};
+        return {
+          ...row,
+          ts,
+          statusLabel: status.label,
+          statusCls: status.cls,
+          department: String(profile.department || row.department || "").toLowerCase(),
+        };
       })
-      .sort((a, b) => (a.storeId || "").localeCompare(b.storeId || "") || (a.startPlanned || "").localeCompare(b.startPlanned || ""));
-  }, [rosterToday, storeFilter, search, tsByUid]);
+      .filter((row) => {
+        const storeMatch = filters.storeId === "all" || row.storeId === filters.storeId;
+        const departmentMatch = filters.department === "all" || row.department === filters.department;
+        const statusMatch = filters.status === "all" || row.statusCls === filters.status;
+        const searchMatch =
+          !queryText ||
+          String(row.staffName || "").toLowerCase().includes(queryText) ||
+          String(row.uid || "").toLowerCase().includes(queryText);
+        return storeMatch && departmentMatch && statusMatch && searchMatch;
+      })
+      .sort(
+        (a, b) =>
+          (a.storeId || "").localeCompare(b.storeId || "") ||
+          (a.startPlanned || "").localeCompare(b.startPlanned || "")
+      );
+  }, [filters, rosterToday, tsByUid, usersByUid]);
+
+  const visibleRows = useMemo(
+    () => filteredRows.slice(0, visibleCount),
+    [filteredRows, visibleCount]
+  );
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [filters]);
 
   const stats = useMemo(() => {
-    const s = { rostered: filteredRows.length, notStarted: 0, working: 0, onBreak: 0, done: 0 };
-    filteredRows.forEach((r) => {
-      if (!r.ts) s.notStarted++;
-      else if (r.ts.endActual) s.done++;
-      else if (r.ts.breakStartActual && !r.ts.breakEndActual) s.onBreak++;
-      else if (r.ts.startActual) s.working++;
+    const next = { rostered: filteredRows.length, notStarted: 0, working: 0, onBreak: 0, done: 0 };
+    filteredRows.forEach((row) => {
+      if (!row.ts) next.notStarted += 1;
+      else if (row.ts.endActual) next.done += 1;
+      else if (row.ts.breakStartActual && !row.ts.breakEndActual) next.onBreak += 1;
+      else if (row.ts.startActual) next.working += 1;
     });
-    return s;
+    return next;
   }, [filteredRows]);
+
+  function updateFilter(key, value) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleSaveView() {
+    const name = window.prompt("Save this dashboard view as:");
+    if (!name?.trim()) return;
+    setSavedViews(saveSavedView("dashboard", name.trim(), filters));
+    showToast("Dashboard view saved", "success");
+  }
 
   const primaryStockAlerts = useMemo(
     () => dailyStocks.filter((stock) => !stock.adminProcessed).slice(0, 4),
@@ -141,16 +168,18 @@ export default function AdminDashboard() {
           </div>
 
           <div className="admdash-actions">
+            <button className="admdash-action-btn" type="button" onClick={handleSaveView}>Save view</button>
             <button
-              className={`admdash-action-btn refresh-pill ${loading ? "spinning" : ""}`}
+              className={`admdash-action-btn refresh-pill ${loading ? "is-syncing" : ""}`}
               onClick={() => loadToday(true)}
               disabled={loading}
+              type="button"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
+              <svg className="admdash-sync-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
               Sync
             </button>
-            <button className="admdash-action-btn view-manager-btn" onClick={() => navigate("/admin/stock-manager")}>
-              Stock
+            <button className="admdash-action-btn view-manager-btn" type="button" onClick={() => navigate("/admin/analytics")}>
+              Analytics
             </button>
           </div>
         </header>
@@ -164,28 +193,57 @@ export default function AdminDashboard() {
         </section>
 
         <section className="admdash-filters">
-          <select className="admdash-select" value={storeFilter} onChange={(e) => setStoreFilter(e.target.value)}>
+          <select className="admdash-select" value={filters.storeId} onChange={(e) => updateFilter("storeId", e.target.value)}>
             <option value="all">All Stores</option>
-            {stores.map((s) => (<option key={s.id} value={s.id}>{s.label}</option>))}
+            {stores.map((store) => (
+              <option key={store.id} value={store.id}>{store.label}</option>
+            ))}
           </select>
-
+          <select className="admdash-select" value={filters.department} onChange={(e) => updateFilter("department", e.target.value)}>
+            <option value="all">All Departments</option>
+            <option value="shop">Shop</option>
+            <option value="kitchen">Kitchen</option>
+            <option value="manager">Manager</option>
+          </select>
+          <select className="admdash-select" value={filters.status} onChange={(e) => updateFilter("status", e.target.value)}>
+            <option value="all">All Statuses</option>
+            <option value="stNot">Absent</option>
+            <option value="stWork">Clocked In</option>
+            <option value="stBreak">On Break</option>
+            <option value="stDone">Finished</option>
+          </select>
           <div className="admdash-search-box">
-            <input placeholder="Search staff..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input placeholder="Search staff..." value={filters.search} onChange={(e) => updateFilter("search", e.target.value)} />
           </div>
         </section>
+
+        {savedViews.length > 0 ? (
+          <section className="admdash-saved-row">
+            {savedViews.map((view) => (
+              <div key={view.id} className="admdash-saved-chip">
+                <button type="button" onClick={() => setFilters(view.filters)}>{view.name}</button>
+                <button type="button" onClick={() => setSavedViews(deleteSavedView("dashboard", view.id))}>×</button>
+              </div>
+            ))}
+          </section>
+        ) : null}
 
         <section className="admdash-content-grid">
           <aside className="admdash-side-rail">
             <section className="admdash-stock-section compact">
               <div className="admdash-stock-header compact">
                 <h3>Stock Alerts</h3>
-                <button className="admdash-text-link" onClick={() => navigate("/admin/stock-manager")}>
+                <button className="admdash-text-link" onClick={() => navigate("/admin/stock-manager")} type="button">
                   Open
                 </button>
               </div>
               <div className="admdash-stock-grid compact">
                 {dailyStocks.length === 0 ? (
-                  <div className="admdash-empty-block">No stock requests submitted today yet.</div>
+                  <div className="app-empty-state compact">
+                    <div className="app-empty-icon">□</div>
+                    <h2>No stock requests yet</h2>
+                    <p>Fresh stock issues for today will show up here.</p>
+                  </div>
                 ) : (
                   primaryStockAlerts.map((stock) => (
                     <div
@@ -213,7 +271,7 @@ export default function AdminDashboard() {
               <div className="admdash-summary-grid">
                 <div className="admdash-summary-item">
                   <span>Stores</span>
-                  <strong>{storeFilter === "all" ? stores.length : 1}</strong>
+                  <strong>{filters.storeId === "all" ? stores.length : 1}</strong>
                 </div>
                 <div className="admdash-summary-item">
                   <span>Reqs</span>
@@ -224,8 +282,8 @@ export default function AdminDashboard() {
                   <strong>{dailyStocks.filter((stock) => !stock.adminProcessed).length}</strong>
                 </div>
                 <div className="admdash-summary-item">
-                  <span>Live</span>
-                  <strong>{stats.rostered - stats.notStarted}</strong>
+                  <span>Visible</span>
+                  <strong>{filteredRows.length}</strong>
                 </div>
               </div>
             </section>
@@ -241,28 +299,41 @@ export default function AdminDashboard() {
 
             <div className="admdash-table-wrap">
               {loading ? (
-                <div className="admdash-empty-block"><div className="spinner" /></div>
+                <div className="app-inline-loader">
+                  <div className="spinner" />
+                  <span>Loading today&apos;s live board...</span>
+                </div>
               ) : filteredRows.length === 0 ? (
-                <div className="admdash-empty-block">No shifts found for today.</div>
+                <div className="app-empty-state compact">
+                  <div className="app-empty-icon">⌕</div>
+                  <h2>No staff match this view</h2>
+                  <p>Try a different store, department, or status filter.</p>
+                </div>
               ) : (
                 <div className="admdash-list compact">
-                  {filteredRows.map((r) => (
-                    <div key={r.id} className="admdash-row-card compact">
+                  {visibleRows.map((row) => (
+                    <div key={row.id} className="admdash-row-card compact">
                       <div className="admdash-row-primary">
                         <div className="admdash-staff-identity">
-                          <span className="admdash-staff-name">{r.staffName || "Unknown"}</span>
-                          <span className="admdash-store-tag">{getStoreLabel(r.storeId)}</span>
+                          <span className="admdash-staff-name">{row.staffName || "Unknown"}</span>
+                          <span className="admdash-store-tag">{getStoreLabel(row.storeId)}</span>
                         </div>
-                        <div className={`admdash-status-badge ${r.statusCls}`}>{r.statusLabel}</div>
+                        <div className={`admdash-status-badge ${row.statusCls}`}>{row.statusLabel}</div>
                       </div>
 
                       <div className="admdash-row-details compact">
-                        <div className="admdash-detail-item"><label>Planned</label><span>{r.startPlanned} - {r.endPlanned}</span></div>
-                        <div className="admdash-detail-item"><label>In</label><span>{fmtTime(r.ts?.startActual)}</span></div>
-                        <div className="admdash-detail-item"><label>Out</label><span>{fmtTime(r.ts?.endActual)}</span></div>
+                        <div className="admdash-detail-item"><label>Planned</label><span>{row.startPlanned} - {row.endPlanned}</span></div>
+                        <div className="admdash-detail-item"><label>Dept</label><span>{row.department || "-"}</span></div>
+                        <div className="admdash-detail-item"><label>In</label><span>{fmtTime(row.ts?.startActual)}</span></div>
+                        <div className="admdash-detail-item"><label>Out</label><span>{fmtTime(row.ts?.endActual)}</span></div>
                       </div>
                     </div>
                   ))}
+                  {visibleCount < filteredRows.length ? (
+                    <button className="admdash-load-more" type="button" onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}>
+                      Load more
+                    </button>
+                  ) : null}
                 </div>
               )}
             </div>

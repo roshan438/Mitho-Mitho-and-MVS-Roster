@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { addDoc, collection, getDocs, query, serverTimestamp, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp, where } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../auth/AuthProvider";
 import { useToast } from "../../context/ToastContext";
@@ -28,7 +28,7 @@ export default function LeaveRequests() {
 
     try {
       const snap = await getDocs(
-        query(collection(db, "leaveRequests"), where("uid", "==", uid))
+        query(collection(db, "leaveRequests"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(40))
       );
 
       const items = sortLeaveRequests(
@@ -214,7 +214,11 @@ export default function LeaveRequests() {
               <span>Loading requests...</span>
             </div>
           ) : requests.length === 0 ? (
-            <div className="leave-empty-state">No leave requests yet.</div>
+            <div className="app-empty-state">
+              <div className="app-empty-icon">Leave</div>
+              <h2>No leave requests yet</h2>
+              <p>Your submitted requests and admin responses will show up here.</p>
+            </div>
           ) : (
             <div className="leave-request-list">
               {requests.map((request) => (

@@ -2,7 +2,18 @@ import React, { useState, useEffect } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { db, auth } from "../firebase/firebase";
+import { normalizeNotificationSettings } from "../utils/notificationSettings";
 import "./MyProfileModal.css";
+
+const NOTIFICATION_CATEGORY_OPTIONS = [
+  { key: "roster", label: "Roster changes" },
+  { key: "shiftRequests", label: "Shift requests" },
+  { key: "leave", label: "Leave updates" },
+  { key: "timesheet", label: "Timesheet reviews" },
+  { key: "reminders", label: "Break reminders" },
+  { key: "kitchen", label: "Kitchen operations" },
+  { key: "general", label: "General updates" },
+];
 
 export default function MyProfileModal({ profile, uid, onClose }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,7 +30,8 @@ export default function MyProfileModal({ profile, uid, onClose }) {
     postcode: profile?.postcode ?? "",
     emergencyName: profile?.emergencyName ?? "",
     emergencyPhone: profile?.emergencyPhone ?? "",
-    emergencyRelationship: profile?.emergencyRelationship ?? ""
+    emergencyRelationship: profile?.emergencyRelationship ?? "",
+    notificationSettings: normalizeNotificationSettings(profile?.notificationSettings),
   });
 
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
@@ -38,7 +50,8 @@ export default function MyProfileModal({ profile, uid, onClose }) {
         postcode: profile.postcode ?? "",
         emergencyName: profile.emergencyName ?? "",
         emergencyPhone: profile.emergencyPhone ?? "",
-        emergencyRelationship: profile.emergencyRelationship ?? ""
+        emergencyRelationship: profile.emergencyRelationship ?? "",
+        notificationSettings: normalizeNotificationSettings(profile.notificationSettings),
       });
     }
   }, [profile]);
@@ -55,6 +68,31 @@ export default function MyProfileModal({ profile, uid, onClose }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const notificationSettings = formData.notificationSettings;
+
+  const updateNotificationSetting = (patch) => {
+    setFormData((prev) => ({
+      ...prev,
+      notificationSettings: {
+        ...prev.notificationSettings,
+        ...patch,
+      },
+    }));
+  };
+
+  const toggleNotificationCategory = (key) => {
+    setFormData((prev) => ({
+      ...prev,
+      notificationSettings: {
+        ...prev.notificationSettings,
+        categories: {
+          ...prev.notificationSettings.categories,
+          [key]: !prev.notificationSettings.categories[key],
+        },
+      },
+    }));
   };
 
   const handlePasswordUpdate = async (e) => {
@@ -155,6 +193,121 @@ export default function MyProfileModal({ profile, uid, onClose }) {
                 {isEditing ? <input className="ps-input" value={formData.emergencyPhone} onChange={e => setFormData({...formData, emergencyPhone: e.target.value})} /> : <p className="ps-value">{profile?.emergencyPhone || "---"}</p>}
               </div>
             </div>
+          </section>
+
+          <section className="ps-section">
+            <div className="ps-section-header">
+              <h3>Notification Settings</h3>
+            </div>
+
+            <div className="ps-settings-stack">
+              <div className="ps-toggle-row">
+                <div>
+                  <strong>Browser alerts</strong>
+                  <p>Allow live roster alerts on this device when important updates arrive.</p>
+                </div>
+                <button
+                  type="button"
+                  className={`ps-switch ${notificationSettings.browserEnabled ? "active" : ""}`}
+                  onClick={() => updateNotificationSetting({ browserEnabled: !notificationSettings.browserEnabled })}
+                >
+                  <span />
+                </button>
+              </div>
+
+              <div className="ps-toggle-row">
+                <div>
+                  <strong>Installed app push alerts</strong>
+                  <p>Allow Home Screen push notifications for priority updates when the app is closed.</p>
+                </div>
+                <button
+                  type="button"
+                  className={`ps-switch ${notificationSettings.pushEnabled ? "active" : ""}`}
+                  onClick={() => updateNotificationSetting({ pushEnabled: !notificationSettings.pushEnabled })}
+                >
+                  <span />
+                </button>
+              </div>
+
+              <div className="ps-setting-card">
+                <label className="ps-setting-label">Bell badge mode</label>
+                <div className="ps-inline-choice">
+                  <button
+                    type="button"
+                    className={`ps-choice-btn ${notificationSettings.badgeMode === "priority" ? "active" : ""}`}
+                    onClick={() => updateNotificationSetting({ badgeMode: "priority" })}
+                  >
+                    Priority only
+                  </button>
+                  <button
+                    type="button"
+                    className={`ps-choice-btn ${notificationSettings.badgeMode === "all" ? "active" : ""}`}
+                    onClick={() => updateNotificationSetting({ badgeMode: "all" })}
+                  >
+                    All unread
+                  </button>
+                </div>
+              </div>
+
+              <div className="ps-setting-card">
+                <div className="ps-toggle-row compact">
+                  <div>
+                    <strong>Quiet hours</strong>
+                    <p>Pause browser popups during your off-hours.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className={`ps-switch ${notificationSettings.quietHoursEnabled ? "active" : ""}`}
+                    onClick={() => updateNotificationSetting({ quietHoursEnabled: !notificationSettings.quietHoursEnabled })}
+                  >
+                    <span />
+                  </button>
+                </div>
+
+                <div className="ps-grid ps-grid-tight">
+                  <div className="ps-field">
+                    <label>Quiet From</label>
+                    <input
+                      type="time"
+                      className="ps-input"
+                      value={notificationSettings.quietHoursStart}
+                      onChange={(e) => updateNotificationSetting({ quietHoursStart: e.target.value })}
+                      disabled={!notificationSettings.quietHoursEnabled}
+                    />
+                  </div>
+                  <div className="ps-field">
+                    <label>Quiet Until</label>
+                    <input
+                      type="time"
+                      className="ps-input"
+                      value={notificationSettings.quietHoursEnd}
+                      onChange={(e) => updateNotificationSetting({ quietHoursEnd: e.target.value })}
+                      disabled={!notificationSettings.quietHoursEnabled}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="ps-setting-card">
+                <label className="ps-setting-label">Muted categories</label>
+                <div className="ps-chip-grid">
+                  {NOTIFICATION_CATEGORY_OPTIONS.map((option) => {
+                    const enabled = notificationSettings.categories[option.key] !== false;
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        className={`ps-chip-toggle ${enabled ? "active" : "muted"}`}
+                        onClick={() => toggleNotificationCategory(option.key)}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
             {isEditing && (
               <button className="ps-save-main-btn" onClick={handleSaveProfile} disabled={loading}>
                 {loading ? "Syncing Data..." : "Save Profile Changes"}

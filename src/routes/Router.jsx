@@ -44,6 +44,7 @@ import KitchenQuickStockTake from "../pages/staff/KitchenQuickStockTake.jsx";
 import NotificationsCenter from "../pages/staff/NotificationsCenter.jsx";
 
 import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
+import AdminAnalytics from "../pages/admin/AdminAnalytics.jsx";
 import Approvals from "../pages/admin/Approvals.jsx";
 import RosterManager from "../pages/admin/RosterManager.jsx";
 import Payroll from "../pages/admin/Payroll.jsx";
@@ -146,6 +147,7 @@ export default function Router() {
           }
         >
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="store-settings" element={<StoreSettings />} />
           <Route path="approvals" element={<Approvals />} />
           <Route path="staff" element={<AdminStaffList />} />

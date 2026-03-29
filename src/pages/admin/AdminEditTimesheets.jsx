@@ -19,6 +19,8 @@ import {
   collection,
   doc,
   getDocs,
+  limit,
+  orderBy,
   query,
   where,
   updateDoc,
@@ -92,7 +94,7 @@ export default function AdminEditTimesheets() {
 
   const [preset, setPreset] = useState("week");
   const [dateFrom, setDateFrom] = useState(toYMD(getWeekStartMonday(new Date())));
-  const [dateTo, setDateTo] = useState(toYMD(addDays(getWeekStartMonday(new Date()), 7)));
+  const [dateTo, setDateTo] = useState(toYMD(addDays(getWeekStartMonday(new Date()), 6)));
   const [storeId, setStoreId] = useState("all");
   const [employeeUid, setEmployeeUid] = useState("all");
 
@@ -100,6 +102,7 @@ export default function AdminEditTimesheets() {
   const [timesheets, setTimesheets] = useState([]);
   const [staffList, setStaffList] = useState([]);
   const [staffByUid, setStaffByUid] = useState({});
+  const [visibleCount, setVisibleCount] = useState(18);
 
   const [openStaffUid, setOpenStaffUid] = useState(null);
   const [openEditorId, setOpenEditorId] = useState(null);
@@ -130,6 +133,11 @@ export default function AdminEditTimesheets() {
     ensActual: "",
     adminNote: "",
   });
+  const queryDateTo = useMemo(() => {
+    if (!dateTo) return "";
+    return toYMD(addDays(new Date(`${dateTo}T00:00:00`), 1));
+  }, [dateTo]);
+
   useEffect(() => {
     if (stores.length > 0 && !addForm.storeId) {
       setAddForm(prev => ({ ...prev, storeId: stores[0].id }));
@@ -174,7 +182,9 @@ export default function AdminEditTimesheets() {
         let qTs = query(
           collection(db, "timesheets"),
           where("date", ">=", dateFrom),
-          where("date", "<", dateTo)
+          where("date", "<", queryDateTo),
+          orderBy("date", "desc"),
+          limit(120)
         );
 
         if (employeeUid !== "all") {
@@ -182,7 +192,9 @@ export default function AdminEditTimesheets() {
             collection(db, "timesheets"),
             where("uid", "==", employeeUid),
             where("date", ">=", dateFrom),
-            where("date", "<", dateTo)
+            where("date", "<", queryDateTo),
+            orderBy("date", "desc"),
+            limit(120)
           );
         }
 
@@ -216,7 +228,7 @@ export default function AdminEditTimesheets() {
         setLoading(false);
       }
     },
-    [dateFrom, dateTo, storeId, employeeUid, staffByUid, showToast]
+    [dateFrom, queryDateTo, storeId, employeeUid, staffByUid, showToast]
   );
 
   useEffect(() => {
@@ -232,13 +244,16 @@ export default function AdminEditTimesheets() {
 
     if (preset === "day") {
       setDateFrom(toYMD(now));
-      setDateTo(toYMD(addDays(now, 1)));
+      setDateTo(toYMD(now));
     } else if (preset === "week") {
       const ws = getWeekStartMonday(now);
       setDateFrom(toYMD(ws));
-      setDateTo(toYMD(addDays(ws, 7)));
+      setDateTo(toYMD(addDays(ws, 6)));
     }
   }, [preset]);
+  useEffect(() => {
+    setVisibleCount(18);
+  }, [dateFrom, dateTo, storeId, employeeUid]);
 
   const groupedTimesheets = useMemo(() => {
     const grouped = {};
@@ -271,6 +286,10 @@ export default function AdminEditTimesheets() {
       }))
       .sort((a, b) => a.staffName.localeCompare(b.staffName));
   }, [timesheets]);
+  const visibleGroups = useMemo(
+    () => groupedTimesheets.slice(0, visibleCount),
+    [groupedTimesheets, visibleCount]
+  );
 
   const openEditor = (t) => {
     setOpenEditorId(t.id);
@@ -310,16 +329,21 @@ export default function AdminEditTimesheets() {
 
       await updateDoc(doc(db, "timesheets", t.id), patch);
 
-      if (t.uid && ["approved", "reviewed"].includes(edit.auditStatus)) {
+      if (
+        t.uid &&
+        ["approved", "reviewed"].includes(edit.auditStatus) &&
+        t.auditStatus !== edit.auditStatus
+      ) {
         await createNotification(db, {
           uid: t.uid,
           title: edit.auditStatus === "approved" ? "Timesheet approved" : "Timesheet reviewed",
-          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was ${edit.auditStatus}.`,
+          message: `Your ${t.date} timesheet for ${getStoreLabel(t.storeId)} was marked ${edit.auditStatus}.`,
           type: edit.auditStatus === "approved" ? "success" : "info",
           link: "/staff/my-timesheets",
           metadata: {
             timesheetId: t.id,
             status: edit.auditStatus,
+            kind: "timesheet-status",
           },
         });
 
@@ -383,28 +407,31 @@ export default function AdminEditTimesheets() {
       });
 
       if (t.uid) {
-        await createNotification(db, {
-          uid: t.uid,
-          title: "Timesheet approved",
-          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was approved.`,
-          type: "success",
-          link: "/staff/my-timesheets",
-          metadata: {
-            timesheetId: t.id,
-            status: "approved",
-          },
-        });
+        if (t.auditStatus !== "approved") {
+          await createNotification(db, {
+            uid: t.uid,
+            title: "Timesheet approved",
+            message: `Your ${t.date} timesheet for ${getStoreLabel(t.storeId)} was approved.`,
+            type: "success",
+            link: "/staff/my-timesheets",
+            metadata: {
+              timesheetId: t.id,
+              status: "approved",
+              kind: "timesheet-approved",
+            },
+          });
 
-        await pushUsers([t.uid], {
-          title: "Timesheet approved",
-          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was approved.`,
-          link: "/staff/my-timesheets",
-          metadata: {
-            timesheetId: t.id,
-            status: "approved",
-            kind: "timesheet-approved",
-          },
-        });
+          await pushUsers([t.uid], {
+            title: "Timesheet approved",
+            message: `Your ${t.date} timesheet for ${getStoreLabel(t.storeId)} was approved.`,
+            link: "/staff/my-timesheets",
+            metadata: {
+              timesheetId: t.id,
+              status: "approved",
+              kind: "timesheet-approved",
+            },
+          });
+        }
       }
 
       showToast("Shift approved.", "success", { title: "Approved" });
@@ -534,7 +561,8 @@ export default function AdminEditTimesheets() {
         ) : groupedTimesheets.length === 0 ? (
           <div className="loading-state">No timesheet entries found for this filter.</div>
         ) : (
-          groupedTimesheets.map((group) => (
+          <>
+          {visibleGroups.map((group) => (
             <div key={group.uid} className="staff-group-card">
               <button
                 className="staff-group-header"
@@ -702,7 +730,13 @@ export default function AdminEditTimesheets() {
                 </div>
               )}
             </div>
-          ))
+          ))}
+          {visibleCount < groupedTimesheets.length ? (
+            <button className="pill-btn" type="button" onClick={() => setVisibleCount((prev) => prev + 18)}>
+              Load more
+            </button>
+          ) : null}
+          </>
         )}
       </div>
 

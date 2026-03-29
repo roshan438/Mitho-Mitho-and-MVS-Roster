@@ -302,6 +302,7 @@ export default function KitchenQuickStockTake() {
         sessionId: session.id,
         lowStockCount: summary.lowStockCount || 0,
         date: today,
+        kind: "kitchen-stocktake",
       },
     });
   }, [currentStoreId, currentStoreLabel, fbUser?.displayName, profile?.firstName, session?.id, today]);

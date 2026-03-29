@@ -613,7 +613,18 @@ export default function StaffToday() {
     loadAllStoreRequests();
   };
 
-  if (loading) return <div className="container staff-today-page"><div className="card staff-today-card">Loading...</div></div>;
+  if (loading) {
+    return (
+      <div className="container staff-today-page">
+        <div className="card staff-today-card">
+          <div className="app-inline-loader">
+            <div className="spinner" />
+            <span>Loading today&apos;s shift…</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container staff-today-page">
@@ -670,7 +681,11 @@ export default function StaffToday() {
         </div>
 
         {!todayShift ? (
-          <div className="notice">No shift today</div>
+          <div className="app-empty-state">
+            <div className="app-empty-icon">Free</div>
+            <h2>No shift today</h2>
+            <p>You&apos;re all clear for today. Check back later if the roster changes.</p>
+          </div>
         ) : (
           <>
             <div className="shift-info-card">

@@ -1,6 +1,7 @@
 import { adminAuth, adminDb } from "../_lib/firebaseAdmin.js";
 import { readBearerToken, sendJson } from "../_lib/http.js";
 import { sendPushToUsers } from "../_lib/webPush.js";
+import { getPushMeta } from "../_lib/pushPolicy.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -27,15 +28,21 @@ export default async function handler(req, res) {
       return sendJson(res, 400, { error: "uids and notification are required" });
     }
 
+    const pushMeta = getPushMeta(notification);
+
     const result = await sendPushToUsers(uids, {
       title: notification.title || "RAS Roster",
       body: notification.message || "Open the app to see the latest update.",
       tag: notification.metadata?.kind || notification.title || "ras-roster",
       icon: "/icon-app.svg",
       badge: "/icon-app.svg",
+      renotify: false,
+      requireInteraction: pushMeta.priority >= 3,
+      timestamp: Date.now(),
       data: {
         url: notification.link || "/",
         metadata: notification.metadata || {},
+        priority: pushMeta.priority,
       },
     });
 

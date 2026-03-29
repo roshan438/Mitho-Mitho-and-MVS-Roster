@@ -241,7 +241,7 @@ export default function MyTimesheets() {
                         </div>
                       </>
                     ) : (
-                      <span className="no-entry">No shift recorded</span>
+                      <span className="no-entry">No time entry recorded</span>
                     )}
                   </div>
                 </div>

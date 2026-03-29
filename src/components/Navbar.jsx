@@ -30,7 +30,7 @@ import "./Navbar.css";
 
 export default function Navbar() {
   const { fbUser, profile, role } = useAuthUser();
-  const { unreadCount } = useNotificationsCenter();
+  const { badgeCount } = useNotificationsCenter();
   const [showProfile, setShowProfile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const nav = useNavigate();
@@ -46,6 +46,7 @@ export default function Navbar() {
       title: "Operations",
       links: [
         { to: "/admin/dashboard", label: "Dashboard" },
+        { to: "/admin/analytics", label: "Analytics" },
         { to: "/admin/approvals", label: "Approvals" },
         { to: "/admin/roster", label: "Roster" },
         { to: "/admin/stock-manager", label: "Stock" },
@@ -105,7 +106,7 @@ export default function Navbar() {
                   <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
                   <path d="M13.73 21a2 2 0 01-3.46 0"></path>
                 </svg>
-                {unreadCount > 0 && <span className="notification-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+                {badgeCount > 0 && <span className="notification-badge">{badgeCount > 9 ? "9+" : badgeCount}</span>}
               </button>
             )}
 
@@ -231,7 +232,7 @@ export default function Navbar() {
               <path d="M13.73 21a2 2 0 01-3.46 0"></path>
             </svg>
             <span>Alerts</span>
-            {unreadCount > 0 && <em className="tab-badge">{unreadCount > 9 ? "9+" : unreadCount}</em>}
+            {badgeCount > 0 && <em className="tab-badge">{badgeCount > 9 ? "9+" : badgeCount}</em>}
           </Link>
         </nav>
       )}

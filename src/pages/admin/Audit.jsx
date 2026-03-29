@@ -217,16 +217,21 @@ export default function Audit() {
         }
       };
       await updateDoc(doc(db, "timesheets", t.id), patch);
-      if (t.uid && ["approved", "reviewed"].includes(edit.auditStatus)) {
+      if (
+        t.uid &&
+        ["approved", "reviewed"].includes(edit.auditStatus) &&
+        t.auditStatus !== edit.auditStatus
+      ) {
         await createNotification(db, {
           uid: t.uid,
           title: edit.auditStatus === "approved" ? "Timesheet approved" : "Timesheet reviewed",
-          message: `Your timesheet for ${t.date} at ${getStoreLabel(t.storeId)} was ${edit.auditStatus}.`,
+          message: `Your ${t.date} timesheet for ${getStoreLabel(t.storeId)} was marked ${edit.auditStatus}.`,
           type: edit.auditStatus === "approved" ? "success" : "info",
           link: "/staff/my-timesheets",
           metadata: {
             timesheetId: t.id,
             status: edit.auditStatus,
+            kind: "timesheet-status",
           },
         });
 

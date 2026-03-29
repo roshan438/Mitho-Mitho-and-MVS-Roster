@@ -146,7 +146,16 @@ export default function AdminStaffList() {
       </header>
 
       {loading ? (
-        <div className="loading-spinner">Syncing staff records...</div>
+        <div className="app-inline-loader">
+          <div className="spinner"></div>
+          <span>Syncing staff records...</span>
+        </div>
+      ) : staff.length === 0 ? (
+        <div className="app-empty-state">
+          <div className="app-empty-icon">◌</div>
+          <h2>No team members found</h2>
+          <p>Approved staff and managers will appear here once they join.</p>
+        </div>
       ) : (
         <div className="staff-grid">
           {staff.map((member) => (

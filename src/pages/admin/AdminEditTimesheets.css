@@ -457,7 +457,7 @@
   text-align: center;
 }
 
-.spinning {
+.btn-refresh.spinning {
   animation: timesheet-spin 0.8s linear infinite;
 }
 

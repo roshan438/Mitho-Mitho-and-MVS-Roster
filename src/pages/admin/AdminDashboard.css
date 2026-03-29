@@ -110,7 +110,7 @@
 
 .admdash-filters {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -293,6 +293,34 @@
   gap: 8px;
 }
 
+.admdash-saved-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admdash-saved-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admdash-saved-chip button {
+  border: 0;
+  background: transparent;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.admdash-load-more {
+  min-height: 40px;
+  border-radius: 14px;
+  font-weight: 800;
+}
+
 .admdash-row-card {
   background: rgba(255, 255, 255, 0.025);
   border-radius: 14px;
@@ -373,7 +401,11 @@
   border-radius: 12px;
 }
 
-.spinning svg {
+.admdash-sync-icon {
+  flex-shrink: 0;
+}
+
+.is-syncing .admdash-sync-icon {
   animation: rotate 1s linear infinite;
 }
 
@@ -405,7 +437,7 @@
 
   .admdash-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     width: 100%;
   }
 

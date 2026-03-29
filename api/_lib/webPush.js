@@ -1,6 +1,7 @@
 import webpush from "web-push";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "./firebaseAdmin.js";
+import { shouldDeliverPush } from "./pushPolicy.js";
 
 function assertWebPushEnv() {
   const missing = ["WEB_PUSH_PUBLIC_KEY", "WEB_PUSH_PRIVATE_KEY"].filter(
@@ -37,6 +38,14 @@ export async function sendPushToUsers(uids, payload) {
 
   await Promise.all(
     uniqueUids.map(async (uid) => {
+      const userDoc = await adminDb.collection("users").doc(uid).get();
+      const userProfile = userDoc.exists ? userDoc.data() : {};
+
+      if (!shouldDeliverPush(userProfile, payload)) {
+        skipped += 1;
+        return;
+      }
+
       const subscriptionSnap = await adminDb
         .collection("users")
         .doc(uid)

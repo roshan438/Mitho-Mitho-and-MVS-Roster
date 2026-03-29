@@ -12,6 +12,8 @@ import {
   collectionGroup,
   doc,
   getDocs,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -54,6 +56,7 @@ export default function MyRoster() {
     try {
       const startYMD = weekStart;
       const endYMD = toYMD(addDays(weekStartDateObj, 7));
+      const requestWindowStart = toYMD(subDays(weekStartDateObj, 14));
 
       const q = query(
         collectionGroup(db, "shifts"),
@@ -72,7 +75,14 @@ export default function MyRoster() {
 
       setShifts(list);
 
-      const requestSnap = await getDocs(collection(db, "shiftRequests"));
+      const requestSnap = await getDocs(
+        query(
+          collection(db, "shiftRequests"),
+          where("shiftDate", ">=", requestWindowStart),
+          orderBy("shiftDate", "desc"),
+          limit(80)
+        )
+      );
 
       const requestList = requestSnap.docs
         .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
@@ -225,7 +235,11 @@ export default function MyRoster() {
             </div>
 
             {myShiftRequests.length === 0 ? (
-              <div className="inline-empty">No shift requests yet.</div>
+              <div className="app-empty-state compact">
+                <div className="app-empty-icon">↔</div>
+                <h2>No shift requests yet</h2>
+                <p>Your swap and release requests will show up here.</p>
+              </div>
             ) : (
               <div className="mini-request-list">
                 {myShiftRequests.map((request) => (
@@ -252,7 +266,11 @@ export default function MyRoster() {
             </div>
 
             {openShiftRequests.length === 0 ? (
-              <div className="inline-empty">No open shifts right now.</div>
+              <div className="app-empty-state compact">
+                <div className="app-empty-icon">+</div>
+                <h2>No open shifts right now</h2>
+                <p>Extra shifts available to claim will appear here first.</p>
+              </div>
             ) : (
               <div className="open-shift-list">
                 {openShiftRequests.slice(0, 5).map((request) => (
@@ -281,7 +299,7 @@ export default function MyRoster() {
   
         <div className="timeline">
           {loading ? (
-            <div className="loader-inline">
+            <div className="app-inline-loader">
               <div className="spinner"></div>
               <span>Searching shifts...</span>
             </div>

@@ -4,6 +4,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -28,11 +30,12 @@ export default function ShiftRequestsAdmin() {
   const [savingId, setSavingId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [requests, setRequests] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const loadRequests = useCallback(async (manual = false) => {
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, "shiftRequests"));
+      const snap = await getDocs(query(collection(db, "shiftRequests"), orderBy("createdAt", "desc"), limit(60)));
       const list = snap.docs
         .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
         .sort((a, b) => {
@@ -60,6 +63,14 @@ export default function ShiftRequestsAdmin() {
       statusFilter === "all" ? true : request.status === statusFilter
     );
   }, [requests, statusFilter]);
+  const visibleRequests = useMemo(
+    () => filteredRequests.slice(0, visibleCount),
+    [filteredRequests, visibleCount]
+  );
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [statusFilter]);
 
   async function updateRequestStatus(request, nextStatus) {
     setSavingId(request.id);
@@ -225,7 +236,7 @@ export default function ShiftRequestsAdmin() {
           </div>
         ) : (
           <div className="shift-request-admin-list">
-            {filteredRequests.map((request) => (
+            {visibleRequests.map((request) => (
               <article key={request.id} className="shift-request-admin-card">
                 <div className="shift-request-admin-top">
                   <div>
@@ -291,6 +302,11 @@ export default function ShiftRequestsAdmin() {
                 </div>
               </article>
             ))}
+            {visibleCount < filteredRequests.length ? (
+              <button className="pill-btn" type="button" onClick={() => setVisibleCount((prev) => prev + 20)}>
+                Load more
+              </button>
+            ) : null}
           </div>
         )}
       </main>
